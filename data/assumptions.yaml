@@ -1,0 +1,141 @@
+# SABRE model assumptions
+#
+# Purpose:
+# - Store scenario inputs (feed quality bins, plant throughput, etc...)
+# - Store unit performance parameters (AD methane yield, biogas composition)
+#
+# Notes:
+# - Keep units explicit in comments (e.g., moisture_frac is mass fraction, wet_feed_ton_per_day is wet basis)
+# - Cite sources in-line (paper key + what value is taken from where)
+
+quality_bins:
+  pelagic_high_quality:
+    moisture_frac: 0.8673
+    ash_wt_frac_dry: 0.3453
+    vs_ts: 0.6550
+    source:
+      key: milledge2020
+      table: "Table 1 (Turks and Caicos pelagic species averages)"
+
+  beach_wrack_low_quality:
+    moisture_frac: 0.8198
+    ash_wt_frac_dry: 0.4694
+    vs_ts: 0.5311
+    source:
+      key: milledge2020
+      table: "Table 1 (Mixed Sargassum inundation)"
+      
+policies:
+  solids_loading_target_ts_wt_frac: 0.15   # target 0.15–0.20
+  solids_loading_target_ts_wt_frac_max: 0.20
+  freshwater_wash_allowed: false
+  retain_salinity: true
+
+scale:
+  wet_feed_ton_per_day: 15000
+  ton_definition: metric 
+
+ad_feed:
+  moisture_frac: 0.85
+
+ad:
+  hrt_days: 25
+  vs_destruction: 0.70
+  biogas:
+    ch4_molfrac: 0.55
+    co2_molfrac: 0.43
+    h2s_molfrac: 0.02
+  slurry_density_kg_per_m3: 1000
+  gas_storage_frac_of_total_volume: 0.15
+  sources:
+    hrt_days:
+      citation: "NREL Anaerobic Digestion Analysis Model User's Manual"
+      note: "Residence time normally 14–20 days for CSTR"
+    vs_destruction:
+      citation: "NREL Anaerobic Digestion Analysis Model User's Manual"
+      note: "VS conversion to biogas 70–75%"
+    biogas_composition:
+      citation: "NREL Anaerobic Digestion Analysis Model User's Manual"
+      note: "Example medium Btu biogas ~55% CH4, 43% CO2, 2% H2S"
+    ch4_range_check:
+      citation: "EPA AgSTAR Operator Guidebook"
+      note: "Typical CH4 45–70%"
+    gas_storage:
+      citation: "Penn State Extension: Agricultural Anaerobic Digesters"
+      note: "Gas storage covers ~10–20% of total volume"
+    slurry_density:
+      citation: "NREL Anaerobic Digestion Analysis Model User's Manual"
+      note: "Example liquid feed density 1000 kg/m3"
+
+
+ad_performance:
+  mode: biogas
+
+  # Biogas mol fraction
+  ch4_molfrac: 0.6
+  ch4_molfrac_source:
+    key: eesi_biogas_factsheet
+    note: "Typical raw biogas CH4 fraction ~50–70%."
+
+  # Untreated pelagic Sargassum methane yield (BMP):
+  # 77.64 mL CH4 / g VS  -> 0.0555 kg CH4 / kg VS (STP conversion)
+  ch4_kg_per_kg_vs: 0.0555
+  ch4_yield_source:
+    key: salgado_hernandez2023
+    value: "77.64 mL CH4 / g VS (untreated)"
+
+  # Assumption on how much digestate solids are reduced
+  vs_destruction: 0.50
+  vs_destruction_source:
+    key: assumed
+    note: "Placeholder; calibrate when VS reduction data available."
+
+ad_costing:
+  base_volume_m3: 2779.92
+  base_capex_usd: 1796981.40
+  scaling_exponent: 0.60
+  maintenance_usd_per_m3_yr: 10.0
+  source:
+    file: "ADBCv2-48 (2).xlsm"
+    sheet: "AnaerobicDigester"
+    cells:
+      base_volume_m3: "K8"
+      base_capex_usd: "U33"
+      maintenance_usd_per_m3_yr: "AB18"
+
+biogas_upgrading:
+  technology: membrane
+
+  ch4_recovery: 0.99
+  co2_removal: 0.95
+
+  # Performance
+  target_ch4_molfrac: 0.97
+  methane_slip_frac: 0.01          # CH4 loss fraction (0.005–0.02 typical)
+
+  # Utilities
+  electricity_kWh_per_Nm3_raw: 0.25 # 0.20–0.30 kWh/Nm3 raw biogas
+
+  # Costing (simple TEA form)
+  capex_usd_per_Nm3ph_raw: 2200     # USD per (Nm3/h raw biogas capacity)
+  maintenance_frac_of_capex_per_yr: 0.035  # 3–4% of investment per year
+
+  sources:
+    electricity:
+      citation: "IEA Bioenergy Task 37 workshop slides (Persson, 2013)"
+      note: "Membrane upgrading electricity ~0.20–0.30 kWh/Nm3 raw biogas"
+    methane_slip:
+      citation: "IEA Bioenergy Task 37 workshop slides (Persson, 2013)"
+      note: "Membrane methane loss ~0.5–2%"
+    maintenance:
+      citation: "IEA Bioenergy Task 37 workshop slides (Persson, 2013)"
+      note: "Maintenance ~3–4% of investment incl. membrane replacement"
+    capex:
+      citation: "IEA-ETSAP E-TechDS (Dec 2013)"
+      note: "Upgrading investment cost ~USD 1950–2600 per Nm3/h (raw gas), for >800–1000 Nm3/h"
+
+seaweed_notes:
+  long_hrt_possible:
+    citation: "Zhao et al. 2025 (preprint)"
+    note: "Mentions retention time >90 days in seaweed AD context; update baseline once substrate-specific yields chosen"
+  
