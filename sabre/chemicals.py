@@ -31,7 +31,7 @@ def create_chemicals():
     chems.compile()
     bst.settings.set_thermo(chems)
 
-    # Loading the ash content for type of Sargassum
+    # Loading the ash content for type of Sargassum from YAML
     A = load_assumptions()
     for name, q in A["quality_bins"].items():
         ash = q["ash_wt_frac_dry"]

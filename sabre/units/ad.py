@@ -28,7 +28,7 @@ class AnaerobicDigester(bst.Unit):
     _N_ins = 1
     _N_outs = 2  # biogas, digestate
 
-    # Bare-module factors (purchase → installed)
+    # Bare-module factors for cost (purchase → installed)
     F_BM = {"Anaerobic digester": 1.5}
 
     def __init__(
@@ -42,11 +42,11 @@ class AnaerobicDigester(bst.Unit):
         hrt_days=20.0,
         slurry_density_kg_per_m3=1000.0,
         headspace_frac=0.15,
-        # costing (anchor scaling)
+        # costing
         base_volume_m3=None,
         base_capex_usd=None,
         scaling_exponent=0.60,
-        maintenance_usd_per_m3_yr=None,  # optional (see note below)
+        maintenance_usd_per_m3_yr=None,  # leave blank for now and can deal later
         **kwargs
     ):
         super().__init__(ID, ins, outs, **kwargs)

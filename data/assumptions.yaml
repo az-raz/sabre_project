@@ -1,12 +1,11 @@
-# SABRE model assumptions
+# Model Assumptions
 #
 # Purpose:
 # - Store scenario inputs (feed quality bins, plant throughput, etc...)
 # - Store unit performance parameters (AD methane yield, biogas composition)
 #
 # Notes:
-# - Keep units explicit in comments (e.g., moisture_frac is mass fraction, wet_feed_ton_per_day is wet basis)
-# - Cite sources in-line (paper key + what value is taken from where)
+# - Sources are cited where possible, assumptions are made otherwise
 
 quality_bins:
   pelagic_high_quality:
@@ -26,7 +25,7 @@ quality_bins:
       table: "Table 1 (Mixed Sargassum inundation)"
       
 policies:
-  solids_loading_target_ts_wt_frac: 0.15   # target 0.15–0.20
+  solids_loading_target_ts_wt_frac: 0.15
   solids_loading_target_ts_wt_frac_max: 0.20
   freshwater_wash_allowed: false
   retain_salinity: true
@@ -116,7 +115,7 @@ biogas_upgrading:
   # Utilities
   electricity_kWh_per_Nm3_raw: 0.25 # 0.20–0.30 kWh/Nm3 raw biogas
 
-  # Costing (simple TEA form)
+  # Costing
   capex_usd_per_Nm3ph_raw: 2200     # USD per (Nm3/h raw biogas capacity)
   maintenance_frac_of_capex_per_yr: 0.035  # 3–4% of investment per year
 

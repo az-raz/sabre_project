@@ -2,7 +2,7 @@
 AD + biogas upgrading system builder
 
 Purpose:
-- Build a flowsheet block: Sargassum feed -> AD -> Upgrading.
+- Build a flowsheet block: feed -> AD -> Upgrading.
 - Return a BioSTEAM System for simulation and diagramming
 
 Key entry points:

@@ -19,6 +19,7 @@ from sabre.streams import make_sargassum_feed
 from sabre.config import load_assumptions, get_scale_feed_kgph, get_quality_params
 from sabre.units.ad import AnaerobicDigester
 
+# Creating AD system
 def create_ad_system(quality="pelagic_high_quality", mode="biogas"):
     A = load_assumptions()
     fresh_feed_kgph = get_scale_feed_kgph(A)
