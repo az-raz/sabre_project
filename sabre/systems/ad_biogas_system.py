@@ -19,6 +19,7 @@ from sabre.config import load_assumptions, get_quality_params, get_scale_feed_kg
 from sabre.streams import make_sargassum_feed
 from sabre.units.ad import AnaerobicDigester
 from sabre.units.biogas_upgrading import BiogasUpgrading
+from sabre.units.screen import Screen
 
 
 def create_ad_biogas_system(quality="pelagic_high_quality"):
@@ -55,23 +56,31 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         hrt_days=adS["hrt_days"],
         slurry_density_kg_per_m3=adS["slurry_density_kg_per_m3"],
         headspace_frac=adS["gas_storage_frac_of_total_volume"],
+        max_single_digester_volume_MG=adS.get("max_single_digester_volume_MG", 1.5),
 
         # costing
         base_volume_m3=adC["base_volume_m3"],
         base_capex_usd=adC["base_capex_usd"],
-        scaling_exponent=adC["scaling_exponent"],
         maintenance_usd_per_m3_yr=adC.get("maintenance_usd_per_m3_yr", None),
     )
 
     upA = A["biogas_upgrading"]
     UP = BiogasUpgrading(
         "UP",
-        ins=AD - 0,
+        ins=AD-0,
         outs=("biomethane", "offgas"),
         ch4_recovery=upA["ch4_recovery"],
         co2_removal=upA["co2_removal"],
         electricity_kwh_per_Nm3_raw=upA["electricity_kWh_per_Nm3_raw"],
         capex_usd_per_Nm3ph_raw=upA["capex_usd_per_Nm3ph_raw"],
     )
+
+    SC = Screen(
+        "SC",
+        ins=AD-1,
+        outs=("soil_amendment", "liquid_digestate"),
+        ts_capture_frac=A["digestate_separation"]["screen"]["ts_capture_frac"],
+        cake_moisture_frac=A["digestate_separation"]["screen"]["cake_moisture_frac"],
+    )
     
-    return bst.System("AD_Biogas_sys", path=(AD, UP))
+    return bst.System("AD_Biogas_sys", path=(AD, UP, SC))

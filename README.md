@@ -6,4 +6,4 @@ BioSTEAM model for Sargassum biorefinery (SABRE). Current scope: AD → membrane
 ```bash
 conda create -n sabre python=3.10 -y
 conda activate sabre
-pip install -e .
+pip install -e
