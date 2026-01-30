@@ -44,4 +44,4 @@ def create_ad_system(quality="pelagic_high_quality", mode="biogas"):
     ch4_molfrac=adp["ch4_molfrac"],
 )
 
-    return bst.System("AD_sys", path=(AD,))
+    return bst.System("AD_sys", path=(AD))

@@ -143,20 +143,22 @@ biogas_upgrading:
       citation: "IEA-ETSAP E-TechDS: Biogas and Bio-syngas Production (Dec 2013)"
       note: "Investment cost for biogas-to-biomethane upgrading units reported ~USD 1950–2600 per Nm³/h for larger raw gas capacities."
 
-seaweed_notes:
-  long_hrt_possible:
-    key: zhao_2025_preprint
-    note: "Mentions AD limitations including long retention time (>90 days) in a seaweed context."
 
-digestate_separation:
-  screen:
-    ts_capture_frac: 0.60
-    cake_moisture_frac: 0.80
-    sources:
-      ts_capture_frac:
-        citation: "UC Davis / CDFA AMMP Final Report (inclined stationary screen ~60.9% dry matter removal in literature comparison table)"
-        link: "https://www.cdfa.ca.gov/oars/ammp/docs/ucd_cdfa_15-0610-sa_finalreport.pdf"
-      cake_moisture_frac:
-        citation: "Texas A&M AgriLife Extension – Screen Separator (screen-separated solids often ≥20% dry matter; 20% DM = 80% moisture)"
-        link: "https://tammi.tamu.edu/files/2022/03/mp-series-screen-separator.pdf"
+digestate_decanter_centrifuge:
+  solids_IDs: ["Cellulose", "Ash"]
+  ts_capture_frac: 0.78
+  cake_moisture_frac: 0.75
+  capacity_tph_each: 50.0
+  centrifuge_purchase_cost_usd_each: 297500.0 
+  F_BM: 1.0
 
+preprocessing:
+  press:
+    cake_solids_wt_frac: 0.35
+    solids_capture_frac: 0.98
+    solids_IDs: [Cellulose, Ash]
+    solubles_to_pressate_frac: 1.0
+    power_kWh_per_ton_wet: null
+  mill:
+    loss_frac: 0.15
+    power_kWh_per_ton_wet: null

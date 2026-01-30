@@ -2,15 +2,18 @@
 AD + biogas upgrading system builder
 
 Purpose:
-- Build a flowsheet block: feed -> AD -> Upgrading.
+- Build a flowsheet block for the current system
 - Return a BioSTEAM System for simulation and diagramming
 
 Key entry points:
 - create_ad_biogas_system(...)
 
 Notes:
-- Uses the existing AD system builder logic: assumptions -> feed -> AD
+- feed --> press --> mill --> AD --> biogas upgrading --> digestate separation
+- Uses plant-scale throughput from YAML (e.g., 15,000 ton/day wet feed)
+- Feed composition (moisture/ash/VS/TS) is quality-bin dependent
 - Adds BiogasUpgrading unit downstream of AD biogas output
+
 """
 
 import biosteam as bst
@@ -19,7 +22,9 @@ from sabre.config import load_assumptions, get_quality_params, get_scale_feed_kg
 from sabre.streams import make_sargassum_feed
 from sabre.units.ad import AnaerobicDigester
 from sabre.units.biogas_upgrading import BiogasUpgrading
-from sabre.units.screen import Screen
+from sabre.units.centrifuge import DigestateDecanterCentrifuge
+from sabre.units.press import Press
+from sabre.units.mill import Mill
 
 
 def create_ad_biogas_system(quality="pelagic_high_quality"):
@@ -36,6 +41,30 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         quality=quality,
     )
 
+        # ---- preprocessing (press + mill) ----
+    pp = A.get("preprocessing", {})
+    prA = pp.get("press", {})
+    mlA = pp.get("mill", {})
+
+    PR = Press(
+        "PR",
+        ins=feed,
+        outs=("pressed_cake", "pressate"),
+        solids_IDs=tuple(prA.get("solids_IDs", ["Cellulose", "Ash"])),
+        solids_capture_frac=prA.get("solids_capture_frac", 0.98),
+        cake_solids_wt_frac=prA.get("cake_solids_wt_frac", 0.35),
+        solubles_to_pressate_frac=prA.get("solubles_to_pressate_frac", 1.0),
+        power_kWh_per_ton_wet=prA.get("power_kWh_per_ton_wet", None),
+    )
+
+    ML = Mill(
+        "ML",
+        ins=PR-0,
+        outs=("milled_biomass", "milling_losses"),
+        loss_frac=mlA.get("loss_frac", 0.15),
+        power_kWh_per_ton_wet=mlA.get("power_kWh_per_ton_wet", None),
+    )
+
     # ---- pull parameters from YAML ----
     adS = A["ad"]              # sizing
     adp = A["ad_performance"]  # performance
@@ -43,7 +72,7 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
 
     AD = AnaerobicDigester(
         "AD",
-        ins=feed,
+        ins=ML-0,
         outs=("biogas", "digestate"),
 
         # performance
@@ -75,12 +104,18 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         capex_usd_per_Nm3ph_raw=upA["capex_usd_per_Nm3ph_raw"],
     )
 
-    SC = Screen(
-        "SC",
+    dc = A["digestate_decanter_centrifuge"]
+
+    DC = DigestateDecanterCentrifuge(
+        ID="DC",
         ins=AD-1,
         outs=("soil_amendment", "liquid_digestate"),
-        ts_capture_frac=A["digestate_separation"]["screen"]["ts_capture_frac"],
-        cake_moisture_frac=A["digestate_separation"]["screen"]["cake_moisture_frac"],
+        solids_IDs=tuple(dc["solids_IDs"]),
+        ts_capture_frac=dc["ts_capture_frac"],
+        cake_moisture_frac=dc["cake_moisture_frac"],
+        capacity_tph_each=dc["capacity_tph_each"],
+        centrifuge_purchase_cost_usd_each=dc["centrifuge_purchase_cost_usd_each"],
+        F_BM=dc.get("F_BM", 1.0),
     )
     
-    return bst.System("AD_Biogas_sys", path=(AD, UP, SC))
+    return bst.System("AD_Biogas_sys", path=(PR, ML, AD, UP,DC))
