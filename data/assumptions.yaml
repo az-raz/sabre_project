@@ -44,7 +44,7 @@ ad:
   # ---- Sizing / operating conditions ----
   hrt_days: 25
   slurry_density_kg_per_m3: 1000
-  gas_storage_frac_of_total_volume: 0.15
+  gas_storage_frac_of_total_volume: 0.25
   max_single_digester_volume_MG: 1.5
 
   # ---- Operating temperature ----
@@ -143,7 +143,6 @@ biogas_upgrading:
       citation: "IEA-ETSAP E-TechDS: Biogas and Bio-syngas Production (Dec 2013)"
       note: "Investment cost for biogas-to-biomethane upgrading units reported ~USD 1950–2600 per Nm³/h for larger raw gas capacities."
 
-
 digestate_decanter_centrifuge:
   solids_IDs: ["Cellulose", "Ash"]
   ts_capture_frac: 0.78
@@ -162,3 +161,14 @@ preprocessing:
   mill:
     loss_frac: 0.15
     power_kWh_per_ton_wet: null
+
+digestate_screw_press:
+  solids_IDs: ["Cellulose", "Ash"]
+  ts_capture_frac: 0.33
+  cake_moisture_frac: 0.77
+  capacity_tph_each: 6.0
+  kWh_per_m3: 0.67
+  eur_to_usd: 1.19
+  include_polymer_dosing: false
+  polymer_dosing_cost_eur_each: 0.0
+  F_BM: 1.0

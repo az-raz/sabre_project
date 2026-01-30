@@ -1,5 +1,5 @@
 """
-AD + biogas upgrading system builder
+AD system builder
 
 Purpose:
 - Build a flowsheet block for the current system
@@ -11,8 +11,7 @@ Key entry points:
 Notes:
 - feed --> press --> mill --> AD --> biogas upgrading --> digestate separation
 - Uses plant-scale throughput from YAML (e.g., 15,000 ton/day wet feed)
-- Feed composition (moisture/ash/VS/TS) is quality-bin dependent
-- Adds BiogasUpgrading unit downstream of AD biogas output
+- Feed composition (moisture/ash/VS/TS) is quality-bin dependent (only have pelagic for now
 
 """
 
@@ -22,11 +21,11 @@ from sabre.config import load_assumptions, get_quality_params, get_scale_feed_kg
 from sabre.streams import make_sargassum_feed
 from sabre.units.ad import AnaerobicDigester
 from sabre.units.biogas_upgrading import BiogasUpgrading
-from sabre.units.centrifuge import DigestateDecanterCentrifuge
+from sabre.units.screwpress import DigestateScrewPress
 from sabre.units.press import Press
 from sabre.units.mill import Mill
 
-
+# function to create the AD system
 def create_ad_biogas_system(quality="pelagic_high_quality"):
     A = load_assumptions()
     q = get_quality_params(A, quality)
@@ -41,7 +40,7 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         quality=quality,
     )
 
-        # ---- preprocessing (press + mill) ----
+    # ---- preprocessing units (Press and Mill) ----
     pp = A.get("preprocessing", {})
     prA = pp.get("press", {})
     mlA = pp.get("mill", {})
@@ -65,10 +64,10 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         power_kWh_per_ton_wet=mlA.get("power_kWh_per_ton_wet", None),
     )
 
-    # ---- pull parameters from YAML ----
+    # ---- AD unit ----
     adS = A["ad"]              # sizing
     adp = A["ad_performance"]  # performance
-    adC = A["ad_costing"]      # costing anchor
+    adC = A["ad_costing"]      # costing
 
     AD = AnaerobicDigester(
         "AD",
@@ -93,6 +92,7 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         maintenance_usd_per_m3_yr=adC.get("maintenance_usd_per_m3_yr", None),
     )
 
+    # ---- biogas upgrading unit ---- 
     upA = A["biogas_upgrading"]
     UP = BiogasUpgrading(
         "UP",
@@ -104,18 +104,34 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         capex_usd_per_Nm3ph_raw=upA["capex_usd_per_Nm3ph_raw"],
     )
 
-    dc = A["digestate_decanter_centrifuge"]
+     # ---- screw press unit (post-AD digestate separation) ----
+    sp = A.get("digestate_screw_press", {})  # new YAML section name
 
-    DC = DigestateDecanterCentrifuge(
-        ID="DC",
+    SP = DigestateScrewPress(
+        ID="SP",
         ins=AD-1,
         outs=("soil_amendment", "liquid_digestate"),
-        solids_IDs=tuple(dc["solids_IDs"]),
-        ts_capture_frac=dc["ts_capture_frac"],
-        cake_moisture_frac=dc["cake_moisture_frac"],
-        capacity_tph_each=dc["capacity_tph_each"],
-        centrifuge_purchase_cost_usd_each=dc["centrifuge_purchase_cost_usd_each"],
-        F_BM=dc.get("F_BM", 1.0),
+
+        solids_IDs=tuple(sp.get("solids_IDs", ["Cellulose", "Ash"])),
+
+        # performance (screw press defaults should be lower than centrifuge)
+        ts_capture_frac=sp.get("ts_capture_frac", 0.33),
+        cake_moisture_frac=sp.get("cake_moisture_frac", 0.77),
+
+        # sizing
+        capacity_tph_each=sp.get("capacity_tph_each", 6.0),
+
+        # energy
+        kWh_per_m3=sp.get("kWh_per_m3", 0.67),
+
+        # costing (Table-based CAPEX; you choose currency handling)
+        eur_to_usd=sp.get("eur_to_usd", 1.0),
+        capex_eur_table=sp.get("capex_eur_table", None),
+
+        include_polymer_dosing=sp.get("include_polymer_dosing", False),
+        polymer_dosing_cost_eur_each=sp.get("polymer_dosing_cost_eur_each", 0.0),
+
+        F_BM=sp.get("F_BM", 1.0),
     )
     
-    return bst.System("AD_Biogas_sys", path=(PR, ML, AD, UP,DC))
+    return bst.System("AD_Biogas_sys", path=(PR, ML, AD, UP, SP))

@@ -14,6 +14,7 @@ Key points:
     N = ceil(V_total / V_max)
     V_each = V_total / N
 - Cost scales on a per-digester basis and is multiplied by N
+- ADBC Excel sheet data is used for cost interpolation
 
 Units:
 - Flow: kg/hr internally
@@ -24,12 +25,12 @@ Units:
 import math
 import biosteam as bst
 
-# Constants
+# conversion factors and ADBC data
 GAL_TO_M3 = 0.003785411784  # US gallons -> m3 conversion
 ADBC_VOL_M3 = [878, 1755, 2633, 3510, 5265, 8775]
 ADBC_CAPEX  = [1720964, 1750201, 1779439, 1808676, 1867151, 1984101]
 
-# Volume and Cost Interpolation from ADBC excel
+# volume and cost interpolation from ADBC excel
 def interp_capex(volume_m3: float) -> float:
     x = ADBC_VOL_M3
     y = ADBC_CAPEX
@@ -45,13 +46,13 @@ def interp_capex(volume_m3: float) -> float:
             return y[i] + m*(volume_m3 - x[i])
     raise RuntimeError("Interpolation failed")
 
-
+# creating the AD unit
 class AnaerobicDigester(bst.Unit):
     _N_ins = 1
     _N_outs = 2  # biogas, digestate
 
-    # Bare-module factor (purchase -> installed)
-    F_BM = {"Anaerobic digester": 1.0}
+    # bare-module factor (purchase -> installed)
+    F_BM = {"Anaerobic digester": 1.0} # ADBC file already has installed costs
 
     def __init__(
         self, ID="", ins=None, outs=(),
@@ -103,28 +104,28 @@ class AnaerobicDigester(bst.Unit):
         biogas.phase = "g"
         digestate.phase = "l"
 
-        # Total solids and volatile solids (kg/hr)
+        # total solids and volatile solids (kg/hr)
         TS = digestate.imass["Cellulose"] + digestate.imass["Ash"]
         VS = self.vs_ts * TS
 
         # VS destroyed (kg/hr)
         VS_destroyed = self.vs_destruction * VS
 
-        # Methane produced from yield (kg/hr)
+        # methane produced from yield (kg/hr)
         m_ch4 = self.ch4_kg_per_kg_vs * VS_destroyed
 
-        # Convert CH4 mass -> kmol/hr
+        # convert CH4 mass -> kmol/hr
         ch4 = bst.settings.thermo.chemicals["Methane"]
         n_ch4 = m_ch4 / ch4.MW
 
-        # Use CH4 mol fraction to set CO2 (assume only CH4+CO2)
+        # use CH4 mol fraction to set CO2 (assume only CH4+CO2)
         n_total = n_ch4 / self.ch4_molfrac if self.ch4_molfrac > 0 else 0.0
         n_co2 = max(n_total - n_ch4, 0.0)
 
         biogas.imol["Methane"] = n_ch4
         biogas.imol["CarbonDioxide"] = n_co2
 
-        # Remove destroyed VS from cellulose only (ash inert)
+        # remove destroyed VS from cellulose only (ash inert)
         remove = min(VS_destroyed, digestate.imass["Cellulose"])
         digestate.imass["Cellulose"] -= remove
 
@@ -134,11 +135,11 @@ class AnaerobicDigester(bst.Unit):
         slurry_m3_per_hr = feed.F_mass / self.slurry_density_kg_per_m3
         V_liquid = slurry_m3_per_hr * 24.0 * self.hrt_days
 
-        # Total volume includes headspace fraction of total
+        # total volume includes headspace fraction of total
         hf = min(max(self.headspace_frac, 0.0), 0.95)
         V_total = V_liquid / (1.0 - hf)
 
-        # Design in parallel
+        # design in parallel
         V_max = self.max_single_digester_volume_m3
         N = max(1, math.ceil(V_total / V_max))
         V_each = V_total / N
@@ -153,7 +154,7 @@ class AnaerobicDigester(bst.Unit):
         self.design_results["Digester volume each (m3)"] = V_each
 
     def _cost(self):
-        # Cost on a per-digester basis, multiplied by number of digesters.
+        # cost on a per-digester basis, multiplied by number of digesters
         V_each = self.design_results["Digester volume each (m3)"]
         N = int(self.design_results["Number of digesters"])
         self.F_BM["Anaerobic digester"] = 1.0

@@ -1,26 +1,30 @@
+"""
+Post-AD digestate decanter centrifuge (solid–liquid separation)
+
+Splits digestate into:
+    - cake (soil_amendment): captured solids + entrained water to hit cake_moisture_frac
+    - centrate (liquid_digestate): remaining liquid + uncaptured solids
+
+Assumptions::
+    - "Solids" are explicitly defined chemical IDs (default: Cellulose, Ash)
+    - Everything else is treated as liquid and starts in centrate
+
+Sizing:
+    - Throughput_tph = inlet_mass_kgph / 1000
+    - N_parallel = ceil(Throughput_tph / capacity_tph_each)
+
+Costing (USD):
+    - Total purchased cost = N_parallel * centrifuge_purchase_cost_usd_each
+
+Notes:
+    - Decanter centrifuge was chosen due to the large volume of digestate
+"""
+
 import math
 import biosteam as bst
 
+# creating the decanter centrifuge unit
 class DigestateDecanterCentrifuge(bst.Unit):
-    """
-    Post-AD digestate decanter centrifuge (solid–liquid separation), sized as parallel units.
-
-    Splits digestate into:
-      - cake (soil_amendment): captured solids + entrained water to hit cake_moisture_frac
-      - centrate (liquid_digestate): remaining liquid + uncaptured solids
-
-    Assumptions (matches your simplified chemicals.py):
-      - "Solids" are explicitly defined chemical IDs (default: Cellulose, Ash)
-      - Everything else (Water, dissolved species if any) is treated as liquid and starts in centrate
-      - No polymers (polymer_system_cost = 0), no mechanistic centrifuge physics
-
-    Sizing:
-      - Throughput_tph = inlet_mass_kgph / 1000
-      - N_parallel = ceil(Throughput_tph / capacity_tph_each)
-
-    Costing (USD):
-      - Total purchased cost = N_parallel * centrifuge_purchase_cost_usd_each
-    """
 
     _N_ins = 1
     _N_outs = 2
@@ -40,7 +44,7 @@ class DigestateDecanterCentrifuge(bst.Unit):
         self.cake_moisture_frac = float(cake_moisture_frac)
 
         self.capacity_tph_each = float(capacity_tph_each)
-        self.centrifuge_purchase_cost_usd_each = centrifuge_purchase_cost_usd_each  # None => no costing
+        self.centrifuge_purchase_cost_usd_each = centrifuge_purchase_cost_usd_each  
 
         self.F_BM_default = float(F_BM)
 
@@ -55,20 +59,20 @@ class DigestateDecanterCentrifuge(bst.Unit):
 
         cap = min(max(self.ts_capture_frac, 0.0), 1.0)
 
-        # 1) Split defined solids between cake and centrate
+        # split defined solids between cake and centrate
         for sid in self.solids_IDs:
             m = float(feed.imass[sid])
             m_cake = cap * m
             cake.imass[sid] = m_cake
             centrate.imass[sid] = m - m_cake
 
-        # 2) Send everything else to centrate initially
+        # send everything else to centrate
         for chem_id in feed.chemicals.IDs:
             if chem_id in self.solids_IDs:
                 continue
             centrate.imass[chem_id] = float(feed.imass[chem_id])
 
-        # 3) Entrained water to cake to meet target cake moisture
+        # entrained water to cake to meet target cake moisture
         TS_cake = sum(float(cake.imass[sid]) for sid in self.solids_IDs)
         if TS_cake > 0 and "Water" in feed.chemicals.IDs:
             mfrac = self.cake_moisture_frac
