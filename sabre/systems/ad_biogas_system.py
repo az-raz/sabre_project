@@ -10,8 +10,7 @@ Key entry points:
 
 Notes:
 - feed --> press --> mill --> AD --> biogas upgrading --> digestate separation
-- Uses plant-scale throughput from YAML (e.g., 15,000 ton/day wet feed)
-- Feed composition (moisture/ash/VS/TS) is quality-bin dependent (only have pelagic for now
+- Uses plant-scale throughput from YAML (e.g. 15,000 ton/day wet feed)
 
 """
 
@@ -26,7 +25,8 @@ from sabre.units.press import Press
 from sabre.units.mill import Mill
 
 # function to create the AD system
-def create_ad_biogas_system(quality="pelagic_high_quality"):
+def create_ad_biogas_system(quality="pelagic_high_quality"): #quality is the argument --> can switch type of bins
+
     A = load_assumptions()
     q = get_quality_params(A, quality)
 
@@ -40,7 +40,7 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         quality=quality,
     )
 
-    # ---- preprocessing units (Press and Mill) ----
+    # preprocessing units (Press and Mill)
     pp = A.get("preprocessing", {})
     prA = pp.get("press", {})
     mlA = pp.get("mill", {})
@@ -53,18 +53,33 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         solids_capture_frac=prA.get("solids_capture_frac", 0.98),
         cake_solids_wt_frac=prA.get("cake_solids_wt_frac", 0.35),
         solubles_to_pressate_frac=prA.get("solubles_to_pressate_frac", 1.0),
-        power_kWh_per_ton_wet=prA.get("power_kWh_per_ton_wet", None),
+
+        power_kWh_per_dry_ton_TS=prA.get("power_kWh_per_dry_ton_TS", None),
+
+        capex_model=prA.get("capex_model", None),
+        ref_capacity_tph_wet=(prA.get("ref_capacity_tph_wet") or 50.0),
+        capex_installed_ref_usd=(prA.get("capex_installed_ref_usd") or 5e6),
+        scale_exponent=(prA.get("scale_exponent") or 0.6),
+        F_BM=(prA.get("F_BM") or 1.0),
     )
+
 
     ML = Mill(
         "ML",
         ins=PR-0,
         outs=("milled_biomass", "milling_losses"),
         loss_frac=mlA.get("loss_frac", 0.15),
-        power_kWh_per_ton_wet=mlA.get("power_kWh_per_ton_wet", None),
+        power_kWh_per_dry_ton_dry=mlA.get("power_kWh_per_dry_ton_dry", None),
+        capex_model=mlA.get("capex_model", None),
+        ref_capacity_dry_ton_per_hr=mlA.get("ref_capacity_dry_ton_per_hr", 10.0),
+        purchase_cost_ref_usd=mlA.get("purchase_cost_ref_usd", 206400.0),
+        install_factor=mlA.get("install_factor", 1.8),
+        scale_exponent=mlA.get("scale_exponent", 0.6),
+        F_BM=mlA.get("F_BM", 1.0),
+
     )
 
-    # ---- AD unit ----
+    # AD unit
     adS = A["ad"]              # sizing
     adp = A["ad_performance"]  # performance
     adC = A["ad_costing"]      # costing
@@ -92,7 +107,7 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         maintenance_usd_per_m3_yr=adC.get("maintenance_usd_per_m3_yr", None),
     )
 
-    # ---- biogas upgrading unit ---- 
+    # biogas upgrading unit 
     upA = A["biogas_upgrading"]
     UP = BiogasUpgrading(
         "UP",
@@ -104,9 +119,8 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         capex_usd_per_Nm3ph_raw=upA["capex_usd_per_Nm3ph_raw"],
     )
 
-     # ---- screw press unit (post-AD digestate separation) ----
-    sp = A.get("digestate_screw_press", {})  # new YAML section name
-
+     #  screw press unit (post-AD digestate separation) 
+    sp = A.get("digestate_screw_press", {})
     SP = DigestateScrewPress(
         ID="SP",
         ins=AD-1,
@@ -114,7 +128,7 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
 
         solids_IDs=tuple(sp.get("solids_IDs", ["Cellulose", "Ash"])),
 
-        # performance (screw press defaults should be lower than centrifuge)
+        # performance
         ts_capture_frac=sp.get("ts_capture_frac", 0.33),
         cake_moisture_frac=sp.get("cake_moisture_frac", 0.77),
 
@@ -124,13 +138,11 @@ def create_ad_biogas_system(quality="pelagic_high_quality"):
         # energy
         kWh_per_m3=sp.get("kWh_per_m3", 0.67),
 
-        # costing (Table-based CAPEX; you choose currency handling)
+        # costing
         eur_to_usd=sp.get("eur_to_usd", 1.0),
         capex_eur_table=sp.get("capex_eur_table", None),
-
         include_polymer_dosing=sp.get("include_polymer_dosing", False),
         polymer_dosing_cost_eur_each=sp.get("polymer_dosing_cost_eur_each", 0.0),
-
         F_BM=sp.get("F_BM", 1.0),
     )
     

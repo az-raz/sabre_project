@@ -44,7 +44,7 @@ def interp_capex(volume_m3: float) -> float:
         if x[i] <= volume_m3 <= x[i+1]:
             m = (y[i+1]-y[i])/(x[i+1]-x[i])
             return y[i] + m*(volume_m3 - x[i])
-    raise RuntimeError("Interpolation failed")
+    raise RuntimeError("Interpolation failed") # avoid errors if logic fails
 
 # creating the AD unit
 class AnaerobicDigester(bst.Unit):
@@ -60,7 +60,7 @@ class AnaerobicDigester(bst.Unit):
         vs_ts=0.65,
         vs_destruction=0.50,
         ch4_kg_per_kg_vs=0.0555,
-        ch4_molfrac=0.60,
+        ch4_molfrac=0.50,
         # sizing
         hrt_days=25.0,
         slurry_density_kg_per_m3=1000.0,
@@ -70,6 +70,12 @@ class AnaerobicDigester(bst.Unit):
         base_volume_m3=None,
         base_capex_usd=None,
         maintenance_usd_per_m3_yr=None,
+        # utilities
+        mixing_W_per_m3=5.0,            # 2–10 typical sensitivity band
+        influent_temperature_K=298.15,  # assume 25°C unless you track it
+        target_temperature_K=308.15,    # 35°C
+        cp_kJ_per_kgK=4.18,             # slurry ~ water
+
         **kwargs
     ):
         super().__init__(ID, ins, outs, **kwargs)
@@ -79,6 +85,12 @@ class AnaerobicDigester(bst.Unit):
         self.vs_destruction = float(vs_destruction)
         self.ch4_kg_per_kg_vs = float(ch4_kg_per_kg_vs)
         self.ch4_molfrac = float(ch4_molfrac)
+
+        # utilities
+        self.mixing_W_per_m3 = float(mixing_W_per_m3)
+        self.influent_temperature_K = float(influent_temperature_K)
+        self.target_temperature_K = float(target_temperature_K)
+        self.cp_kJ_per_kgK = float(cp_kJ_per_kgK)
 
         # sizing
         self.hrt_days = float(hrt_days)
@@ -104,30 +116,57 @@ class AnaerobicDigester(bst.Unit):
         biogas.phase = "g"
         digestate.phase = "l"
 
-        # total solids and volatile solids (kg/hr)
+        # calculate TS and VS
         TS = digestate.imass["Cellulose"] + digestate.imass["Ash"]
         VS = self.vs_ts * TS
-
-        # VS destroyed (kg/hr)
         VS_destroyed = self.vs_destruction * VS
 
-        # methane produced from yield (kg/hr)
-        m_ch4 = self.ch4_kg_per_kg_vs * VS_destroyed
+        # remove destroyed VS from cellulose only (ash inert)
+        cellulose_available = digestate.imass["Cellulose"]
+        remove = min(VS_destroyed, cellulose_available)
+        if remove <= 0:
+            return
 
-        # convert CH4 mass -> kmol/hr
-        ch4 = bst.settings.thermo.chemicals["Methane"]
-        n_ch4 = m_ch4 / ch4.MW
+        # stoichiometric conversion for cellulose monomer C6H10O5 
+        chems = bst.settings.thermo.chemicals
+        cell = chems["Cellulose"]
+        h2o  = chems["Water"]
+        ch4  = chems["Methane"]
+        co2  = chems["CarbonDioxide"]
 
-        # use CH4 mol fraction to set CO2 (assume only CH4+CO2)
-        n_total = n_ch4 / self.ch4_molfrac if self.ch4_molfrac > 0 else 0.0
-        n_co2 = max(n_total - n_ch4, 0.0)
+        # moles of cellulose monomer destroyed
+        n_cell = remove / cell.MW  # kmol/hr
 
+        # reaction: Cellulose + Water -> 3 CH4 + 3 CO2
+        n_h2o = 1.0 * n_cell
+        n_ch4 = 3.0 * n_cell
+        n_co2 = 3.0 * n_cell
+
+        # consume cellulose
+        digestate.imass["Cellulose"] -= remove
+
+        # consume water
+        water_available = digestate.imass["Water"]
+        water_needed = n_h2o * h2o.MW
+        if water_available < water_needed - 1e-9:
+            raise RuntimeError(
+                f"Not enough water in digestate for AD stoichiometry: "
+                f"need {water_needed:.2f} kg/hr, have {water_available:.2f} kg/hr. "
+                f"Check feed water content or Water chemical ID."
+            )
+        digestate.imass["Water"] -= water_needed # mass balances
+
+        # produce biogas
         biogas.imol["Methane"] = n_ch4
         biogas.imol["CarbonDioxide"] = n_co2
 
-        # remove destroyed VS from cellulose only (ash inert)
-        remove = min(VS_destroyed, digestate.imass["Cellulose"])
-        digestate.imass["Cellulose"] -= remove
+        # adjust biogas composition if target specified
+        if 0 < self.ch4_molfrac < 1:
+            n_total = n_ch4 + n_co2
+            n_ch4_target = self.ch4_molfrac * n_total
+            n_co2_target = (1 - self.ch4_molfrac) * n_total
+            biogas.imol["Methane"] = n_ch4_target
+            biogas.imol["CarbonDioxide"] = n_co2_target
 
     def _design(self):
         feed = self.ins[0]
@@ -152,6 +191,44 @@ class AnaerobicDigester(bst.Unit):
         self.design_results["Max single digester (m3)"] = V_max
         self.design_results["Number of digesters"] = N
         self.design_results["Digester volume each (m3)"] = V_each
+
+                # ------------------------
+        # Utilities: mixing + heating
+        # ------------------------
+
+        # Mixing electricity (kW) = (W/m3)*V_liquid / 1000
+        # Use liquid volume (excluding headspace) for mixing basis
+        mixing_kW = (self.mixing_W_per_m3 * V_liquid) / 1000.0
+
+        # Heating duty (kJ/h) to bring influent slurry to target temperature
+        # Use assumed influent temperature (or feed.T if you prefer)
+        T_in = self.influent_temperature_K
+        T_target = self.target_temperature_K
+        dT = max(0.0, T_target - T_in)
+
+        m_dot_kgph = feed.F_mass
+        Q_kJph = m_dot_kgph * self.cp_kJ_per_kgK * dT  # kJ/h
+
+        # Record utilities in design_results
+        self.design_results["Mixing power (kW)"] = mixing_kW
+        self.design_results["Influent T (K)"] = T_in
+        self.design_results["Target T (K)"] = T_target
+        self.design_results["Heating duty (kJ/h)"] = Q_kJph
+
+        # Apply electricity utility
+        self.power_utility.consumption = mixing_kW
+        self.power_utility.production = 0.0
+
+        if Q_kJph > 0:
+            T_in = self.influent_temperature_K
+            T_out = self.target_temperature_K
+
+            # BioSTEAM version differences: some expect (duty, T_in, T_out), others (duty, T_in)
+            try:
+                hu = self.add_heat_utility(Q_kJph, T_in, T_out)
+            except TypeError:
+                hu = self.add_heat_utility(Q_kJph, T_in)
+
 
     def _cost(self):
         # cost on a per-digester basis, multiplied by number of digesters

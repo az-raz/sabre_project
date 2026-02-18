@@ -5,7 +5,7 @@
 # - Store unit performance parameters (AD methane yield, biogas composition)
 #
 # Notes:
-# - Sources are cited where possible; assumptions are marked and can be upgraded later.
+# - Sources are cited where possible; assumptions are marked and can be changed later
 
 quality_bins:
   pelagic_high_quality:
@@ -24,6 +24,7 @@ quality_bins:
       key: milledge2020
       note: "Energies 2020 paper (Mixed Sargassum inundation), Table 1."
 
+# Notes from the previous presentation
 policies:
   solids_loading_target_ts_wt_frac: 0.15
   solids_loading_target_ts_wt_frac_max: 0.20
@@ -31,7 +32,7 @@ policies:
   retain_salinity: true
 
 scale:
-  wet_feed_ton_per_day: 15000
+  wet_feed_ton_per_day: 15000 # as discussed with Hauke
   ton_definition: metric
 
 ad_feed:
@@ -41,65 +42,70 @@ ad_feed:
     note: "Placeholder; update if/when AD feed dilution or dewatering basis is defined."
 
 ad:
-  # ---- Sizing / operating conditions ----
+  # sizing and operating conditions
   hrt_days: 25
-  slurry_density_kg_per_m3: 1000
+  slurry_density_kg_per_m3: 1000 # approximate density of water
   gas_storage_frac_of_total_volume: 0.25
   max_single_digester_volume_MG: 1.5
 
-  # ---- Operating temperature ----
-  temperature_K: 308.15  # 35°C
+  # operating temperature
+  temperature_K: 308.15  # 35°C (Mesophillic)
 
-  # ---- Composition assumptions for raw biogas (if needed for sizing or checks) ----
+  # composition assumptions for raw biogas
   biogas:
     ch4_molfrac: 0.55
     co2_molfrac: 0.43
     h2s_molfrac: 0.02
 
+  mixing_W_per_m3: 5.0
+  influent_temperature_K: 298.15   # 25C baseline
+  temperature_K: 308.15            # already have this (35C)
+  cp_kJ_per_kgK: 4.18
+
   sources:
     hrt_days:
       key: nrel_adam_1994
-      note: "Residence time guidance; used here as baseline."
+      note: "Residence time guidance; used here as baseline"
     slurry_density:
       key: nrel_adam_1994
-      note: "Example liquid feed density ~1000 kg/m3."
+      note: "Example liquid feed density ~1000 kg/m3"
     gas_storage:
       key: psu_extension_ad_design
-      note: "Temporary gas storage suggested ~10–20% of total digester volume."
+      note: "Temporary gas storage suggested ~10–20% of total digester volume"
     biogas_composition_example:
       key: nrel_adam_1994
-      note: "Example medium-Btu biogas composition (~55% CH4, 43% CO2, 2% H2S)."
+      note: "Example medium-Btu biogas composition (~55% CH4, 43% CO2, 2% H2S)"
     ch4_range_check:
       key: epa_agstar_operator_guidebook
-      note: "Typical CH4 in biogas commonly cited around 45–70%."
+      note: "Typical CH4 in biogas commonly cited around 45–70%"
     temperature:
       key: assumed_mesophilic
-      note: "Mesophilic AD commonly operated around ~35°C; baseline set to 35°C."
+      note: "Mesophilic AD commonly operated around ~35°C; baseline set to 35°C"
 
 ad_performance:
   mode: biogas
 
-  # Biogas mol fraction
-  ch4_molfrac: 0.6
+  # biogas mol fraction
+  ch4_molfrac: 0.5
   ch4_molfrac_source:
     key: eesi_biogas_factsheet
-    note: "Biogas often ~50–70% methane (contextual support)."
+    note: "Biogas often ~50–70% methane"
 
-  # Untreated pelagic Sargassum methane yield (BMP)
+  # untreated pelagic Sargassum methane yield
   # 77.64 mL CH4 / g VS -> 0.0555 kg CH4 / kg VS (STP conversion)
   ch4_kg_per_kg_vs: 0.0555
   ch4_yield_source:
     key: salgado_hernandez_2023
-    note: "Reports methane production for untreated biomass (UT)."
+    note: "Reports methane production for untreated biomass"
 
-  # Digestate solids reduction
+  # digestate solids reduction
   vs_destruction: 0.50
   vs_destruction_source:
     key: assumed
     note: "Placeholder"
 
 ad_costing:
-  # Anchor point from ADBC spreadsheet
+  # anchor point from ADBC spreadsheet --> ADBC is a spreadsheet model developed by NREL for anaerobic digestion costing
   base_volume_m3: 2779.92
   base_capex_usd: 1796981.40
   maintenance_usd_per_m3_yr: 10.0
@@ -113,19 +119,19 @@ ad_costing:
       maintenance_usd_per_m3_yr: "AB18"
 
 biogas_upgrading:
-  technology: membrane
+  technology: membrane  # using membrane --> can switch to other technologies later
 
   ch4_recovery: 0.99
   co2_removal: 0.95
 
-  # Performance
+  # performance
   target_ch4_molfrac: 0.97
   methane_slip_frac: 0.01
 
-  # Utilities
+  # utilities
   electricity_kWh_per_Nm3_raw: 0.25
 
-  # Costing
+  # costing
   capex_usd_per_Nm3ph_raw: 2200
   maintenance_frac_of_capex_per_yr: 0.035
 
@@ -144,7 +150,7 @@ biogas_upgrading:
       note: "Investment cost for biogas-to-biomethane upgrading units reported ~USD 1950–2600 per Nm³/h for larger raw gas capacities."
 
 digestate_decanter_centrifuge:
-  solids_IDs: ["Cellulose", "Ash"]
+  solids_IDs: ["Cellulose", "Ash"]  # currently only tracking these solids
   ts_capture_frac: 0.78
   cake_moisture_frac: 0.75
   capacity_tph_each: 50.0
@@ -152,20 +158,59 @@ digestate_decanter_centrifuge:
   F_BM: 1.0
 
 preprocessing:
-  press:
-    cake_solids_wt_frac: 0.35
-    solids_capture_frac: 0.98
-    solids_IDs: [Cellulose, Ash]
-    solubles_to_pressate_frac: 1.0
-    power_kWh_per_ton_wet: null
-  mill:
-    loss_frac: 0.15
-    power_kWh_per_ton_wet: null
+    press:
+      cake_solids_wt_frac: 0.35
+      solids_capture_frac: 0.98
+      solids_IDs: [Cellulose, Ash]
+      solubles_to_pressate_frac: 1.0
+
+      # utilities
+      power_kWh_per_dry_ton_TS: 5.0
+
+      # costing
+      capex_model: scaled_anchor
+      basis: wet_tph               # wet tons per hour throughput basis
+      ref_capacity_tph_wet: 50.0
+      capex_installed_ref_usd: 5000000.0
+      scale_exponent: 0.60 
+      F_BM: 1.0  
+
+      sources:
+      capex:
+        citation: "Engineering reports / municipal dewatering projects (order-of-magnitude installed cost anchor)"
+        note: "Using installed CAPEX anchor per dewatering train + scaling. Replace with vendor quote or sector-specific TEA when available."
+      power:
+        citation: "Assumed baseline (temporary)"
+        note: "Placeholder press electricity intensity on dry-solids basis; update with vendor/spec or wastewater ref when selected."
+
+    mill:
+      loss_frac: 0.15
+
+      # utilities
+      power_kWh_per_dry_ton_dry: 25.0
+
+      # costing
+      capex_model: inl_hammermill_anchor
+      ref_capacity_dry_ton_per_hr: 10.0
+      purchase_cost_ref_usd: 206400.0
+      install_factor: 1.8
+      scale_exponent: 0.6
+      F_BM: 1.0
+
+    sources:
+      power:
+        citation: "NREL, Fast Pyrolysis and Hydrotreating TEA (FY11 OSTI 46586)"
+        url: "https://docs.nrel.gov/docs/fy11osti/46586.pdf"
+        note: "NREL cites 50 kWh/ton as a common grinding assumption; baseline set to 25 with planned sensitivity (25–50)."
+      capex:
+        citation: "INL TEA table (hammer mill cost anchor)"
+        url: "https://inldigitallibrary.inl.gov/sites/sti/sti/7323596.pdf"
+        note: "Hammer mill purchase cost anchor $206,400 used for capacity scaling with exponent 0.6 and install factor."
 
 digestate_screw_press:
   solids_IDs: ["Cellulose", "Ash"]
-  ts_capture_frac: 0.33
-  cake_moisture_frac: 0.77
+  ts_capture_frac: 0.4
+  cake_moisture_frac: 0.5
   capacity_tph_each: 6.0
   kWh_per_m3: 0.67
   eur_to_usd: 1.19

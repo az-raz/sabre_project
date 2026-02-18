@@ -26,8 +26,6 @@ class BiogasUpgrading(bst.Unit):
     _N_ins = 1
     _N_outs = 2  # biomethane, offgas
 
-    F_BM = {"Membrane upgrading skid": 1.5} # bare-module factor
-
     def __init__(
         self, ID="", ins=None, outs=(),
         ch4_recovery=0.98,

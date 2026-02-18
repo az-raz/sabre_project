@@ -90,33 +90,41 @@ class DigestateScrewPress(bst.Unit):
 
         cap = min(max(self.ts_capture_frac, 0.0), 1.0)
 
-        # split defined solids between cake and pressate
-        for sid in self.solids_IDs:
-            m = float(feed.imass[sid])
-            m_cake = cap * m
-            cake.imass[sid] = m_cake
-            pressate.imass[sid] = m - m_cake
+        water_id = "Water"
+        ids = feed.chemicals.IDs
 
-        # send everything else to pressate
-        for chem_id in feed.chemicals.IDs:
-            if chem_id in self.solids_IDs:
-                continue
-            pressate.imass[chem_id] = float(feed.imass[chem_id])
+        # Define TS as everything except Water (i.e., "dry matter" in this model)
+        ts_ids = [i for i in ids if i != water_id]
 
-        # entrained water to cake to meet target cake moisture
-        TS_cake = sum(float(cake.imass[sid]) for sid in self.solids_IDs)
-        if TS_cake > 0 and "Water" in feed.chemicals.IDs:
+        # --- split TS by capture fraction (based on TOTAL TS, not just Cellulose+Ash) ---
+        TS_total = sum(float(feed.imass[i]) for i in ts_ids)
+        TS_to_cake = cap * TS_total
+
+        if TS_total > 0:
+            for i in ts_ids:
+                m = float(feed.imass[i])
+                m_cake = (m / TS_total) * TS_to_cake
+                cake.imass[i] = m_cake
+                pressate.imass[i] = m - m_cake
+
+        # all water starts in pressate
+        if water_id in ids:
+            pressate.imass[water_id] = float(feed.imass[water_id])
+
+        # --- add entrained water to cake to meet target cake moisture ---
+        TS_cake = sum(float(cake.imass[i]) for i in ts_ids)
+        if TS_cake > 0 and water_id in ids:
             mfrac = self.cake_moisture_frac
             if not (0.0 < mfrac < 1.0):
                 raise ValueError("cake_moisture_frac must be between 0 and 1")
 
             # moisture = water/(water+TS) => water = mfrac/(1-mfrac)*TS
             water_needed = (mfrac / (1.0 - mfrac)) * TS_cake
-            water_available = float(pressate.imass["Water"])
+            water_available = float(pressate.imass[water_id])
             water_to_cake = min(water_needed, water_available)
 
-            cake.imass["Water"] += water_to_cake
-            pressate.imass["Water"] -= water_to_cake
+            cake.imass[water_id] += water_to_cake
+            pressate.imass[water_id] -= water_to_cake
 
     def _design(self):
         F_kgph = float(self.ins[0].F_mass)
