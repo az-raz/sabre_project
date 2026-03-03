@@ -1,5 +1,4 @@
 """
-
 Ethanol-only fermentation flowsheet with:
 - optional upstream + post-pretreatment dewatering (ScrewPress) with feasible-moisture fallback
 - optional conversion of alginate/fucoidan/mannitol -> glucose/xylose (mass bookkeeping)
@@ -19,7 +18,7 @@ from thermosteam.exceptions import InfeasibleRegion
 
 
 # -----------------------------
-# Small helpers
+# Helper functions
 # -----------------------------
 
 def ensure_chemical(chems: bst.Chemicals, chem_id: str, *, phase: str, MW: float = 1.0) -> None:
@@ -144,7 +143,6 @@ def simulate_screwpress_with_fallback(
 # -----------------------------
 
 def build_feed_dewatering_split(*, keep_solids: float = 0.995, keep_solubles: float = 0.90) -> dict[str, float]:
-    # IMPORTANT: do not include "Water" if you are using moisture_content.
     return {
         "Ash": keep_solids,
         "Protein": keep_solids,
@@ -165,7 +163,6 @@ def build_feed_dewatering_split(*, keep_solids: float = 0.995, keep_solubles: fl
 
 
 def build_post_pretreatment_dewatering_split(*, keep_solids: float = 0.995, keep_solubles: float = 0.85) -> dict[str, float]:
-    # IMPORTANT: do not include "Water" if you are using moisture_content.
     return {
         "Ash": keep_solids,
         "Protein": keep_solids,
@@ -218,7 +215,7 @@ def convert_seaweed_to_sugars(
     frac_to_xylose: float,
 ) -> None:
     """
-    Mass-bookkeeping conversion (not stoichiometric):
+    Mass-bookkeeping conversion:
     Alginate/Fucoidan/Mannitol -> Glucose (+ optional Xylose fraction).
     """
     def take(ID: str, X: float) -> float:
@@ -278,7 +275,7 @@ def select_stillage(purif_sys: bst.System, *, exclude: bst.Stream) -> bst.Stream
 
 
 # -----------------------------
-# Main builder
+# System builder
 # -----------------------------
 
 def create_ethanol_fermentation_system(
@@ -288,18 +285,18 @@ def create_ethanol_fermentation_system(
     # Feedstock
     feedstock_price: float = 0.0,
 
-    # ScrewPress cake moisture_content (water mass fraction)
+    # ScrewPress cake moisture_content
     feed_dewatering_moisture: float = 0.60,
     dewatering_moisture: float = 0.60,
 
-    # Keep solubles with cake (since you are not fermenting pressate in this flowsheet)
+    # Keep solubles with cake
     keep_feed_solubles: float = 0.85,
     keep_post_solubles: float = 0.85,
 
-    # Optional pool bookkeeping
+    # Pool bookkeeping
     seaweed_solubilization: float = 0.0,
 
-    # Seaweed -> sugars conversion knobs (THIS is what you sweep)
+    # Seaweed -> sugars conversion knobs
     X_alginate_to_sugars: float = 0.90,
     X_fucoidan_to_sugars: float = 0.90,
     X_mannitol_to_sugars: float = 0.95,
@@ -336,7 +333,7 @@ def create_ethanol_fermentation_system(
     if debug:
         print("Thermo set? bst:", bst.settings.thermo is not None, "tmo:", tmo.settings.thermo is not None)
 
-    # Feedstock (wet Sargassum proxy)
+    # Feedstock (wet Sargassum)
     feedstock = bst.Stream(
         "feedstock",
         total_flow=104229.16,
@@ -463,7 +460,7 @@ def create_ethanol_fermentation_system(
 
     wet_ethanol = select_wet_ethanol(purif_sys)
 
-    # Dehydration: default everything to recycle unless specified
+    # Dehydration: default everything to recycle
     ethanol_prod = bst.Stream("ethanol")
     recycle_process_water = bst.Stream("recycle_process_water_dehyd")
 
