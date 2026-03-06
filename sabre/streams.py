@@ -3,28 +3,67 @@ Stream functions (feed/product streams)
 
 Purpose:
 - Create BioSTEAM Stream objects with correct mass flowrates and composition
-- Convert high-level scenario inputs (fresh feed kg/hr, moisture, quality bin) into component flows
-
-Key entry points:
-- make_sargassum_feed(fresh_feed_kgph, moisture_frac, quality)
-
-Notes:
-- Streams are typically specified in kg/hr; BioSTEAM may display kmol/hr
-- Dry Sargassum is injected via a group name (e.g., SargassumDry_<quality>)
+- Convert scenario inputs (fresh feed kg/hr, moisture, quality bin) into component flows
 """
 
 import biosteam as bst
+from sabre.config import load_assumptions
+
+# Wet-basis composition
+WET_COMPOSITION = dict(
+    Water=0.85,
+    Ash=0.0720,
+    Protein=0.0090,
+    Lignin=0.0003,
+    Glucan=0.01146,
+    Xylan=0.000705,
+    Mannan=0.000705,
+    Galactan=0.001665,
+    Arabinan=0.0,
+    Alginate=0.00987,
+    Fucoidan=0.00321,
+    Mannitol=0.007785,
+    OtherSolids=0.0333,
+)
 
 def make_sargassum_feed(fresh_feed_kgph: float, moisture_frac: float, quality: str):
+    A = load_assumptions()
+    ash_target = float(A["quality_bins"][quality]["ash_wt_frac_dry"])  # dry-basis ash
+
     water_kgph = fresh_feed_kgph * moisture_frac
     dry_kgph   = fresh_feed_kgph * (1 - moisture_frac)
 
-    group = f"SargassumDry_{quality}"
+    # Convert wet composition -> base dry-basis fractions (excluding water)
+    solids = {k: v for k, v in WET_COMPOSITION.items() if k != "Water"}
+    solids_sum = sum(solids.values())
+    base_dry = {k: v / solids_sum for k, v in solids.items()}  # sums to 1
+
+    base_ash = base_dry["Ash"]
+    base_nonash_sum = 1.0 - base_ash
+    target_nonash_sum = 1.0 - ash_target
+
+    if base_nonash_sum <= 1e-12:
+        raise RuntimeError("Base non-ash fraction is ~0; cannot scale.")
+    scale = target_nonash_sum / base_nonash_sum
+
+    # Build final dry-basis fractions with ash overridden
+    dry_fracs = {"Ash": ash_target}
+    for k, v in base_dry.items():
+        if k == "Ash": 
+            continue
+        dry_fracs[k] = v * scale
+
+    # Normalize for numerical safety
+    s = sum(dry_fracs.values())
+    dry_fracs = {k: v / s for k, v in dry_fracs.items()}
+
+    # Allocate component mass flows
+    kwargs = {k: dry_kgph * frac for k, frac in dry_fracs.items()}
 
     return bst.Stream(
         "sargassum_feed",
         Water=water_kgph,
-        **{group: dry_kgph},
         units="kg/hr",
         phase="l",
+        **kwargs,
     )

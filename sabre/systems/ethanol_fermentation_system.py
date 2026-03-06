@@ -1,6 +1,6 @@
 """
 Ethanol-only fermentation flowsheet with:
-- optional upstream + post-pretreatment dewatering (ScrewPress) with feasible-moisture fallback
+- one upstream dewatering step (ScrewPress) with feasible-moisture fallback
 - optional conversion of alginate/fucoidan/mannitol -> glucose/xylose (mass bookkeeping)
 - optional stripping of mostly-water auxiliary inlets in the fermentation template
 """
@@ -52,7 +52,6 @@ def water_wt(s: bst.Stream) -> float:
 
 
 def zero_mostly_water_aux_inlets(sys: bst.System, *, threshold: float = 0.95, debug: bool = False) -> None:
-    # Keep sys.ins[0] as main feed, clear other inlets that are basically water
     for i, s in enumerate(sys.ins):
         if i == 0:
             continue
@@ -89,14 +88,12 @@ def simulate_screwpress_with_fallback(
         except InfeasibleRegion:
             return False
 
-    # First attempt: requested target
     if try_m(target):
         return float(press.moisture_content)
 
     if debug:
         print(f"[{press.ID}] target moisture_content={target:.3f} infeasible; searching fallback")
 
-    # Common failure mode: too dry => try wetter
     if try_m(hi):
         a, b = target, hi
         best = hi
@@ -113,7 +110,6 @@ def simulate_screwpress_with_fallback(
             print(f"[{press.ID}] using moisture_content={best:.4f}")
         return float(best)
 
-    # If even hi fails, try any feasible on [lo, target]
     if try_m(lo):
         a, b = lo, target
         best = lo
@@ -130,7 +126,6 @@ def simulate_screwpress_with_fallback(
             print(f"[{press.ID}] using moisture_content={best:.4f}")
         return float(best)
 
-    # Last resort: no moisture constraint
     press.moisture_content = None
     press.simulate()
     if debug:
@@ -143,26 +138,6 @@ def simulate_screwpress_with_fallback(
 # -----------------------------
 
 def build_feed_dewatering_split(*, keep_solids: float = 0.995, keep_solubles: float = 0.90) -> dict[str, float]:
-    return {
-        "Ash": keep_solids,
-        "Protein": keep_solids,
-        "Lignin": keep_solids,
-        "OtherSolids": keep_solids,
-        "Glucan": keep_solids,
-        "Xylan": keep_solids,
-        "Mannan": keep_solids,
-        "Galactan": keep_solids,
-        "Arabinan": keep_solids,
-        "Alginate": keep_solids,
-        "Fucoidan": keep_solids,
-        "Mannitol": keep_solubles,
-        "Glucose": keep_solubles,
-        "Xylose": keep_solubles,
-        "Arabinose": keep_solubles,
-    }
-
-
-def build_post_pretreatment_dewatering_split(*, keep_solids: float = 0.995, keep_solubles: float = 0.85) -> dict[str, float]:
     return {
         "Ash": keep_solids,
         "Protein": keep_solids,
@@ -282,16 +257,18 @@ def create_ethanol_fermentation_system(
     *,
     debug: bool = False,
 
+    # Keep only one dewatering step
+    include_feed_dewatering: bool = True,
+
     # Feedstock
     feedstock_price: float = 0.0,
+    feed_total_flow_kg_hr: float = 104229.16,
 
     # ScrewPress cake moisture_content
     feed_dewatering_moisture: float = 0.60,
-    dewatering_moisture: float = 0.60,
 
     # Keep solubles with cake
     keep_feed_solubles: float = 0.85,
-    keep_post_solubles: float = 0.85,
 
     # Pool bookkeeping
     seaweed_solubilization: float = 0.0,
@@ -310,7 +287,6 @@ def create_ethanol_fermentation_system(
     strip_ferm_aux_water: bool = True,
     aux_water_threshold: float = 0.95,
 ):
-    # Isolated flowsheet to avoid collisions
     fs = bst.Flowsheet("ethanol_fs")
     bst.main_flowsheet.set_flowsheet(fs)
     fs.clear()
@@ -336,7 +312,7 @@ def create_ethanol_fermentation_system(
     # Feedstock (wet Sargassum)
     feedstock = bst.Stream(
         "feedstock",
-        total_flow=104229.16,
+        total_flow=float(feed_total_flow_kg_hr),
         units="kg/hr",
         price=float(feedstock_price),
         Water=0.85,
@@ -363,24 +339,34 @@ def create_ethanol_fermentation_system(
         print("Feedstock F_mass:", feedstock.F_mass, "water wt%:", water_wt(feedstock))
         print("U101 out F_mass:", U101.outs[0].F_mass, "water wt%:", water_wt(U101.outs[0]))
 
-    # Upstream dewatering
-    U_DW0 = ScrewPress(
-        "U_DW0",
-        ins=U101 - 0,
-        outs=("feed_dewatered_cake", "feed_pressate"),
-        split=build_feed_dewatering_split(keep_solubles=keep_feed_solubles),
-        moisture_content=float(feed_dewatering_moisture),
-    )
-    used_m0 = simulate_screwpress_with_fallback(U_DW0, feed_dewatering_moisture, debug=debug)
-    feed_cake, feed_pressate = U_DW0.outs
+    # One upstream dewatering step only
+    U_DW0 = None
+    used_m0 = float("nan")
 
-    if debug:
-        print("\n=== Upstream dewatering (U_DW0) ===")
-        print("Target moisture:", feed_dewatering_moisture, "used:", used_m0)
-        print("Feed cake F_mass:", feed_cake.F_mass, "water wt%:", water_wt(feed_cake))
-        print("Feed pressate F_mass:", feed_pressate.F_mass, "water wt%:", water_wt(feed_pressate))
+    if include_feed_dewatering:
+        U_DW0 = ScrewPress(
+            "U_DW0",
+            ins=U101 - 0,
+            outs=("feed_dewatered_cake", "feed_pressate"),
+            split=build_feed_dewatering_split(keep_solubles=keep_feed_solubles),
+            moisture_content=float(feed_dewatering_moisture),
+        )
+        used_m0 = simulate_screwpress_with_fallback(U_DW0, feed_dewatering_moisture, debug=debug)
+        feed_cake, feed_pressate = U_DW0.outs
 
-    # Pretreatment (on dewatered cake)
+        if debug:
+            print("\n=== Upstream dewatering (U_DW0) ===")
+            print("Target moisture:", feed_dewatering_moisture, "used:", used_m0)
+            print("Feed cake F_mass:", feed_cake.F_mass, "water wt%:", water_wt(feed_cake))
+            print("Feed pressate F_mass:", feed_pressate.F_mass, "water wt%:", water_wt(feed_pressate))
+    else:
+        feed_cake = U101.outs[0]
+        feed_pressate = bst.Stream("feed_pressate_bypass")
+        if debug:
+            print("\n=== Upstream dewatering bypassed ===")
+            print("Feed cake F_mass:", feed_cake.F_mass, "water wt%:", water_wt(feed_cake))
+
+    # Pretreatment
     pretreatment_sys = cellulosic.create_dilute_acid_pretreatment_system(ins=feed_cake, area=200, mockup=False)
     clamp_heat_exchanger_target(pretreatment_sys, "H201")
     pretreatment_sys.simulate()
@@ -392,7 +378,7 @@ def create_ethanol_fermentation_system(
         print("\n=== Pretreatment ===")
         print("Pretreated F_mass:", pretreated.F_mass, "water wt%:", water_wt(pretreated))
 
-    # Seaweed -> sugars (simple bookkeeping unit)
+    # Seaweed -> sugars bookkeeping unit
     U_SW2S = bst.Unit("U_SW2S", ins=pretreated, outs=("pretreated_with_sugars",))
 
     def _run_sw2s():
@@ -413,26 +399,17 @@ def create_ethanol_fermentation_system(
     U_SW2S.simulate()
     pretreated2 = U_SW2S.outs[0]
 
-    # Post-pretreatment dewatering
-    U_DW = ScrewPress(
-        "U_DW",
-        ins=pretreated2,
-        outs=("dewatered_cake", "pressate"),
-        split=build_post_pretreatment_dewatering_split(keep_solubles=keep_post_solubles),
-        moisture_content=float(dewatering_moisture),
-    )
-    used_m1 = simulate_screwpress_with_fallback(U_DW, dewatering_moisture, debug=debug)
-    cake, pressate = U_DW.outs
+    # No post-pretreatment screw press
+    cake = pretreated2
+    pressate = bst.Stream("pressate_bypass")
 
     if debug:
-        print("\n=== Dewatering (U_DW) ===")
-        print("Target moisture:", dewatering_moisture, "used:", used_m1)
-        print("Cake F_mass:", cake.F_mass, "water wt%:", water_wt(cake))
-        print("Pressate F_mass:", pressate.F_mass, "water wt%:", water_wt(pressate))
+        print("\n=== Post-pretreatment dewatering removed ===")
+        print("Fermentation feed F_mass:", cake.F_mass, "water wt%:", water_wt(cake))
 
     solubilize_seaweed_pools(cake, solubilization=float(seaweed_solubilization))
 
-    # Fermentation template
+    # Fermentation
     fermentation_sys = cellulosic.create_cellulosic_fermentation_system(ins=cake, area=300, mockup=False, kind="SCF")
     if strip_ferm_aux_water:
         zero_mostly_water_aux_inlets(fermentation_sys, threshold=float(aux_water_threshold), debug=debug)
@@ -460,7 +437,7 @@ def create_ethanol_fermentation_system(
 
     wet_ethanol = select_wet_ethanol(purif_sys)
 
-    # Dehydration: default everything to recycle
+    # Simple dehydration placeholder
     ethanol_prod = bst.Stream("ethanol")
     recycle_process_water = bst.Stream("recycle_process_water_dehyd")
 
@@ -489,19 +466,19 @@ def create_ethanol_fermentation_system(
     )
 
     # System
-    all_units = (
-        U101,
-        U_DW0,
-        *pretreatment_sys.units,
-        U_SW2S,
-        U_DW,
-        *fermentation_sys.units,
-        *purif_sys.units,
-        U_DEHYD,
-    )
+    all_units = [U101]
+    if U_DW0 is not None:
+        all_units.append(U_DW0)
+    all_units.extend(pretreatment_sys.units)
+    all_units.append(U_SW2S)
+    all_units.extend(fermentation_sys.units)
+    all_units.extend(purif_sys.units)
+    all_units.append(U_DEHYD)
 
     system = bst.System("Ethanol_Fermentation_sys", path=all_units)
     tea = create_cellulosic_ethanol_tea(system)
+    tea.duration = (2030, 2060)
+    tea.income_tax = 0.21
 
     key_streams = {
         "feedstock": feedstock,

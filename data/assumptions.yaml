@@ -217,3 +217,30 @@ digestate_screw_press:
   include_polymer_dosing: false
   polymer_dosing_cost_eur_each: 0.0
   F_BM: 1.0
+
+vfa_ad:
+  # sizing
+  hrt_days: 15.0
+  slurry_density_kg_per_m3: 1000.0
+  gas_storage_frac_of_total_volume: 0.25
+  max_single_digester_volume_MG: 1.5
+
+  # utilities
+  mixing_W_per_m3: 5.0
+  influent_temperature_K: 298.15   # 25 C
+  target_temperature_K: 308.15     # 35 C
+  cp_kJ_per_kgK: 4.18
+
+vfa_ad_performance:
+  # conversion
+  vs_destruction: 0.50
+  vfa_kg_per_kg_vs_destroyed: 0.80
+  vfa_recovery: 0.90
+
+  # VFA composition
+  vfa_split:
+    AceticAcid: 0.25
+    PropionicAcid: 0.05
+    ButyricAcid: 0.45
+    ValericAcid: 0.05
+    HexanoicAcid: 0.20
