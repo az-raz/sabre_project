@@ -22,7 +22,7 @@ L_PER_GAL = 3.785
 # -----------------------------
 # Paths
 # -----------------------------
-RESULTS_DIR = Path("results/sweeps")
+RESULTS_DIR = Path("results/fermentation/sweeps")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 

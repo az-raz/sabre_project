@@ -253,7 +253,7 @@ def run_case(case_name: str, target_ethanol_price_per_gal: float | None = None, 
 def main():
     target_ethanol_price_per_gal = 3.50
 
-    outdir = Path("results/tea")
+    outdir = Path("results/fermentation/tea")
     figs = outdir / "figures"
     tables = outdir / "tables"
     figs.mkdir(parents=True, exist_ok=True)

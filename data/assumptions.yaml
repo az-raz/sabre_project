@@ -161,7 +161,20 @@ preprocessing:
     press:
       cake_solids_wt_frac: 0.35
       solids_capture_frac: 0.98
-      solids_IDs: [Cellulose, Ash]
+      solids_IDs:
+      - Glucan
+      - Xylan
+      - Mannan
+      - Galactan
+      - Arabinan
+      - Alginate
+      - Fucoidan
+      - Mannitol
+      - Protein
+      - OtherSolids
+      - Lignin
+      - Ash
+      
       solubles_to_pressate_frac: 1.0
 
       # utilities
@@ -208,7 +221,19 @@ preprocessing:
         note: "Hammer mill purchase cost anchor $206,400 used for capacity scaling with exponent 0.6 and install factor."
 
 digestate_screw_press:
-  solids_IDs: ["Cellulose", "Ash"]
+  solids_IDs:
+    - Glucan
+    - Xylan
+    - Mannan
+    - Galactan
+    - Arabinan
+    - Alginate
+    - Fucoidan
+    - Mannitol
+    - Protein
+    - OtherSolids
+    - Lignin
+    - Ash
   ts_capture_frac: 0.4
   cake_moisture_frac: 0.5
   capacity_tph_each: 6.0

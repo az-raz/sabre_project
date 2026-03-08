@@ -61,6 +61,7 @@ class AnaerobicDigester(bst.Unit):
         vs_destruction=0.50,
         ch4_kg_per_kg_vs=0.0555,
         ch4_molfrac=0.50,
+        digestible_IDs=None,
         # sizing
         hrt_days=25.0,
         slurry_density_kg_per_m3=1000.0,
@@ -85,6 +86,11 @@ class AnaerobicDigester(bst.Unit):
         self.vs_destruction = float(vs_destruction)
         self.ch4_kg_per_kg_vs = float(ch4_kg_per_kg_vs)
         self.ch4_molfrac = float(ch4_molfrac)
+        self.digestible_IDs = tuple(digestible_IDs) if digestible_IDs is not None else (
+            "Glucan", "Xylan", "Mannan", "Galactan",
+            "Alginate", "Fucoidan", "Mannitol",
+            "Protein", "OtherSolids", "Cellulose",
+        )
 
         # utilities
         self.mixing_W_per_m3 = float(mixing_W_per_m3)
@@ -106,6 +112,17 @@ class AnaerobicDigester(bst.Unit):
         self.maintenance_usd_per_m3_yr = maintenance_usd_per_m3_yr
         self.F_BM = dict(self.F_BM)
 
+    def _available_digestible_pool(self, stream):
+        ids = set(bst.settings.thermo.chemicals.IDs)
+        avail = {}
+        for cid in self.digestible_IDs:
+            if cid not in ids:
+                continue
+            m = float(stream.imass[cid])
+            if m > 0:
+                avail[cid] = m
+        return avail
+
     def _run(self):
         feed = self.ins[0]
         biogas, digestate = self.outs
@@ -116,57 +133,48 @@ class AnaerobicDigester(bst.Unit):
         biogas.phase = "g"
         digestate.phase = "l"
 
-        # calculate TS and VS
-        TS = digestate.imass["Cellulose"] + digestate.imass["Ash"]
-        VS = self.vs_ts * TS
+        chems = bst.settings.thermo.chemicals
+        ids = set(chems.IDs)
+
+        water = float(digestate.imass["Water"]) if "Water" in ids else 0.0
+        ash = float(digestate.imass["Ash"]) if "Ash" in ids else 0.0
+        TS = max(digestate.F_mass - water, 0.0)
+        VS = max(TS - ash, 0.0)
         VS_destroyed = self.vs_destruction * VS
 
-        # remove destroyed VS from cellulose only (ash inert)
-        cellulose_available = digestate.imass["Cellulose"]
-        remove = min(VS_destroyed, cellulose_available)
-        if remove <= 0:
+        if VS_destroyed <= 0:
             return
 
-        # stoichiometric conversion for cellulose monomer C6H10O5 
-        chems = bst.settings.thermo.chemicals
-        cell = chems["Cellulose"]
-        h2o  = chems["Water"]
-        ch4  = chems["Methane"]
-        co2  = chems["CarbonDioxide"]
+        avail = self._available_digestible_pool(digestate)
+        pool = sum(avail.values())
+        if pool <= 1e-12:
+            return
 
-        # moles of cellulose monomer destroyed
-        n_cell = remove / cell.MW  # kmol/hr
+        remove = min(VS_destroyed, pool)
+        for cid, m in avail.items():
+            take = remove * (m / pool)
+            digestate.imass[cid] -= take
 
-        # reaction: Cellulose + Water -> 3 CH4 + 3 CO2
-        n_h2o = 1.0 * n_cell
-        n_ch4 = 3.0 * n_cell
-        n_co2 = 3.0 * n_cell
-
-        # consume cellulose
-        digestate.imass["Cellulose"] -= remove
-
-        # consume water
-        water_available = digestate.imass["Water"]
-        water_needed = n_h2o * h2o.MW
-        if water_available < water_needed - 1e-9:
+        if "Methane" not in ids or "CarbonDioxide" not in ids:
             raise RuntimeError(
-                f"Not enough water in digestate for AD stoichiometry: "
-                f"need {water_needed:.2f} kg/hr, have {water_available:.2f} kg/hr. "
-                f"Check feed water content or Water chemical ID."
+                "AD unit requires Methane and CarbonDioxide in thermo."
             )
-        digestate.imass["Water"] -= water_needed # mass balances
 
-        # produce biogas
+        ch4 = chems["Methane"]
+        ch4_mass = self.ch4_kg_per_kg_vs * remove
+        n_ch4 = ch4_mass / ch4.MW
+
+        if n_ch4 <= 0:
+            return
+
+        if 0 < self.ch4_molfrac < 1:
+            n_total = n_ch4 / self.ch4_molfrac
+            n_co2 = max(n_total - n_ch4, 0.0)
+        else:
+            n_co2 = n_ch4
+
         biogas.imol["Methane"] = n_ch4
         biogas.imol["CarbonDioxide"] = n_co2
-
-        # adjust biogas composition if target specified
-        if 0 < self.ch4_molfrac < 1:
-            n_total = n_ch4 + n_co2
-            n_ch4_target = self.ch4_molfrac * n_total
-            n_co2_target = (1 - self.ch4_molfrac) * n_total
-            biogas.imol["Methane"] = n_ch4_target
-            biogas.imol["CarbonDioxide"] = n_co2_target
 
     def _design(self):
         feed = self.ins[0]
@@ -192,7 +200,7 @@ class AnaerobicDigester(bst.Unit):
         self.design_results["Number of digesters"] = N
         self.design_results["Digester volume each (m3)"] = V_each
 
-                # ------------------------
+        # ------------------------
         # Utilities: mixing + heating
         # ------------------------
 
@@ -225,10 +233,9 @@ class AnaerobicDigester(bst.Unit):
 
             # BioSTEAM version differences: some expect (duty, T_in, T_out), others (duty, T_in)
             try:
-                hu = self.add_heat_utility(Q_kJph, T_in, T_out)
+                self.add_heat_utility(Q_kJph, T_in, T_out)
             except TypeError:
-                hu = self.add_heat_utility(Q_kJph, T_in)
-
+                self.add_heat_utility(Q_kJph, T_in)
 
     def _cost(self):
         # cost on a per-digester basis, multiplied by number of digesters

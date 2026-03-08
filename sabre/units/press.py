@@ -25,17 +25,30 @@ class Press(bst.Unit):
 
     def __init__(
         self, ID="", ins=None, outs=(),
-        solids_IDs=("Cellulose", "Ash"),
+        solids_IDs=(
+            "Glucan",
+            "Xylan",
+            "Mannan",
+            "Galactan",
+            "Arabinan",
+            "Alginate",
+            "Fucoidan",
+            "Mannitol",
+            "Protein",
+            "OtherSolids",
+            "Lignin",
+            "Ash",
+        ),
         solids_capture_frac=0.98,
         cake_solids_wt_frac=0.35,
         solubles_to_pressate_frac=1.0,
 
         # --- utilities ---
         power_kWh_per_dry_ton_TS=None,
-        power_kWh_per_ton_wet=None, 
+        power_kWh_per_ton_wet=None,
 
         # --- costing ---
-        capex_model=None,             
+        capex_model=None,
         F_BM=1.0,
         ref_capacity_tph_wet=50.0,
         capex_installed_ref_usd=5e6,
@@ -58,6 +71,14 @@ class Press(bst.Unit):
         self.capex_installed_ref_usd = float(capex_installed_ref_usd)
         self.scale_exponent = float(scale_exponent)
 
+    def _get_mass(self, stream, chem_id):
+        if chem_id not in stream.chemicals:
+            return 0.0
+        return float(stream.imass[chem_id])
+
+    def _available_solids(self, stream):
+        return [sid for sid in self.solids_IDs if sid in stream.chemicals]
+
     def _run(self):
         feed = self.ins[0]
         cake, pressate = self.outs
@@ -67,10 +88,12 @@ class Press(bst.Unit):
         cake.phase = "l"
         pressate.phase = "l"
 
+        solids = self._available_solids(feed)
+
         # Split defined solids by capture
         cap = min(max(self.solids_capture_frac, 0.0), 1.0)
-        for sid in self.solids_IDs:
-            m = float(feed.imass[sid])
+        for sid in solids:
+            m = self._get_mass(feed, sid)
             m_cake = cap * m
             cake.imass[sid] = m_cake
             pressate.imass[sid] = m - m_cake
@@ -78,18 +101,18 @@ class Press(bst.Unit):
         # Partition everything else except water
         sol_to_p = min(max(self.solubles_to_pressate_frac, 0.0), 1.0)
         for chem_id in feed.chemicals.IDs:
-            if chem_id in self.solids_IDs or chem_id == "Water":
+            if chem_id in solids or chem_id == "Water":
                 continue
-            m = float(feed.imass[chem_id])
+            m = self._get_mass(feed, chem_id)
             m_p = sol_to_p * m
             pressate.imass[chem_id] += m_p
             cake.imass[chem_id] += (m - m_p)
 
         # Allocate water to hit cake solids wt% target
-        TS_cake = sum(float(cake.imass[sid]) for sid in self.solids_IDs)
+        TS_cake = sum(self._get_mass(cake, sid) for sid in solids)
         other_nonwater_cake = sum(
-            float(cake.imass[i]) for i in feed.chemicals.IDs
-            if i not in self.solids_IDs and i != "Water"
+            self._get_mass(cake, i) for i in feed.chemicals.IDs
+            if i not in solids and i != "Water"
         )
 
         f = self.cake_solids_wt_frac
@@ -99,7 +122,7 @@ class Press(bst.Unit):
         else:
             water_needed = 0.0
 
-        water_avail = float(feed.imass["Water"])
+        water_avail = self._get_mass(feed, "Water")
         water_to_cake = min(water_needed, water_avail)
 
         cake.imass["Water"] += water_to_cake
@@ -107,9 +130,10 @@ class Press(bst.Unit):
 
     def _design(self):
         feed = self.ins[0]
+        solids = self._available_solids(feed)
 
-        # TS through the press (kg/h) based on solids_IDs
-        TS_kgph = sum(float(feed.imass[sid]) for sid in self.solids_IDs)
+        # TS through the press (kg/h) based on solids_IDs present in the stream
+        TS_kgph = sum(self._get_mass(feed, sid) for sid in solids)
         dry_ton_per_hr_TS = TS_kgph / KG_PER_DRY_TON
         dtpd = dry_ton_per_hr_TS * HR_PER_DAY
 
@@ -133,13 +157,15 @@ class Press(bst.Unit):
         model = (self.capex_model or "").lower()
 
         if model == "scaled_anchor":
-            wet_tph = feed.F_mass / 1000.0  # metric ton/h (close enough for baseline)
+            wet_tph = feed.F_mass / 1000.0  # metric ton/h
             Q0 = float(getattr(self, "ref_capacity_tph_wet", 50.0))
             C0 = float(getattr(self, "capex_installed_ref_usd", 5e6))
             n = float(getattr(self, "scale_exponent", 0.6))
 
             if wet_tph <= 0:
                 capex = 0.0
+                N = 0
+                Q_each = 0.0
             else:
                 N = max(1, math.ceil(wet_tph / Q0))
                 Q_each = wet_tph / N
