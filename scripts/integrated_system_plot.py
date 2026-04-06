@@ -13,7 +13,7 @@ OUTDIR.mkdir(parents=True, exist_ok=True)
 
 set_thermo()
 
-# Build at alpha=0.5 so both pathways are populated
+# Build at alpha=0.5 so both pathways are populated --> just to have it
 sys, streams, units, _ = create_integrated_biorefinery(
     alpha=0.5,
     pretreatment_case="combined_PE",
@@ -39,11 +39,16 @@ if meth_units:
     print(f"Saved: {OUTDIR / 'methanogenic_pathway'}")
 
 # VFA fermentation pathway only
-vfa_ids = ("VFA_AD", "SP_VFA", "MF", "T601", "R601", "V605", "OE", "C603_2")
-vfa_units = [u for u in sys.units if u.ID in vfa_ids]
+exclude_ids = {
+    "PR", "PC", "ML", "SPL",      # shared front end
+    "PX", "EZ", "HT", "MX",       # methane-side pretreatment
+    "AD", "H2SR", "UP", "SP_AD",  # methane pathway
+}
+
+vfa_units = [u for u in sys.units if u.ID not in exclude_ids]
+
 if vfa_units:
     vfa_sys = bst.System("vfa_ferm_path", path=vfa_units)
     vfa_sys.diagram(file=str(OUTDIR / "vfa_fermentation_pathway"))
     print(f"Saved: {OUTDIR / 'vfa_fermentation_pathway'}")
-
 print(f"\nAll flowsheets saved to: {OUTDIR.resolve()}")

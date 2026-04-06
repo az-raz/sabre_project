@@ -1,15 +1,11 @@
 """
 plot_vfa_pathway_figures.py
 ---------------------------
-Generate core results figures for Section 4.2 Acidogenic and Fermentation Pathway.
-
 Figures:
-1) VFA composition in acidogenic broth (kg/hr)
-2) Crude microbial oil MSP vs feed price ($/kg oil)
+1) VFA composition in acidogenic broth (kg/hr) --> bar chart of mass flow of each VFA in acidogenic broth
+2) Crude microbial oil MSP vs feed price ($/kg oil) --> MSP vs benchmark ($5)
 3) Product scenario comparison at near-zero feed price ($/kg product)
 
-Run from sabre_project root:
-    python scripts/plot_vfa_pathway_figures.py
 """
 
 from __future__ import annotations
@@ -22,7 +18,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 import biosteam as bst
 
-# Make sure sibling imports work when the script is run from repo root
+# Make sure imports work when the script is run from repo root
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.append(str(SCRIPT_DIR))
@@ -152,7 +148,7 @@ def make_oil_msp_vs_feed_price_figure():
             ha="center", va="bottom", fontsize=8
         )
 
-    # product scenario file uses $5/kg as the microbial oil market reference
+    # $5/kg as the microbial oil market reference
     ax.axhline(5.0, color="black", linewidth=1.0, linestyle="--", zorder=1, label="$5/kg market reference")
 
     ax.set_xlabel("Feed price ($/kg wet Sargassum)")
@@ -190,7 +186,7 @@ def make_product_scenario_comparison_figure(feed_price: float = 0.00):
         _patch_ev607(full_sys, silent=True)
         _apply_disposal_costs(streams)
 
-        # Wire extraction / purification cost into OE.add_OPEX exactly as in vfa_fermentation_tea.py
+        # Putting purification cost into OE.add_OPEX exactly as in vfa_fermentation_tea.py
         oil_stream = streams["backend_oil"]
         product_kg_hr = float(oil_stream.imass["MicrobialOil"])
         extraction_usd_per_hr = product_kg_hr * sc["extraction_usd_per_kg"]

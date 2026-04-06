@@ -9,8 +9,8 @@ Key entry points:
 - create_ad_biogas_system(...)
 
 Notes:
-- feed -> press -> pressate concentrator -> optional evaporator -> mill
-  -> optional pretreatment -> optional dilution -> AD -> biogas upgrading -> digestate separation
+- feed -> press -> pressate concentrator -> mill
+  -> optional pretreatment -> AD -> H2S removal -> biogas upgrading -> digestate separation
 - Uses plant-scale throughput from YAML (e.g. 15,000 ton/day wet feed)
 """
 

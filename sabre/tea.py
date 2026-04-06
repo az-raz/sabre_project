@@ -8,7 +8,7 @@ CH4_MMBTU_PER_KG = 0.0526
 
 class SABREBaselineTEA(bst.TEA):
     """
-    Simplified TEA for SABRE systems.
+    Simplified TEA
 
     Assumptions:
     - Fixed operating cost (FOC) is modeled as a fraction of FCI.
@@ -50,7 +50,7 @@ class SABREBaselineTEA(bst.TEA):
     def VOC(self):
         """
         Override BioSTEAM's default VOC property so reagent add_OPEX is included
-        in the cashflow / MSP calculation.
+        in the cashflow / MSP calculation --> for reagent cost and other OPEX
         """
         return (
             self.material_cost
@@ -134,15 +134,6 @@ def solve_product_msp(
     - usd_per_kg_product
     - annual_product_kg
     - usd_per_mmbtu  (if energy basis is provided)
-
-    Notes
-    -----
-    If product_ID is provided, the price is also converted from
-    $/kg stream to $/kg pure product basis using the product mass fraction
-    in the stream.
-
-    Example:
-        solve_product_msp(tea, recovered_product, product_ID="PHA")
     """
     msp_usd_per_kg_stream = tea.solve_price(product_stream)
     annual_hours = tea.operating_days * 24

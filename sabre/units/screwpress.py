@@ -50,9 +50,9 @@ class DigestateScrewPress(bst.Unit):
 
         self.solids_IDs = tuple(solids_IDs)
 
-        # Dissolved chemicals pass entirely to pressate regardless of ts_capture_frac.
-        # VFAs are soluble acids — they must not be captured in the cake.
-        # Defaults cover the standard VFA set; override via dissolved_IDs if needed.
+        # Dissolved chemicals pass entirely to pressate regardless of ts_capture_frac
+        # VFAs are soluble acids — they must not be captured in the cake
+        # Defaults cover the standard VFA set; override via dissolved_IDs if needed
         if dissolved_IDs is None:
             dissolved_IDs = (
                 "AceticAcid", "PropionicAcid", "ButyricAcid",
@@ -106,8 +106,8 @@ class DigestateScrewPress(bst.Unit):
         water_id = "Water"
         ids = feed.chemicals.IDs
 
-        # Dissolved chemicals (VFAs, CO2, Ammonia etc.) pass entirely to pressate.
-        # They are soluble and cannot be mechanically captured in a screw press cake.
+        # Dissolved chemicals (VFAs, CO2, Ammonia etc.) pass entirely to pressate
+        # They are soluble and cannot be mechanically captured in a screw press cake
         dissolved_set = set(self.dissolved_IDs)
 
         # Define TS as everything except Water AND dissolved chemicals
@@ -166,7 +166,7 @@ class DigestateScrewPress(bst.Unit):
         # Power: kW = (kWh/m3) * (m3/h)
         F_m3ph = float(self.ins[0].F_vol)
         kW = self.kWh_per_m3 * F_m3ph
-        self.power_utility.consumption = kW  # kW
+        self.power_utility.consumption = kW 
 
         self.design_results["Throughput_m3ph"] = F_m3ph
         self.design_results["kWh_per_m3"] = self.kWh_per_m3

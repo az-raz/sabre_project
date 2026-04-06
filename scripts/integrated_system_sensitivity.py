@@ -3,9 +3,9 @@ from __future__ import annotations
 """
 Integrated-system TEA figures
 
-1) Runs the alpha sweep for several integrated-system scenarios.
-2) Saves one CSV per scenario plus a summary CSV of the best point in each case.
-3) Generates 4 figures:
+1) Runs the alpha sweep for several integrated-system scenarios
+2) Saves one CSV per scenario plus a summary CSV of the best point in each case
+3) Plots 4 figures:
    - Figure 1: Alpha sweep across four scenario cases (2x2 panels, NPV vs alpha)
    - Figure 2: Best-case scenario comparison
    - Figure 3: Cost metrics at selected alpha values (base scenario)
@@ -43,7 +43,7 @@ from sabre.tea import make_baseline_tea
 
 
 # -----------------------------------------------------------------------------
-# Scenario definitions
+# Scenario definitions --> trying to find worst/best cases
 # -----------------------------------------------------------------------------
 @dataclass(frozen=True)
 class Scenario:
@@ -485,7 +485,7 @@ def plot_cost_metrics(selected_df: pd.DataFrame, outpath: Path) -> None:
 
 
 def plot_product_outputs(full_metrics_df: pd.DataFrame, outpath: Path) -> None:
-    """Annual product rates vs alpha (thesis quality, three-panel stacked)."""
+    """Annual product rates vs alpha"""
     import matplotlib.ticker as mticker
 
     C_CH4  = "#185FA5"

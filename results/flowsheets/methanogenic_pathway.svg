@@ -1,0 +1,201 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="1355pt" height="249pt" viewBox="0.00 0.00 1355.00 249.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 244.66)">
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>807248584:c-&gt;807248785:c</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M249.52,-97.2C281.54,-97.2 319.27,-97.2 353.01,-97.2" />
+<ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="352.89,-100.7 362.89,-97.2 352.89,-93.7 352.89,-100.7" />
+<ns0:g id="a_edge2-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="307.68" y="-115.4" font-family="Arial" font-size="14.00" fill="#90918e"> peroxide treated</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="307.68" y="-99.65" font-family="Arial" font-size="14.00" fill="#90918e"> biomass</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>807248785:c-&gt;807248881:c</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M526.69,-97.2C559.33,-97.2 596.99,-97.2 629.35,-97.2" />
+<ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="629.06,-100.7 639.06,-97.2 629.06,-93.7 629.06,-100.7" />
+<ns0:g id="a_edge3-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="584.55" y="-115.4" font-family="Arial" font-size="14.00" fill="#90918e"> combined PE</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="584.55" y="-99.65" font-family="Arial" font-size="14.00" fill="#90918e"> treated biomass</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>807248881:c-&gt;807248407:c</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M771.56,-108.66C802.59,-114.26 839.71,-120.96 870.18,-126.46" />
+<ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="869.52,-129.9 879.98,-128.23 870.76,-123.01 869.52,-129.9" />
+<ns0:g id="a_edge4-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 516 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="813.8" y="-124.41" font-family="Arial" font-size="14.00" fill="#90918e"> biogas raw</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge8" class="edge">
+<ns0:title>807248881:c-&gt;807248833:c</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M762.04,-75.16C767.8,-73.34 773.63,-71.72 779.3,-70.45 799.63,-65.9 821.84,-62.99 842.81,-61.15" />
+<ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="843,-64.65 852.7,-60.37 842.45,-57.67 843,-64.65" />
+<ns0:g id="a_edge8-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 4.73e+04 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="813.8" y="-72.9" font-family="Arial" font-size="14.00" fill="#90918e"> digestate</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>807248407:c-&gt;807248404:c</ns0:title>
+<ns0:path fill="none" stroke="#90918e" d="M979.14,-148.49C1016.97,-157.48 1070.52,-170.21 1113.39,-180.4" />
+<ns0:polygon fill="#90918e" stroke="#90918e" points="1112.31,-183.74 1122.85,-182.65 1113.93,-176.93 1112.31,-183.74" />
+<ns0:g id="a_edge5-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 500 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="1064.8" y="-183.56" font-family="Arial" font-size="14.00" fill="#90918e"> treated biogas</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge9" class="edge">
+<ns0:title>807248407:c-&gt;807339444:w</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M978.99,-133.98C990.15,-133.35 1002.02,-132.78 1013.05,-132.45 1087.65,-130.22 1106.34,-132.2 1180.97,-132.2" />
+<ns0:g id="a_edge9-label"><ns0:a ns1:title="(empty)">
+<ns0:text xml:space="preserve" text-anchor="middle" x="1064.8" y="-134.9" font-family="Arial" font-size="14.00" fill="#90918e"> spent h2s media</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>807248404:c-&gt;807339948:w</ns0:title>
+<ns0:path fill="none" stroke="#90918e" d="M1245.8,-213.41C1273.57,-219.6 1307.18,-225.2 1337.87,-225.2" />
+<ns0:g id="a_edge6-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 444 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="1291.05" y="-227.36" font-family="Arial" font-size="14.00" fill="#90918e"> biomethane</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge10" class="edge">
+<ns0:title>807248404:c-&gt;807339612:w</ns0:title>
+<ns0:path fill="none" stroke="#90918e" d="M1245.76,-180.41C1273.53,-174 1307.14,-168.2 1337.87,-168.2" />
+<ns0:g id="a_edge10-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 56.5 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="1291.05" y="-180.86" font-family="Arial" font-size="14.00" fill="#90918e"> offgas co2</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>807248833:c-&gt;807339504:w</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M1005.29,-60.9C1054.92,-62.49 1121.87,-64.2 1180.97,-64.2" />
+<ns0:g id="a_edge7-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.47e+04 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="1064.8" y="-66.03" font-family="Arial" font-size="14.00" fill="#90918e"> soil amendment</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge11" class="edge">
+<ns0:title>807248833:c-&gt;807339528:w</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M1001.28,-36.13C1050.85,-22.34 1119.34,-7.2 1180.97,-7.2" />
+<ns0:g id="a_edge11-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 3.26e+04 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="1064.8" y="-35.15" font-family="Arial" font-size="14.00" fill="#90918e"> liquid digestate</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>807339648:e-&gt;807248584:c</ns0:title>
+<ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M10.8,-97.2C39.51,-97.2 71.08,-97.2 98.67,-97.2" />
+<ns0:g id="a_edge1-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
+<ns0:text xml:space="preserve" text-anchor="middle" x="54.8" y="-115.4" font-family="Arial" font-size="14.00" fill="#90918e"> to methane</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="54.8" y="-99.65" font-family="Arial" font-size="14.00" fill="#90918e"> ad</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node1" class="node">
+<ns0:title>807248584</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:title="Purchase cost: 1,000,000 USD&#10;Installed equipment cost: 1,000,000 USD">
+<ns0:polygon fill="#555f69" stroke="#90918e" points="249.05,-118.8 98.8,-118.8 98.8,-75.6 249.05,-75.6 249.05,-118.8" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="173.93" y="-99.65" font-family="Arial" font-size="14.00" fill="white">PX</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="173.93" y="-83.9" font-family="Arial" font-size="14.00" fill="white">Peroxide pretreatment</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>807248785</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:title="Purchase cost: 7,280,000 USD&#10;Installed equipment cost: 7,280,000 USD">
+<ns0:polygon fill="#555f69" stroke="#90918e" points="526.3,-118.8 366.3,-118.8 366.3,-75.6 526.3,-75.6 526.3,-118.8" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="446.3" y="-99.65" font-family="Arial" font-size="14.00" fill="white">EZ</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="446.3" y="-83.9" font-family="Arial" font-size="14.00" fill="white">Enzymatic pretreatment</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>807248881</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:title="Electricity consumption: 788 kW&#10;Heating duty: 1.16e+04 MJ/hr&#10;Utility cost: 133 USD/hr&#10;Purchase cost: 71,290,627 USD&#10;Installed equipment cost: 71,290,627 USD">
+<ns0:polygon fill="#555f69" stroke="#90918e" points="771.3,-118.8 642.8,-118.8 642.8,-75.6 771.3,-75.6 771.3,-118.8" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="707.05" y="-99.65" font-family="Arial" font-size="14.00" fill="white">AD</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="707.05" y="-83.9" font-family="Arial" font-size="14.00" fill="white">Anaerobic digester</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>807248407</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:title="Purchase cost: 1,721,654 USD&#10;Installed equipment cost: 1,721,654 USD">
+<ns0:polygon fill="#555f69" stroke="#90918e" points="978.8,-158.8 882.55,-158.8 882.55,-115.6 978.8,-115.6 978.8,-158.8" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="930.68" y="-139.65" font-family="Arial" font-size="14.00" fill="white">H2SR</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="930.68" y="-123.9" font-family="Arial" font-size="14.00" fill="white">H2SRemoval</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>807248404</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:title="Electricity consumption: 2.8e+03 kW&#10;Utility cost: 219 USD/hr&#10;Purchase cost: 24,674,818 USD&#10;Installed equipment cost: 24,674,818 USD">
+<ns0:polygon fill="#555f69" stroke="#90918e" points="1245.55,-218.8 1124.55,-218.8 1124.55,-175.6 1245.55,-175.6 1245.55,-218.8" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="1185.05" y="-199.65" font-family="Arial" font-size="14.00" fill="white">UP</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="1185.05" y="-183.9" font-family="Arial" font-size="14.00" fill="white">Biogas upgrading</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>807248833</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:title="Electricity consumption: 170 kW&#10;Utility cost: 13.3 USD/hr&#10;Purchase cost: 1,581,879 USD&#10;Installed equipment cost: 1,581,879 USD">
+<ns0:polygon fill="#555f69" stroke="#90918e" points="1005.05,-79.8 856.3,-79.8 856.3,-36.6 1005.05,-36.6 1005.05,-79.8" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="930.68" y="-60.65" font-family="Arial" font-size="14.00" fill="white">SP_AD</ns0:text>
+<ns0:text xml:space="preserve" text-anchor="middle" x="930.68" y="-44.9" font-family="Arial" font-size="14.00" fill="white">Digestate screw press</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>807339648</ns0:title>
+<ns0:polygon fill="#f98f60" stroke="#90918e" points="5.4,-102.6 0,-97.2 5.4,-91.8 10.8,-97.2 5.4,-102.6" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>807339948</ns0:title>
+<ns0:polygon fill="#f98f60" stroke="#90918e" points="1347.35,-225.2 1339.25,-232.4 1339.25,-218 1347.35,-225.2" />
+</ns0:g>
+
+<ns0:g id="node9" class="node">
+<ns0:title>807339504</ns0:title>
+<ns0:polygon fill="#f98f60" stroke="#90918e" points="1190.45,-64.2 1182.35,-71.4 1182.35,-57 1190.45,-64.2" />
+</ns0:g>
+
+<ns0:g id="node10" class="node">
+<ns0:title>807339444</ns0:title>
+<ns0:polygon fill="#f98f60" stroke="#90918e" points="1190.45,-132.2 1182.35,-139.4 1182.35,-125 1190.45,-132.2" />
+</ns0:g>
+
+<ns0:g id="node11" class="node">
+<ns0:title>807339612</ns0:title>
+<ns0:polygon fill="#f98f60" stroke="#90918e" points="1347.35,-168.2 1339.25,-175.4 1339.25,-161 1347.35,-168.2" />
+</ns0:g>
+
+<ns0:g id="node12" class="node">
+<ns0:title>807339528</ns0:title>
+<ns0:polygon fill="#f98f60" stroke="#90918e" points="1190.45,-7.2 1182.35,-14.4 1182.35,0 1190.45,-7.2" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

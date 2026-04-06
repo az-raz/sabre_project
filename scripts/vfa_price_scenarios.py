@@ -1,7 +1,6 @@
 """
-plot_vfa_results_figures.py
+plot_vfa_results_figures.py --> similar factors to methanogenic AD
 ---------------------------
-Generate Section 4.2 economics figures for the acidogenic AD + fermentation pathway.
 
 Figures:
 1) fig_vfa_feed_price.png / pdf
@@ -12,9 +11,8 @@ Figures:
 
 3) fig_vfa_product_scenarios.png / pdf
    - MSP by product scenario, with market-price markers
+   - initial scoping assumptions 
 
-Run from sabre_project root:
-    python scripts/plot_vfa_results_figures.py
 """
 
 from __future__ import annotations
@@ -48,11 +46,11 @@ from sabre.tea import make_baseline_tea, solve_product_msp
 OUT = Path("results/figures")
 OUT.mkdir(parents=True, exist_ok=True)
 
-# Base assumptions for 4.2 figures
+# Base assumption
 BIOSTIMULANT_PRICE_CASES = [0.00, 0.50, 1.00, 2.00]
 FEED_PRICE_BASE = 0.00
 
-# Change this if you want a different benchmark line on the feed/biostim plots
+# Assumed market price of crude oil (take higher end)
 CRUDE_OIL_MARKET_REF_USD_PER_KG = 5.00
 
 plt.rcParams.update({
@@ -79,7 +77,7 @@ def _solve_msp_from_system(
     solids_disposal_usd_per_kg: float = SOLIDS_DISPOSAL_USD_PER_KG,
 ) -> float:
     """
-    Solve crude microbial oil MSP on the same basis as run_case().
+    Solve crude microbial oil MSP on the same basis as run_case()
     """
     _patch_ev607(full_sys, silent=True)
     _apply_disposal_costs(streams, solids_disposal_usd_per_kg=solids_disposal_usd_per_kg)
@@ -104,17 +102,13 @@ def _solve_msp_from_system(
 
 
 def _apply_biostimulant_price(streams, price_per_kg: float) -> bool:
-    """
-    Try to assign a biostimulant coproduct price if that stream exists.
-    Returns True if a matching stream was found, else False.
-    """
+
     candidate_ids = [
         "biostimulant_membrane_concentrate",
         "biostimulant_concentrate",
         "pressate_concentrate",
     ]
 
-    # try dictionary-style access first
     for sid in candidate_ids:
         try:
             s = bst.main_flowsheet.stream[sid]
@@ -123,7 +117,6 @@ def _apply_biostimulant_price(streams, price_per_kg: float) -> bool:
         except Exception:
             pass
 
-    # try passed streams dict second
     if isinstance(streams, dict):
         for sid in candidate_ids:
             try:
@@ -173,7 +166,7 @@ def make_feed_price_figure():
             fontsize=8,
         )
 
-    # Base case star: near-zero feed price
+    # Base case star (zero feed price)
     base_feed_price = 0.00
     base_idx = feed_prices.index(base_feed_price)
     base_msp = msp_vals[base_idx]
@@ -251,7 +244,7 @@ def make_biostimulant_price_figure():
             fontsize=8,
         )
 
-    # Base case star: zero biostimulant price
+    # Base case star (zero biostimulant price)
     base_biostim_price = 0.00
     base_idx = BIOSTIMULANT_PRICE_CASES.index(base_biostim_price)
     base_msp = msp_vals[base_idx]
@@ -383,7 +376,7 @@ def make_product_scenarios_figure():
     ax.set_ylabel("Price ($/kg product)")
     ax.set_title("Product scenario comparison at near-zero feed price")
 
-    # log scale is cleaner because astaxanthin is orders of magnitude higher
+    # log scale --> just to show all the plots
     ax.set_yscale("log")
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"${v:,.0f}"))
     ax.grid(axis="y", linewidth=0.4, color="#D3D1C7", zorder=0, which="both")

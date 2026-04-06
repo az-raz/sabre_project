@@ -7,9 +7,6 @@ including error bars based on the low/high methane-yield estimates in assumption
 Outputs:
 1) fig_methane_production_by_pretreatment_errorbars.(png/pdf)
 2) fig_msp_by_pretreatment_errorbars.(png/pdf)
-
-Run from sabre_project root:
-    python scripts/plot_two_pretreatment_figures_from_tea_with_errorbars.py
 """
 
 from __future__ import annotations
@@ -30,6 +27,7 @@ from sabre.tea import make_baseline_tea, solve_biomethane_msp
 OUT = Path("results/figures")
 OUT.mkdir(parents=True, exist_ok=True)
 
+# Reads the methane yield effects for each pretreatment case from assumptions.yaml
 PRETREATMENT_CASES = [
     "press_mill_only",
     "enzymatic",
@@ -127,6 +125,7 @@ def get_case_yields(case: str):
     return central, low, high
 
 
+# Plotting style
 plt.rcParams.update({
     "font.family":      "DejaVu Sans",
     "font.size":        10,

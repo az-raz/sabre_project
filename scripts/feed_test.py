@@ -1,3 +1,10 @@
+
+"""
+Feed testing
+
+1) Making sure the feed stream is created correctly with the expected mass flow and composition based on the YAML assumptions for "pelagic_high_quality" Sargassum.
+"""
+
 from sabre.chemicals import set_thermo
 from sabre.config import load_assumptions, get_quality_params, get_scale_feed_kgph
 from sabre.streams import make_sargassum_feed

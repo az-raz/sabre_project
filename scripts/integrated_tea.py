@@ -1,5 +1,5 @@
 """
-Integrated Biorefinery TEA — SABRE Project
+Integrated Biorefinery TEA
 ===========================================
 Sweeps the split fraction alpha (0 → 1) between the two pathways:
   alpha=0   → 100% VFA-to-oil
@@ -16,8 +16,6 @@ Products:
   - Biomethane at assumed $5/MMBtu (Henry Hub midpoint)
   - Microbial oil at assumed $2.47/kg (near_zero standalone result)
   - Biostimulant at $0.50/kg (conservative)
-
-The sweep shows the optimal alpha that maximizes combined NPV.
 """
 
 import biosteam as bst
@@ -31,15 +29,15 @@ from sabre.tea import make_baseline_tea, solve_product_msp, solve_biomethane_msp
 # Market price assumptions
 # Used for NPV calculation at each alpha
 # -------------------------
-BIOMETHANE_MARKET_MMBTU    = 3.00    # $/MMBtu — Henry Hub midpoint
-OIL_MARKET_USD_PER_KG      = 5.00  # $/kg — near_zero standalone VFA MSP
-BIOSTIMULANT_USD_PER_KG    = 0.00   # $/kg — conservative wholesale
+BIOMETHANE_MARKET_MMBTU    = 3.00    # $/MMBtu 
+OIL_MARKET_USD_PER_KG      = 5.00  # $/kg
+BIOSTIMULANT_USD_PER_KG    = 0.00   # $/kg (base case --> looking at AD pathways)
 
 # -------------------------
 # Reagent cost (oil extraction)
-# Wired into OE.add_OPEX same as standalone VFA TEA
+# --> OE.add_OPEX same as standalone VFA TEA
 # -------------------------
-OIL_EXTRACTION_REAGENT_USD_PER_KG_OIL = 0.50
+OIL_EXTRACTION_REAGENT_USD_PER_KG_OIL = 0.50 # lower end
 
 # -------------------------
 # Disposal costs
@@ -81,8 +79,8 @@ def _apply_stream_prices(streams, biostimulant_price=BIOSTIMULANT_USD_PER_KG):
         streams["biostimulant_membrane_concentrate"].price = biostimulant_price
 
     # Pressate permeate — zero-cost discharge (floating biorefinery assumption)
-    # The PC permeate is mostly water; modeled as near-shore discharge with no cost.
-    # A disposal cost of $0.001–0.003/kg could be applied for land-based sensitivity.
+    # The PC permeate is mostly water; modeled as near-shore discharge with no cost
+    # A disposal cost of $0.001–0.003/kg could be applied if necessary
     permeate = _get_integrated_stream("pressate_permeate")
     if permeate is not None:
         permeate.price = 0.0
@@ -137,8 +135,8 @@ def _patch_ev607():
 
 def _compute_npv_at_market(tea, streams, market_mmbtu, market_oil_usd_per_kg):
     """
-    Compute NPV at assumed market prices for both products.
-    Sets prices temporarily, reads NPV, restores prices.
+    Compute NPV at assumed market prices for both products
+    Sets prices temporarily, reads NPV, restores prices
     """
     biomethane = streams.get("biomethane")
     oil_stream = streams.get("backend_oil")
@@ -178,9 +176,9 @@ def run_alpha_sweep(
     print_summary: bool = True,
 ):
     """
-    Sweep alpha from 0 to 1 and report both product MSPs and combined NPV.
+    Sweep alpha from 0 to 1 and report both product MSPs and combined NPV
 
-    Returns a list of result dicts, one per alpha point.
+    Returns a list of result dicts, one per alpha point
     """
     results = []
 
@@ -211,12 +209,10 @@ def run_alpha_sweep(
             # Each MSP is solved with the OTHER product's stream price held at
             # zero. This gives the true standalone breakeven for each product
             # within the integrated system — i.e., the price each product needs
-            # to reach if the other contributes nothing. The two MSPs are NOT
-            # additive; they are independent sensitivity answers. The NPV column
-            # (below) is the correct multi-product economic result.
+            # to reach if the other contributes nothing.
 
             oil_stream = streams.get("backend_oil")
-            msp_oil    = float("nan")   # reset each iteration — prevents value leaking from previous alpha
+            msp_oil    = float("nan")   # reset each iteration —> prevents value leaking from previous alpha
             oil_kg_yr  = 0.0
 
             # Biomethane MSP: solve with oil price = 0
@@ -331,7 +327,7 @@ def _print_sweep_table(results, case_label, pretreatment_case,
             f"{npv_str:>15}  {tci_str:>10}{star}"
         )
 
-    # Find best alpha
+    # Find best alpha (highest NPV) among valid results
     valid = [r for r in results if r["ok"] and not math.isnan(r["combined_npv_M"])]
     if valid:
         best = max(valid, key=lambda r: r["combined_npv_M"])
@@ -354,8 +350,8 @@ if __name__ == "__main__":
         case_label="near_zero",
         pretreatment_case="press_mill_only",
         biostimulant_price=0.50,
-        market_mmbtu=3.50,
-        market_oil=2.47,
+        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
+        market_oil=OIL_MARKET_USD_PER_KG,
     )
 
     # -------------------------
@@ -367,8 +363,8 @@ if __name__ == "__main__":
         case_label="tipping_fee",
         pretreatment_case="press_mill_only",
         biostimulant_price=0.50,
-        market_mmbtu=3.50,
-        market_oil=2.47,
+        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
+        market_oil=OIL_MARKET_USD_PER_KG,
     )
 
     # -------------------------
@@ -380,8 +376,8 @@ if __name__ == "__main__":
         case_label="near_zero",
         pretreatment_case="combined_PE",
         biostimulant_price=0.50,
-        market_mmbtu=3.50,
-        market_oil=2.47,
+        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
+        market_oil=OIL_MARKET_USD_PER_KG,
     )
 
     # -------------------------
@@ -393,6 +389,6 @@ if __name__ == "__main__":
         case_label="near_zero",
         pretreatment_case="press_mill_only",
         biostimulant_price=1.00,
-        market_mmbtu=3.50,
-        market_oil=2.47,
+        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
+        market_oil=OIL_MARKET_USD_PER_KG,
     )

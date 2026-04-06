@@ -1,8 +1,8 @@
 """
-plot_biostimulant_sensitivity.py
+plot_biostimulant_sensitivity.py --< feed price and biostimulant price sensitivity for AD pretreatment case
 --------------------------------
 Plot biomethane MSP as a function of biostimulant selling price for the
-methanogenic AD pretreatment cases.
+methanogenic AD pretreatment cases
 
 Run from sabre_project root:
     python scripts/plot_biostimulant_sensitivity.py
@@ -109,6 +109,7 @@ for case in PRETREATMENT_CASES:
         results[case].append(msp_mmbtu)
         revenues[case].append(annual_rev_musd)
 
+# plotting styles
 plt.rcParams.update({
     "font.family":      "DejaVu Sans",
     "font.size":        10,

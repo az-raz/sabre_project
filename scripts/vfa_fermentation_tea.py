@@ -27,13 +27,11 @@ FERM_WASTEWATER_DISPOSAL_USD_PER_KG = -0.005
 # Acidogenic residual solids: screw press cake
 #   Basis: standard biosolids ~$30-80/dry ton ≈ $0.03-0.08/kg wet
 #   Base case $0.04/kg — sensitivity tested below
-#   If heavy metal content elevated: could be $0.10-0.30/kg (hazardous)
 SOLIDS_DISPOSAL_USD_PER_KG = -0.04
 
 # -------------------------
 # Oil extraction reagent cost
-# Now wired directly into tea.other_annual_costs so it flows through
-# solve_product_msp correctly — no more manual MSP correction needed.
+# Wired to tea.other_annual_costs so it flows through MSP calculation correctly.
 # Basis: solvent purchase + recovery $0.50-1.50/kg oil
 #   (Knoshaug et al. 2018, NREL/TP-5100-62492; Laurens et al. 2017, Green Chem.)
 # Base case $0.50/kg — sensitivity tested below
@@ -43,9 +41,6 @@ VFA_IDS = ["AceticAcid", "PropionicAcid", "ButyricAcid", "ValericAcid", "Hexanoi
 
 # -------------------------
 # Feed price scenarios
-# Source: Rodriguez-Martinez et al. 2023 (Sci Total Environ)
-#   Beach cleanup $19-85/m3 wet ≈ $0.024-0.106/kg wet
-#   Caribbean spends ~$120M/yr removing Sargassum
 # -------------------------
 FEED_PRICE_CASES = [
     ("tipping_fee",      -0.02),
@@ -85,7 +80,7 @@ def _patch_ev607(full_sys=None, silent: bool = False):
     """
     Replace Ev607 cost + utility with a low-duty placeholder when V < 0.02.
     MultiEffectEvaporator cost correlation produces nonsensical vessel geometry
-    at near-zero evaporation duty. Flagged in methods as a known limitation.
+    at near-zero evaporation duty.
     """
     try:
         ev607 = bst.main_flowsheet.unit["Ev607"]
@@ -115,7 +110,6 @@ def _apply_disposal_costs(
 ):
     """
     Assign disposal costs to waste outlet streams as negative stream prices.
-    In BioSTEAM, negative prices on outlet streams register as costs in VOC.
     Returns a summary dict of {stream_name: annual_cost_usd}.
     """
     annual_hours = 330.0 * 24.0
@@ -153,14 +147,13 @@ def build_and_simulate(feed_price_per_kg_wet: float):
     bst.main_flowsheet.clear()
     set_thermo()
 
-    # ── Read fermentation parameters from YAML ────────────────────────────────
+    # ── from YAML ────────────────────────────────
     from sabre.config import load_assumptions
     A = load_assumptions()
     vfaF = A.get("vfa_fermentation", {})
     fc   = vfaF.get("cases", {}).get(vfaF.get("case", "yarrowia_vfa_base"), {})
     mf   = vfaF.get("vfa_microfilter", {})
     fmed = vfaF.get("fermentation_medium_tank", {})
-    # ─────────────────────────────────────────────────────────────────────────
 
     vfa_sys = create_vfa_ad_system()
     vfa_sys.feeds[0].price = feed_price_per_kg_wet
@@ -216,25 +209,7 @@ def run_case(
     solids_disposal_usd_per_kg: float = SOLIDS_DISPOSAL_USD_PER_KG,
     silent: bool = False,
 ):
-    """
-    Run one scenario and return (tea, msp_dict, streams, units, full_sys).
 
-    Parameters
-    ----------
-    feed_price_per_kg_wet : float
-        Sargassum feed price (negative = tipping fee credit).
-    case_label : str
-        Label printed in output header.
-    run_diagnostics : bool
-        Whether to print the VFA mass balance trace.
-    reagent_usd_per_kg_oil : float
-        Oil extraction solvent/reagent cost in $/kg oil.
-        Wired into tea.other_annual_costs — flows through MSP correctly.
-    solids_disposal_usd_per_kg : float
-        Acidogenic solids disposal rate (negative = cost). $/kg wet cake.
-    silent : bool
-        If True, suppress all print output (for sensitivity loops).
-    """
     vfa_sys, fer_sys, streams, units, full_sys = build_and_simulate(feed_price_per_kg_wet)
 
     _patch_ev607(full_sys)
@@ -242,7 +217,7 @@ def run_case(
         streams,
         solids_disposal_usd_per_kg=solids_disposal_usd_per_kg,
     )
-    
+
     biostim_summary = _apply_biostimulant_credit(BIOSTIMULANT_PRICE_BASE_USD_PER_KG)
 
     oil_stream = streams["backend_oil"]
@@ -250,15 +225,12 @@ def run_case(
     annual_hours = 330.0 * 24.0
 
     # -------------------------
-    # Wire reagent cost into OE.add_OPEX ($/hr)
+    # Reagent cost into OE.add_OPEX ($/hr)
     # SABREBaselineTEA.VOC reads _annual_unit_add_opex() which sums
-    # add_OPEX across all units — this is the correct hook.
-    # tea.other_annual_costs is NOT read by the overridden VOC property.
-    # Basis: solvent purchase + recovery $0.50-1.50/kg oil
-    #   (Knoshaug et al. 2018 NREL; Laurens et al. 2017 Green Chem.)
+    # add_OPEX across all units
     # -------------------------
     reagent_usd_per_hr = oil_kg_hr * reagent_usd_per_kg_oil
-    oil_extraction_reagent_annual = reagent_usd_per_hr * annual_hours  # for print block below
+    oil_extraction_reagent_annual = reagent_usd_per_hr * annual_hours  # for printing
     try:
         oe_unit = bst.main_flowsheet.unit["OE"]
         oe_unit.add_OPEX = {"Oil extraction reagent": reagent_usd_per_hr}
@@ -462,8 +434,8 @@ def run_reagent_sensitivity(feed_price: float = 0.00):
 def run_solids_sensitivity(feed_price: float = 0.00):
     """
     Sensitivity on acidogenic solids disposal cost at fixed feed price.
-    Tests: $0.02, $0.04, $0.10 per kg wet cake.
-    Reflects uncertainty from: standard biosolids vs. hazardous (heavy metals).
+    Tests: $0.02, $0.04, $0.10 per kg wet cake --> disposal costs
+
     """
     print("\n" + "=" * 60)
     print(f"SENSITIVITY: Acidogenic Solids Disposal Cost")
@@ -522,10 +494,9 @@ def _apply_biostimulant_credit(
 #   - Extraction cost replaces the oil reagent in OE.add_OPEX ($/kg product).
 #   - Downstream purification (HPLC for astaxanthin, winterization for EPA)
 #     is lumped into the extraction cost rather than modeled as explicit units.
-#     This is a standard scoping assumption for early-stage TEA.
 #   - All three scenarios use the same VFA feedstock and preprocessing.
 #   - Engineered Yarrowia strains are assumed available — metabolic engineering
-#     costs are not capitalized (future work).
+#     costs are not capitalized
 #
 # Sources:
 #   Microbial oil:   Cortés-Peña et al. 2024 GCB Bioenergy; Knoshaug et al. 2018 NREL
@@ -596,11 +567,11 @@ def build_and_simulate_scenario(
         vfa_broth=vfa_sys.flowsheet.stream.vfa_broth,
         product_ID=fc.get("product_ID", "MicrobialOil"),
         conversion=fc.get("conversion", 0.85),
-        product_yield_kg_per_kg_vfa_consumed=product_yield,   # scenario override
+        product_yield_kg_per_kg_vfa_consumed=product_yield,   # scenario override --> from scenario input
         biomass_yield_kg_per_kg_vfa_consumed=fc.get("biomass_yield_kg_per_kg_vfa_consumed", 0.40),
         co2_yield_kg_per_kg_vfa_consumed=fc.get("co2_yield_kg_per_kg_vfa_consumed", 0.20),
         oxygen_kg_per_kg_vfa_consumed=fc.get("oxygen_kg_per_kg_vfa_consumed", 0.80),
-        residence_time_h=residence_time_h,                    # scenario override
+        residence_time_h=residence_time_h,                    # scenario override --> from scenario input
         broth_density_kg_per_m3=fmed.get("broth_density_kg_per_m3", 1000.0),
         target_pH=fc.get("target_pH", fmed.get("target_pH", 8.0)),
         ammonia_dose_kg_per_m3=fmed.get("ammonia_dose_kg_per_m3", 0.0),
@@ -638,8 +609,8 @@ def build_and_simulate_scenario(
 
 def run_product_scenario_comparison(feed_price: float = 0.00):
     """
-    Compare microbial oil vs EPA vs astaxanthin at the same VFA feedstock.
-    Reports MSP, TCI, annual production, and market absorption for each.
+    Compare microbial oil vs EPA vs astaxanthin at the same VFA feedstock
+    Reports MSP, TCI, annual production, and market absorption for each scenario
     """
     annual_hours = 330.0 * 24.0
 
@@ -703,7 +674,7 @@ def run_product_scenario_comparison(feed_price: float = 0.00):
             npv_at_market = tea.NPV / 1e6
             oil_stream.price = old_price
 
-            # Market absorption
+            # Market absorption (how much percentage of the global market)
             mkt = sc["global_market_tonne_yr"]
             if mkt is not None:
                 absorb_pct = annual_product_t / mkt * 100

@@ -1,7 +1,6 @@
 """
-plot_vfa_yield_sensitivities.py
+plot_vfa_yield_sensitivities.py --> see how yield effects the VFA and oil production
 -------------------------------
-Generate two sensitivity figures for Section 4.2:
 
 1) Crude microbial oil MSP vs acidogenic VFA yield
    (kg VFA / kg VS destroyed)
@@ -9,8 +8,6 @@ Generate two sensitivity figures for Section 4.2:
 2) Crude microbial oil MSP vs fermentation oil yield
    (kg oil / kg VFA consumed)
 
-Run from sabre_project root:
-    python scripts/plot_vfa_yield_sensitivities.py
 """
 
 from __future__ import annotations

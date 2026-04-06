@@ -6,7 +6,7 @@ Splits wet biomass into:
   - pressate: remaining water + uncaptured solids + (optional) solubles
 
 Economics:
-- CAPEX can be set using an installed system correlation (e.g., PCA-style curve on dtpd basis)
+- CAPEX can be set using an installed system correlation
 - Electricity set using kWh per dry ton TS (preferred) or legacy kWh per wet ton (optional)
 """
 
@@ -177,7 +177,6 @@ class Press(bst.Unit):
             self.design_results["Installed CAPEX ($)"] = capex
 
         elif model == "pca_screwpress_curve":
-            # keep for reference but don't use at your scale
             dtpd = float(self.design_results.get("Capacity (dry ton/day)", 0.0))
             capex = (0.574 * dtpd + 3.27) * 1e6
 

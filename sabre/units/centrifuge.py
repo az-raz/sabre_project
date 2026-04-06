@@ -15,9 +15,6 @@ Sizing:
 
 Costing (USD):
     - Total purchased cost = N_parallel * centrifuge_purchase_cost_usd_each
-
-Notes:
-    - Decanter centrifuge was chosen due to the large volume of digestate
 """
 
 import math

@@ -87,9 +87,9 @@ def create_vfa_ad_system(
         - offgas
         - vfa_broth
         - acidogenic_residual_solids
-        - biostimulant_membrane_concentrate   (if enabled in standalone mode)
-        - pressate_permeate                   (if enabled in standalone mode)
-        - biostimulant_product                (if evaporator enabled)
+        - biostimulant_membrane_concentrate
+        - pressate_permeate                
+        - biostimulant_product            
     """
     A = load_assumptions()
 

@@ -3,10 +3,10 @@ H2S Removal Unit — Biogas Desulfurization
 ==========================================
 Removes hydrogen sulfide from raw biogas before membrane upgrading.
 H2S must be removed because it degrades polymer membranes rapidly and
-is toxic above ~200 ppm in pipeline-quality biomethane.
+is toxic above ~200 ppm in pipeline-quality biomethane
 
 Technology: Iron sponge (dry oxidation) — the standard, lowest-cost
-option for biogas desulfurization at this scale.
+option for biogas desulfurization at this scale
 
 Modeling approach:
 - Pass-through for CH4 and CO2 (not affected by iron sponge)
@@ -17,13 +17,13 @@ Modeling approach:
 Capital anchor:
   EPA/USDA AgSTAR: Iron sponge desulfurization systems for biogas,
   typical installed cost $200–600 per Nm3/h raw biogas at 100–1000 Nm3/h
-  scale, scaling exponent 0.6.
-  Reference: AgSTAR Handbook, 3rd Ed. (2012); EPRI Biogas Cleanup (2013).
+  scale, scaling exponent 0.6
+  Reference: AgSTAR Handbook, 3rd Ed. (2012); EPRI Biogas Cleanup (2013)
 
 Reagent cost:
   Iron sponge media replacement: ~$0.001–0.003/Nm3 raw biogas treated.
   Source: Wellinger & Linberg, Biogas Upgrading and Utilisation (2000);
-          IEA Bioenergy Task 37 (2014).
+          IEA Bioenergy Task 37 (2014)
 
 Operating notes:
   - Electricity is negligible for iron sponge (passive media bed)
@@ -46,24 +46,6 @@ class H2SRemoval(bst.Unit):
     Outputs:
         outs[0]: treated biogas (H2S removed to near-zero)
         outs[1]: spent media / captured H2S (solid waste, negligible mass)
-
-    Parameters
-    ----------
-    h2s_removal_efficiency : float
-        Fraction of H2S removed (default 0.99 — iron sponge typical).
-    ref_flow_Nm3ph : float
-        Reference raw biogas flow for CAPEX anchor (Nm3/h).
-    ref_installed_cost_usd : float
-        Installed cost at reference flow ($).
-        Default: $400/Nm3/h at 1000 Nm3/h = $400,000 anchor.
-        Source: AgSTAR Handbook 3rd Ed. (2012).
-    scale_exponent : float
-        Six-tenths rule for cost scaling.
-    reagent_cost_usd_per_Nm3_raw : float
-        Iron sponge media replacement cost per Nm3 raw biogas treated.
-        Default $0.002/Nm3. Source: IEA Bioenergy Task 37 (2014).
-    F_BM : float
-        Bare module factor (default 1.0 — installed cost basis).
     """
 
     _N_ins = 1
@@ -114,7 +96,7 @@ class H2SRemoval(bst.Unit):
             h2s_removed = self.h2s_removal_efficiency * h2s_in
             h2s_out = h2s_in - h2s_removed
             treated.imol["HydrogenSulfide"] = h2s_out
-            # Spent media is mostly iron sulfide solids — negligible mass in model
+            # Spent media is mostly iron sulfide solids —> negligible mass in model
             # Not explicitly tracked as a chemical stream
 
         # Pass any other gas components to treated
@@ -148,7 +130,7 @@ class H2SRemoval(bst.Unit):
             self.design_results["H2S inlet (ppm mol)"] = h2s_in_ppm
             self.design_results["H2S outlet (ppm mol)"] = h2s_out_ppm
 
-        # Iron sponge is passive — no electricity
+        # Iron sponge is passive —> no electricity
         self.power_utility.consumption = 0.0
 
     def _cost(self):

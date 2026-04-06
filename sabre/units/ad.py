@@ -11,17 +11,13 @@ Purpose:
 - Estimate CAPEX using ADBC-based interpolation
 
 Modeling notes:
-- This is a lumped methanogenic AD model, not ADM1
+- Lumped methanogenic AD model
 - Methane production is based on:
     feed VS * ch4_kg_per_kg_vs_fed
 - Different components can have different biodegradability factors
 - Biodegradability + vs_destruction determine digestate solids reduction
 - Raw biogas composition is imposed from target mole fractions
 
-Units:
-- Flow: kg/hr internally
-- Volume: m3
-- HRT: days
 """
 
 from __future__ import annotations

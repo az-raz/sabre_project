@@ -7,13 +7,12 @@ import biosteam as bst
 class YarrowiaLipidFermenter(bst.AeratedBioreactor):
     """
     VFA-fed microbial-oil fermenter structured after the oilcane
-    AeratedFermentation class.
+    AeratedFermentation class
 
-    Important note:
     This is now using the *reactor architecture* of the oilcane code
     (AeratedBioreactor with automatic aeration / power optimization),
     but it still uses yield-based VFA conversion because MicrobialOil
-    is a pseudo-component in the current Sabre thermo.
+    is a pseudo-component in the current Sabre thermo
 
     Inputs:
     - conditioned VFA broth

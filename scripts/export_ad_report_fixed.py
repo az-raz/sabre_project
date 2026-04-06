@@ -1,6 +1,6 @@
 
 """
-export_ad_report.py
+export_ad_report.py --> for Hauke
 
 Updated exporter:
 - includes raw biogas totals and composition in stream tables

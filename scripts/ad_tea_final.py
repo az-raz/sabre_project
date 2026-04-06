@@ -1,15 +1,15 @@
 """
-Methanogenic AD TEA — SABRE Project
+Methanogenic AD TEA
 =====================================
-Runs all five pretreatment cases and produces:
+Runs all five pretreatment cases -->
   1. Base case (press_mill_only) with full diagnostics
   2. Pretreatment case comparison table (MSP vs case)
   3. Feed price sensitivity (same 4 scenarios as VFA TEA)
   4. Biomethane market price sensitivity (NPV at target $/MMBtu)
   5. Biostimulant price sensitivity
 
-Product: biomethane (pipeline-quality gas)
-Co-product: biostimulant liquid concentrate (pressate concentrator output)
+Product: biomethane
+Co-product: biostimulant liquid concentrate (pressate concentrator output) --> not sold in base case
 MSP reported as $/kg CH4 and $/MMBtu
 
 Sources:
@@ -60,8 +60,7 @@ BIOMETHANE_MARKET_MMBTU = [2.0, 3.0, 4.0, 5.0, 6.0, 8.0]
 
 # -------------------------
 # Disposal costs
-# Sargassum heavy metal contamination (As, Cd, Pb) prevents land application
-# as fertilizer — modeled as disposal costs, not fertilizer revenue.
+# Digestate and solids --> modeled as waste
 # -------------------------
 LIQUID_DIGESTATE_DISPOSAL_USD_PER_KG = -0.002  # $2/m3 wastewater disposal
 SOLIDS_DIGESTATE_DISPOSAL_USD_PER_KG = -0.02   # standard biosolids
@@ -83,11 +82,8 @@ def _apply_stream_economics(
 ):
     """
     Assign prices to all outlet streams.
-    Positive price = revenue (reduces MSP).
-    Negative price = disposal cost (increases MSP).
-    Both flow through BioSTEAM VOC automatically.
-    Returns summary dict {stream_name: annual_value_usd}
-    (positive = revenue, negative = cost).
+    Positive price -> revenue (reduces MSP).
+    Negative price -> disposal cost (increases MSP).
     """
     annual_hours = 330.0 * 24.0
     summary = {}

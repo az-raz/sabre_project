@@ -2,7 +2,7 @@
 Oil Extraction Placeholder Unit
 ================================
 Represents cell disruption + lipid extraction for microbial oil recovery
-from Yarrowia lipolytica fermentation broth.
+from Yarrowia lipolytica fermentation broth
 
 All separation is handled downstream by C603_2 (LiquidsSplitCentrifuge).
 Its purpose is to carry realistic capital and operating costs for:
@@ -19,7 +19,7 @@ Operating cost:
     - Electricity: high-pressure homogenization ~1.5 kWh/kg dry biomass
       (Doucha & Livansky 2008; Postma et al. 2017)
     - Reagent/solvent cost included as $/kg oil surrogate operating cost,
-      passed through as a fixed annual cost adder in the TEA script.
+      passed through as a fixed annual cost adder in the TEA script
       Literature range: $0.50-1.50/kg oil for solvent + recovery
       (Knoshaug et al. 2018, NREL; Laurens et al. 2017, Green Chem.)
 """
@@ -30,7 +30,7 @@ import biosteam as bst
 
 class OilExtractionPlaceholder(bst.Unit):
     """
-    Pass-through unit representing cell disruption and lipid extraction.
+    Pass-through unit representing cell disruption and lipid extraction
 
     Inputs:
         ins[0]: concentrated fermentation broth (from upstream pump/evaporator)
