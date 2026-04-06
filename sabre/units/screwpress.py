@@ -35,6 +35,7 @@ class DigestateScrewPress(bst.Unit):
 
     def __init__(self, ID="", ins=None, outs=(),
                  solids_IDs=("Cellulose", "Ash"),
+                 dissolved_IDs=None,            # chemicals treated as dissolved — always route to pressate
                  ts_capture_frac=0.33,          # SYSTEMIC avg SE_DM for screw press
                  cake_moisture_frac=0.77,       # ~23% DM solid fraction
                  capacity_tph_each=6.0,         # aligns with reported 6 ton/h energy datapoint
@@ -48,6 +49,18 @@ class DigestateScrewPress(bst.Unit):
         super().__init__(ID, ins, outs, **kwargs)
 
         self.solids_IDs = tuple(solids_IDs)
+
+        # Dissolved chemicals pass entirely to pressate regardless of ts_capture_frac.
+        # VFAs are soluble acids — they must not be captured in the cake.
+        # Defaults cover the standard VFA set; override via dissolved_IDs if needed.
+        if dissolved_IDs is None:
+            dissolved_IDs = (
+                "AceticAcid", "PropionicAcid", "ButyricAcid",
+                "ValericAcid", "HexanoicAcid",
+                "CarbonDioxide", "Ammonia",
+            )
+        self.dissolved_IDs = tuple(dissolved_IDs)
+
         self.ts_capture_frac = float(ts_capture_frac)
         self.cake_moisture_frac = float(cake_moisture_frac)
 
@@ -93,10 +106,19 @@ class DigestateScrewPress(bst.Unit):
         water_id = "Water"
         ids = feed.chemicals.IDs
 
-        # Define TS as everything except Water (i.e., "dry matter" in this model)
-        ts_ids = [i for i in ids if i != water_id]
+        # Dissolved chemicals (VFAs, CO2, Ammonia etc.) pass entirely to pressate.
+        # They are soluble and cannot be mechanically captured in a screw press cake.
+        dissolved_set = set(self.dissolved_IDs)
 
-        # --- split TS by capture fraction (based on TOTAL TS, not just Cellulose+Ash) ---
+        # Define TS as everything except Water AND dissolved chemicals
+        ts_ids = [i for i in ids if i != water_id and i not in dissolved_set]
+
+        # Route dissolved chemicals entirely to pressate
+        for i in dissolved_set:
+            if i in ids:
+                pressate.imass[i] = float(feed.imass[i])
+
+        # --- split TS by capture fraction (based on true solids only) ---
         TS_total = sum(float(feed.imass[i]) for i in ts_ids)
         TS_to_cake = cap * TS_total
 

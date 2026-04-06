@@ -1,33 +1,20 @@
-"""
-Biogas upgrading unit (UP)
-
-Purpose
-- Takes raw biogas from anaerobic digestion and splits it into:
-  (1) biomethane product (CH4-rich gas) and (2) offgas (CO2-rich stream + impurities)
-- Applies simple performance parameters (CH4 recovery, CO2 removal)
-- Estimates utilities and CAPEX using a capacity-based membrane upgrading skid
-
-Key assumptions / conventions
-- Raw biogas volumetric flow is computed at STP (0°C, 1 atm) using 22.414 Nm3 per kmol ideal gas
-- Electricity demand is modeled as kWh per Nm3 raw biogas (converted to kW in _design())
-- CAPEX is modeled as USD per (Nm3/h) of raw biogas capacity and annual maintenance is a fixed fraction of CAPEX
-- Non-CH4/CO2 species (trace gases) are sent to offgas by default
-
-Outputs
-- biomethane: Methane + any unrecovered CO2
-- offgas: removed CO2 + unrecovered CH4 + all other species
-
-"""
+from __future__ import annotations
 
 import biosteam as bst
 
-# creating the biogas upgrading unit 
+
 class BiogasUpgrading(bst.Unit):
     _N_ins = 1
     _N_outs = 2  # biomethane, offgas
 
+    COST_ITEM = "Membrane upgrading skid"
+    F_BM = {COST_ITEM: 1.0}
+
     def __init__(
-        self, ID="", ins=None, outs=(),
+        self,
+        ID="",
+        ins=None,
+        outs=(),
         ch4_recovery=0.98,
         co2_removal=0.95,
         electricity_kwh_per_Nm3_raw=0.25,
@@ -36,15 +23,31 @@ class BiogasUpgrading(bst.Unit):
         **kwargs
     ):
         super().__init__(ID, ins, outs, **kwargs)
+
         self.ch4_recovery = float(ch4_recovery)
         self.co2_removal = float(co2_removal)
         self.electricity_kwh_per_Nm3_raw = float(electricity_kwh_per_Nm3_raw)
         self.capex_usd_per_Nm3ph_raw = float(capex_usd_per_Nm3ph_raw)
         self.maintenance_frac_of_capex_per_yr = float(maintenance_frac_of_capex_per_yr)
 
+        # make sure instance has the same F_BM mapping
+        self.F_BM = dict(type(self).F_BM)
+
+        if not (0.0 <= self.ch4_recovery <= 1.0):
+            raise ValueError("ch4_recovery must be between 0 and 1.")
+        if not (0.0 <= self.co2_removal <= 1.0):
+            raise ValueError("co2_removal must be between 0 and 1.")
+        if self.electricity_kwh_per_Nm3_raw < 0:
+            raise ValueError("electricity_kwh_per_Nm3_raw must be >= 0.")
+        if self.capex_usd_per_Nm3ph_raw < 0:
+            raise ValueError("capex_usd_per_Nm3ph_raw must be >= 0.")
+        if not (0.0 <= self.maintenance_frac_of_capex_per_yr <= 1.0):
+            raise ValueError("maintenance_frac_of_capex_per_yr must be between 0 and 1.")
+
     def _run(self):
         raw = self.ins[0]
         biomethane, offgas = self.outs
+
         biomethane.empty()
         offgas.empty()
 
@@ -66,36 +69,61 @@ class BiogasUpgrading(bst.Unit):
             if cid in ("Methane", "CarbonDioxide"):
                 continue
             n = float(raw.imol[cid])
-            if n:
+            if n > 0:
                 offgas.imol[cid] = n
 
     def _design(self):
-        # compute raw biogas flow in Nm3/h at STP
         raw = self.ins[0]
+        biomethane, offgas = self.outs
 
-        # total kmol/h
-        n_kmolph = float(raw.F_mol)  # kmol/hr
+        # Use dry raw biogas basis for sizing and power
+        dry_gas_IDs = ["Methane", "CarbonDioxide", "HydrogenSulfide", "Nitrogen", "Oxygen"]
+        n_kmolph_dry = sum(float(raw.imol[i]) for i in dry_gas_IDs if i in raw.chemicals.IDs)
 
-        # 1 kmol ideal gas = 22.414 Nm3 (STP)
-        Q_Nm3ph = 22.414 * n_kmolph
+        Q_Nm3ph_dry = 22.414 * n_kmolph_dry
+        self.design_results["Raw biogas flow (Nm3/h, dry)"] = Q_Nm3ph_dry
 
-        self.design_results["Raw biogas flow (Nm3/h)"] = Q_Nm3ph
+        kW = self.electricity_kwh_per_Nm3_raw * Q_Nm3ph_dry
+        self.design_results["Electricity demand (kW)"] = kW
 
-        # electricity: kWh per Nm3 raw -> kW (since per hour)
-        kW = self.electricity_kwh_per_Nm3_raw * Q_Nm3ph
-        if kW:
-            self.power_utility(kW)
+        # Explicit overwrite
+        self.power_utility.consumption = kW
+        self.power_utility.production = 0.0
+
+        if biomethane.F_mol > 0:
+            self.design_results["Biomethane CH4 mol%"] = (
+                100.0 * float(biomethane.imol["Methane"]) / float(biomethane.F_mol)
+            )
+        else:
+            self.design_results["Biomethane CH4 mol%"] = 0.0
+
+        self.design_results["Methane slip (kmol/h)"] = float(offgas.imol["Methane"])
+
+        ch4_in = float(raw.imol["Methane"])
+        if ch4_in > 0:
+            self.design_results["Methane recovery actual"] = (
+                float(biomethane.imol["Methane"]) / ch4_in
+            )
+        else:
+            self.design_results["Methane recovery actual"] = 0.0
 
     def _cost(self):
-        Q_Nm3ph = self.design_results.get("Raw biogas flow (Nm3/h)")
+        Q_Nm3ph = self.design_results.get("Raw biogas flow (Nm3/h, dry)")
         if Q_Nm3ph is None:
-            n_kmolph = float(self.ins[0].F_mol)
-            Q_Nm3ph = 22.414 * n_kmolph
-            self.design_results["Raw biogas flow (Nm3/h)"] = Q_Nm3ph
+            raw = self.ins[0]
+            dry_gas_IDs = ["Methane", "CarbonDioxide", "HydrogenSulfide", "Nitrogen", "Oxygen"]
+            n_kmolph_dry = sum(float(raw.imol[i]) for i in dry_gas_IDs if i in raw.chemicals.IDs)
+            Q_Nm3ph = 22.414 * n_kmolph_dry
+            self.design_results["Raw biogas flow (Nm3/h, dry)"] = Q_Nm3ph
 
         capex = self.capex_usd_per_Nm3ph_raw * float(Q_Nm3ph)
-        self.baseline_purchase_costs["Membrane upgrading skid"] = capex
+        self.baseline_purchase_costs[self.COST_ITEM] = capex
 
-        self.design_results["Annual maintenance ($/yr)"] = (
-            self.maintenance_frac_of_capex_per_yr * capex
-        )
+        annual_maintenance = self.maintenance_frac_of_capex_per_yr * capex
+        self.design_results["Annual maintenance ($/yr)"] = annual_maintenance
+
+        if annual_maintenance > 0:
+            operating_hours_per_yr = 330.0 * 24.0
+            self.add_OPEX = {
+                "Membrane upgrading maintenance": annual_maintenance / operating_hours_per_yr
+            }

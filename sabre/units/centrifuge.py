@@ -102,6 +102,15 @@ class DigestateDecanterCentrifuge(bst.Unit):
         self.design_results["Capacity_tph_each"] = cap
         self.design_results["N_centrifuges_parallel"] = N
 
+        # Electricity: 1.0 kWh/m3 digestate for decanter centrifuge
+        # Source: Tchobanoglous et al., Wastewater Engineering 5th ed.
+        F_m3ph = float(self.ins[0].F_vol)
+        kWh_per_m3 = 1.0
+        power_kW = kWh_per_m3 * F_m3ph
+        self.power_utility.consumption = power_kW
+        self.design_results["Feed flow (m3/h)"] = F_m3ph
+        self.design_results["Power (kW)"] = power_kW
+
     def _cost(self):
         if self.centrifuge_purchase_cost_usd_each is None:
             return

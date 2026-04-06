@@ -24,7 +24,6 @@ quality_bins:
       key: milledge2020
       note: "Energies 2020 paper (Mixed Sargassum inundation), Table 1."
 
-# Notes from the previous presentation
 policies:
   solids_loading_target_ts_wt_frac: 0.15
   solids_loading_target_ts_wt_frac_max: 0.20
@@ -32,80 +31,314 @@ policies:
   retain_salinity: true
 
 scale:
-  wet_feed_ton_per_day: 15000 # as discussed with Hauke
+  wet_feed_ton_per_day: 15000
   ton_definition: metric
 
-ad_feed:
-  moisture_frac: 0.85
-  source:
-    key: assumed
-    note: "Placeholder; update if/when AD feed dilution or dewatering basis is defined."
+# PREPROCESSING UNITS
+preprocessing:
+  press:
+    cake_solids_wt_frac: 0.15
+    solids_capture_frac: 0.98
+    solids_IDs:
+      - Glucan
+      - Arabinan
+      - Alginate
+      - Fucoidan
+      - Mannitol
+      - Protein
+      - OtherSolids
+      - Lignin
+      - Ash
+
+    solubles_to_pressate_frac: 1.0
+
+    power_kWh_per_dry_ton_TS: 5.0
+
+    capex_model: scaled_anchor
+    basis: dry_tph
+    ref_capacity_tph_dry: 0.953
+    capex_installed_ref_usd: 3100000.0
+    scale_exponent: 0.60
+    F_BM: 1.0
+
+    sources:
+      capex:
+        citation: "City of Bellingham Biosolids Facility Planning Report, TM 12: Solids Screening, Thickening, and Dewatering Technology Evaluation (2021)"
+        note: "Installed screw press system anchor based on municipal screw press dewatering cost tables; adapted to this model using dry-solids throughput scaling."
+      performance:
+        citation: "Vincent Corporation seaweed pressing notes; supported by brown macroalgae dewatering literature"
+        note: "Sargassum-specific pressing data indicate cake solids around 26–29 wt% TS; 27 wt% TS selected as central baseline."
+      power:
+        citation: "HUBER screw press case study (2023)"
+        note: "Use ~5 kWh/t dry solids for press-only electricity. Larger values such as ~20 kWh/t DS correspond to total system electricity including pumps and auxiliaries."
+
+  mill:
+    loss_frac: 0.03
+
+    power_kWh_per_dry_ton_dry: 25.0
+
+    capex_model: inl_hammermill_anchor
+    ref_capacity_dry_ton_per_hr: 10.0
+    purchase_cost_ref_usd: 206400.0
+    install_factor: 1.8
+    scale_exponent: 0.6
+    F_BM: 1.0
+
+  sources:
+    power:
+      citation: "Oyedeji et al. (2020); NREL FY11 grinding basis"
+      note: "Herbaceous biomass coarse grinding typically falls in the ~11–28 kWh/t range; 25 kWh/t selected as a defensible central proxy for dried Sargassum."
+    capex:
+      citation: "INL hammer mill cost anchor"
+      url: "https://inldigitallibrary.inl.gov/sites/sti/sti/7323596.pdf"
+      note: "Hammer mill purchase cost anchor $206,400 used for capacity scaling with exponent 0.6 and install factor."
+    loss:
+      citation: "INL preprocessing/logistics accounting"
+      note: "Dry matter loss across preprocessing is typically on the order of ~1–5%; 3% selected as central baseline."
+
+pressate_biostimulant:
+  enabled: true
+  concentrate_pressate: true
+
+  concentrator:
+    retained_solute_IDs: [Alginate, Fucoidan, Mannitol, Protein, OtherSolids]
+    water_recovery_to_permeate: 0.93
+    retained_solute_recovery_to_concentrate: 0.95
+    design_flux_L_m2_h: 35.0
+    operating_pressure_bar: 5.0
+    electricity_kWh_per_m3_feed: 2.5
+    capex_usd_per_m2: 500.0
+    maintenance_frac_of_capex_per_yr: 0.035
+
+    sources:
+      flux:
+        citation: "Seaweed/algal membrane concentration literature; Sievers et al. (2017); Díaz-Reinoso and Domínguez (2020)"
+        note: "UF fluxes for bioprocess and seaweed-derived streams commonly fall in the ~15–60 LMH range; 35 LMH selected as a central design value."
+      electricity:
+        citation: "Membrane concentration literature for algal and bioprocess streams"
+        note: "UF electricity commonly falls in the ~0.5–2.5 kWh/m3 range"
+      capex:
+        citation: "Sethi and Wiesner (2000); Nguyen and Yoshikawa (2020); Cheryan (1998)"
+        note: "UF membrane/module cost commonly reported around $200–$500/m2; $800/m2 for convervative assumption"
+        citation: "Assumed maintenance fraction consistent with other membrane systems in this model"
+        note: "Annual maintenance retained at 3.5% of installed CAPEX for consistency."
 
 ad:
   # sizing and operating conditions
   hrt_days: 25
-  slurry_density_kg_per_m3: 1000 # approximate density of water
+  slurry_density_kg_per_m3: 1000
   gas_storage_frac_of_total_volume: 0.25
   max_single_digester_volume_MG: 1.5
 
-  # operating temperature
-  temperature_K: 308.15  # 35°C (Mesophillic)
-
-  # composition assumptions for raw biogas
-  biogas:
-    ch4_molfrac: 0.55
-    co2_molfrac: 0.43
-    h2s_molfrac: 0.02
-
+  # operating temperature and utilities
+  temperature_K: 308.15
+  influent_temperature_K: 298.15
   mixing_W_per_m3: 5.0
-  influent_temperature_K: 298.15   # 25C baseline
-  temperature_K: 308.15            # already have this (35C)
   cp_kJ_per_kgK: 4.18
 
-  sources:
-    hrt_days:
-      key: nrel_adam_1994
-      note: "Residence time guidance; used here as baseline"
-    slurry_density:
-      key: nrel_adam_1994
-      note: "Example liquid feed density ~1000 kg/m3"
-    gas_storage:
-      key: psu_extension_ad_design
-      note: "Temporary gas storage suggested ~10–20% of total digester volume"
-    biogas_composition_example:
-      key: nrel_adam_1994
-      note: "Example medium-Btu biogas composition (~55% CH4, 43% CO2, 2% H2S)"
-    ch4_range_check:
-      key: epa_agstar_operator_guidebook
-      note: "Typical CH4 in biogas commonly cited around 45–70%"
-    temperature:
-      key: assumed_mesophilic
-      note: "Mesophilic AD commonly operated around ~35°C; baseline set to 35°C"
+  # selected pretreatment case
+  pretreatment_case: press_mill_only
+
+  enable_feed_dilution: false
+  target_feed_moisture_frac: 0.92
 
 ad_performance:
   mode: biogas
 
-  # biogas mol fraction
-  ch4_molfrac: 0.5
-  ch4_molfrac_source:
-    key: eesi_biogas_factsheet
-    note: "Biogas often ~50–70% methane"
+  # Global CSTR vs_destruction — uniform across all pretreatment cases
+  # Conservative lower bound of 20–70% range for full-scale mesophilic CSTRs
+  # No continuous CSTR data for pretreated pelagic Sargassum exists in literature
+  vs_destruction: 0.20
 
-  # untreated pelagic Sargassum methane yield
-  # 77.64 mL CH4 / g VS -> 0.0555 kg CH4 / kg VS (STP conversion)
-  ch4_kg_per_kg_vs: 0.0555
-  ch4_yield_source:
-    key: salgado_hernandez_2023
-    note: "Reports methane production for untreated biomass"
+  # Global fallback biogas composition (overridden per pretreatment case below)
+  raw_biogas_molfrac:
+    Methane: 0.55
+    CarbonDioxide: 0.42
+    HydrogenSulfide: 0.03
 
-  # digestate solids reduction
-  vs_destruction: 0.50
-  vs_destruction_source:
-    key: assumed
-    note: "Placeholder"
+  biodegradability:
+    Mannitol: 0.95
+    Glucan: 0.75
+    Arabinan: 0.70
+    Protein: 0.65
+    Alginate: 0.45
+    Fucoidan: 0.35
+    OtherSolids: 0.30
+
+  digestible_IDs:
+    - Glucan
+    - Arabinan
+    - Alginate
+    - Fucoidan
+    - Mannitol
+    - Protein
+    - OtherSolids
+
+ad_pretreatment_cases:
+  press_mill_only:
+    kind: none
+    description: "Baseline physical preprocessing only: press plus mill anchored to Yuhendra et al. mechanical pretreatment result on Sargassum fulvellum"
+    ad_effects:
+      vs_destruction: 0.20
+      ch4_kg_per_kg_vs_fed: 0.100
+      ch4_kg_per_kg_vs_fed_low: 0.0958   # BMP (224.19 - 9.45) L/kg VS, scaled
+      ch4_kg_per_kg_vs_fed_high: 0.1042  # BMP (224.19 + 9.45) L/kg VS, scaled
+      raw_biogas_molfrac:
+        Methane: 0.4644
+        CarbonDioxide: 0.5056
+        HydrogenSulfide: 0.03
+      biodegradability_factor_overrides: {}
+    sources:
+      methane_yield:
+        key: chikani_cabrera_2022_physical_C
+        note: "224.19 ± 9.45 L CH4/kg VS (Chikani-Cabrera et al. 2022, Table 4). Central value scaled conservatively to 0.100 kg/kg VS for continuous CSTR."
+      biogas_composition:
+        key: chikani_cabrera_2022_physical_C
+        note: "46.44% CH4 in biogas reported for physical pretreatment C condition."
+      vs_destruction:
+        key: calibrated_from_biodegradability_index
+        note: "Baseline vs_destruction retained at 0.20 as the continuous-CSTR anchor. Other pretreatment cases are scaled relative to this baseline using the Chikani-Cabrera et al. (2022) biodegradability index trend."
+
+  enzymatic:
+    kind: enzymatic
+    description: "Enzymatic pretreatment before methanogenic AD"
+    enzymatic:
+      temperature_K: 308.15
+      residence_time_hr: 24.0
+      enzyme_dose_kg_per_kg_dry_feed: 0.005
+      treated_fraction: 0.25
+      enzyme_recycle_factor: 2.0
+      capex_usd: 7280000.0
+      enzyme_price_usd_per_kg: 7.0
+      maintenance_frac_of_capex_per_yr: 0.035
+    ad_effects:
+      vs_destruction: 0.15
+      ch4_kg_per_kg_vs_fed: 0.123
+      ch4_kg_per_kg_vs_fed_low: 0.1226   # BMP (172.57 - 0.56) L/kg VS, scaled
+      ch4_kg_per_kg_vs_fed_high: 0.1234  # BMP (172.57 + 0.56) L/kg VS, scaled
+      raw_biogas_molfrac:
+        Methane: 0.8456
+        CarbonDioxide: 0.1244
+        HydrogenSulfide: 0.03
+      biodegradability_factor_overrides: {}
+    sources:
+      methane_yield:
+        key: chikani_cabrera_2022_enzymatic_E
+        note: "172.57 ± 0.56 L CH4/kg VS (Chikani-Cabrera et al. 2022, Table 4)."
+      biogas_composition:
+        key: chikani_cabrera_2022_enzymatic_E
+        note: "84.56% CH4 in biogas reported for enzymatic pretreatment E condition."
+      vs_destruction:
+        key: calibrated_from_biodegradability_index
+        note: "Set to 0.15 by scaling the baseline continuous-CSTR vs_destruction of 0.20 by the relative biodegradability index ratio E/C = 0.42/0.55 from Chikani-Cabrera et al. (2022)."
+      capex:
+        key: nrel_2015_saccharification_tank
+        report: "NREL/TP-5100-62498"
+      enzyme_price:
+        key: nrel_2015_enzyme_cost
+        report: "NREL/TP-5100-62498"
+
+  peroxide:
+    kind: peroxide
+    description: "Hydrogen peroxide pretreatment before methanogenic AD"
+    peroxide:
+      h2o2_wt_frac_on_dry_feed: 0.025
+      temperature_K: 298.15
+      residence_time_hr: 2.0
+      capex_usd: 1000000.0
+      h2o2_price_usd_per_kg: 0.37
+      maintenance_frac_of_capex_per_yr: 0.035
+    ad_effects:
+      vs_destruction: 0.21
+      ch4_kg_per_kg_vs_fed: 0.165
+      ch4_kg_per_kg_vs_fed_low: 0.1566   # BMP (230.82 - 11.65) L/kg VS, scaled
+      ch4_kg_per_kg_vs_fed_high: 0.1732  # BMP (230.82 + 11.65) L/kg VS, scaled
+      raw_biogas_molfrac:
+        Methane: 0.5155
+        CarbonDioxide: 0.4545
+        HydrogenSulfide: 0.03
+      biodegradability_factor_overrides: {}
+    sources:
+      methane_yield:
+        key: chikani_cabrera_2022_peroxide_P
+        note: "230.82 ± 11.65 L CH4/kg VS (Chikani-Cabrera et al. 2022, Table 4)."
+      biogas_composition:
+        key: chikani_cabrera_2022_peroxide_P
+        note: "51.55% CH4 in biogas reported for peroxide pretreatment P condition."
+      vs_destruction:
+        key: calibrated_from_biodegradability_index
+        note: "Set to 0.21 by scaling the baseline continuous-CSTR vs_destruction of 0.20 by the relative biodegradability index ratio P/C = 0.57/0.55 from Chikani-Cabrera et al. (2022)."
+      capex:
+        key: nrel_2011_conditioning_tank_anchor
+        report: "NREL/TP-5100-47764"
+
+  combined_PE:
+    kind: combined_PE
+    description: "Peroxide pretreatment followed by enzymatic pretreatment"
+    sequence:
+      - peroxide
+      - enzymatic
+    ad_effects:
+      vs_destruction: 0.35
+      ch4_kg_per_kg_vs_fed: 0.277
+      ch4_kg_per_kg_vs_fed_low: 0.2760   # BMP (387.64 - 1.41) L/kg VS, scaled
+      ch4_kg_per_kg_vs_fed_high: 0.2780  # BMP (387.64 + 1.41) L/kg VS, scaled
+      raw_biogas_molfrac:
+        Methane: 0.8641
+        CarbonDioxide: 0.1059
+        HydrogenSulfide: 0.03
+      biodegradability_factor_overrides: {}
+    sources:
+      methane_yield:
+        key: chikani_cabrera_2022_combined_PE
+        note: "387.64 ± 1.41 L CH4/kg VS (Chikani-Cabrera et al. 2022, Table 4)."
+      biogas_composition:
+        key: chikani_cabrera_2022_combined_PE
+        note: "86.41% CH4 in biogas reported for combined PE condition."
+      vs_destruction:
+        key: calibrated_from_biodegradability_index
+        note: "Set to 0.35 by scaling the baseline continuous-CSTR vs_destruction of 0.20 by the relative biodegradability index ratio PE/C = 0.95/0.55 from Chikani-Cabrera et al. (2022)."
+      capex:
+        key: additive_peroxide_plus_enzymatic
+        note: "Combined PE CAPEX = sum of peroxide and enzymatic installed CAPEX."
+
+  combined_PTE:
+    kind: combined_PTE
+    description: "Peroxide pretreatment followed by thermal pretreatment and enzymatic pretreatment"
+    sequence:
+      - peroxide
+      - heating
+      - enzymatic
+    heating:
+      target_temperature_K: 393.15
+      residence_time_hr: 0.25
+      capex_usd: 1200000.0
+      maintenance_frac_of_capex_per_yr: 0.035
+    ad_effects:
+      vs_destruction: 0.32
+      ch4_kg_per_kg_vs_fed: 0.261
+      ch4_kg_per_kg_vs_fed_low: 0.2551   # BMP (364.95 - 8.18) L/kg VS, scaled
+      ch4_kg_per_kg_vs_fed_high: 0.2667  # BMP (364.95 + 8.18) L/kg VS, scaled
+      raw_biogas_molfrac:
+        Methane: 0.8769
+        CarbonDioxide: 0.0931
+        HydrogenSulfide: 0.03
+      biodegradability_factor_overrides: {}
+    sources:
+      methane_yield:
+        key: chikani_cabrera_2022_combined_PTE
+        note: "364.95 ± 8.18 L CH4/kg VS (Chikani-Cabrera et al. 2022, Table 4)."
+      biogas_composition:
+        key: chikani_cabrera_2022_combined_PTE
+        note: "87.69% CH4 in biogas reported for combined PTE condition."
+      vs_destruction:
+        key: calibrated_from_biodegradability_index
+        note: "Set to 0.32 by scaling the baseline continuous-CSTR vs_destruction of 0.20 by the relative biodegradability index ratio PTE/C = 0.88/0.55 from Chikani-Cabrera et al. (2022)."
+      capex:
+        key: additive_peroxide_plus_heating_plus_enzymatic
+        note: "Combined PTE CAPEX = sum of peroxide, heating, and enzymatic installed CAPEX."
 
 ad_costing:
-  # anchor point from ADBC spreadsheet --> ADBC is a spreadsheet model developed by NREL for anaerobic digestion costing
   base_volume_m3: 2779.92
   base_capex_usd: 1796981.40
   maintenance_usd_per_m3_yr: 10.0
@@ -118,20 +351,46 @@ ad_costing:
       base_capex_usd: "U33"
       maintenance_usd_per_m3_yr: "AB18"
 
+h2s_removal:
+  technology: iron_sponge
+  h2s_removal_efficiency: 0.99
+
+  # Capital cost anchor from Díaz et al. (2015), Bioresour. Technol. 192:280-286
+  # citing Abatzoglou & Boivin (2009): $450,000 at 1,700 Nm3/hr iron sponge system
+  # Scale exponent 0.7 from Díaz et al. (2015) Eq. 4 (Green & Perry 2008 convention)
+  ref_flow_Nm3ph: 1700.0
+  ref_installed_cost_usd: 450000.0
+  scale_exponent: 0.7
+
+  # Reagent cost: iron sponge media replacement
+  # Source: IEA Bioenergy Task 37 (2014); Wellinger & Linberg (2000)
+  reagent_cost_usd_per_Nm3_raw: 0.002
+
+  sources:
+    capex:
+      citation: "Díaz, I.; Ramos, I.; Fdz-Polanco, M. Bioresour. Technol. 2015, 192, 280–286."
+      note: "Capital cost of $450,000 at 1,700 Nm3/hr for iron-sponge-bed filter, scaled
+             with exponent 0.7 per Green & Perry (2008). Original anchor from
+             Abatzoglou & Boivin (2009) A review of biogas purification processes."
+    efficiency:
+      citation: "Choudhury et al. Energies 2019, 12, 4605."
+      note: "Commercially available iron sponge media achieves >99.9% H2S removal,
+             reducing concentrations from 3,600 ppm to <1 ppm."
+    reagent:
+      citation: "IEA Bioenergy Task 37 (2014)."
+      note: "Iron sponge media replacement cost ~$0.001-0.003/Nm3 raw biogas."
+
 biogas_upgrading:
-  technology: membrane  # using membrane --> can switch to other technologies later
+  technology: membrane
 
   ch4_recovery: 0.99
   co2_removal: 0.95
 
-  # performance
   target_ch4_molfrac: 0.97
   methane_slip_frac: 0.01
 
-  # utilities
   electricity_kWh_per_Nm3_raw: 0.25
 
-  # costing
   capex_usd_per_Nm3ph_raw: 2200
   maintenance_frac_of_capex_per_yr: 0.035
 
@@ -150,82 +409,16 @@ biogas_upgrading:
       note: "Investment cost for biogas-to-biomethane upgrading units reported ~USD 1950–2600 per Nm³/h for larger raw gas capacities."
 
 digestate_decanter_centrifuge:
-  solids_IDs: ["Cellulose", "Ash"]  # currently only tracking these solids
+  solids_IDs: ["Cellulose", "Ash"]
   ts_capture_frac: 0.78
   cake_moisture_frac: 0.75
   capacity_tph_each: 50.0
-  centrifuge_purchase_cost_usd_each: 297500.0 
+  centrifuge_purchase_cost_usd_each: 297500.0
   F_BM: 1.0
-
-preprocessing:
-    press:
-      cake_solids_wt_frac: 0.35
-      solids_capture_frac: 0.98
-      solids_IDs:
-      - Glucan
-      - Xylan
-      - Mannan
-      - Galactan
-      - Arabinan
-      - Alginate
-      - Fucoidan
-      - Mannitol
-      - Protein
-      - OtherSolids
-      - Lignin
-      - Ash
-      
-      solubles_to_pressate_frac: 1.0
-
-      # utilities
-      power_kWh_per_dry_ton_TS: 5.0
-
-      # costing
-      capex_model: scaled_anchor
-      basis: wet_tph               # wet tons per hour throughput basis
-      ref_capacity_tph_wet: 50.0
-      capex_installed_ref_usd: 5000000.0
-      scale_exponent: 0.60 
-      F_BM: 1.0  
-
-      sources:
-      capex:
-        citation: "Engineering reports / municipal dewatering projects (order-of-magnitude installed cost anchor)"
-        note: "Using installed CAPEX anchor per dewatering train + scaling. Replace with vendor quote or sector-specific TEA when available."
-      power:
-        citation: "Assumed baseline (temporary)"
-        note: "Placeholder press electricity intensity on dry-solids basis; update with vendor/spec or wastewater ref when selected."
-
-    mill:
-      loss_frac: 0.15
-
-      # utilities
-      power_kWh_per_dry_ton_dry: 25.0
-
-      # costing
-      capex_model: inl_hammermill_anchor
-      ref_capacity_dry_ton_per_hr: 10.0
-      purchase_cost_ref_usd: 206400.0
-      install_factor: 1.8
-      scale_exponent: 0.6
-      F_BM: 1.0
-
-    sources:
-      power:
-        citation: "NREL, Fast Pyrolysis and Hydrotreating TEA (FY11 OSTI 46586)"
-        url: "https://docs.nrel.gov/docs/fy11osti/46586.pdf"
-        note: "NREL cites 50 kWh/ton as a common grinding assumption; baseline set to 25 with planned sensitivity (25–50)."
-      capex:
-        citation: "INL TEA table (hammer mill cost anchor)"
-        url: "https://inldigitallibrary.inl.gov/sites/sti/sti/7323596.pdf"
-        note: "Hammer mill purchase cost anchor $206,400 used for capacity scaling with exponent 0.6 and install factor."
 
 digestate_screw_press:
   solids_IDs:
     - Glucan
-    - Xylan
-    - Mannan
-    - Galactan
     - Arabinan
     - Alginate
     - Fucoidan
@@ -235,37 +428,300 @@ digestate_screw_press:
     - Lignin
     - Ash
   ts_capture_frac: 0.4
-  cake_moisture_frac: 0.5
+  cake_moisture_frac: 0.45
   capacity_tph_each: 6.0
   kWh_per_m3: 0.67
   eur_to_usd: 1.19
   include_polymer_dosing: false
   polymer_dosing_cost_eur_each: 0.0
   F_BM: 1.0
-
+  
 vfa_ad:
-  # sizing
   hrt_days: 15.0
   slurry_density_kg_per_m3: 1000.0
   gas_storage_frac_of_total_volume: 0.25
   max_single_digester_volume_MG: 1.5
 
-  # utilities
   mixing_W_per_m3: 5.0
-  influent_temperature_K: 298.15   # 25 C
-  target_temperature_K: 308.15     # 35 C
+  influent_temperature_K: 298.15
+  target_temperature_K: 308.15
   cp_kJ_per_kgK: 4.18
 
-vfa_ad_performance:
-  # conversion
-  vs_destruction: 0.50
-  vfa_kg_per_kg_vs_destroyed: 0.80
-  vfa_recovery: 0.90
+  sources:
+    hrt_days:
+      key: aad_review_window
+      note: "15 d retained as a midpoint design basis within the 10–20 d AAD operating window; not a direct fitted value for this exact Sargassum system."
+    temperature:
+      key: mesophilic_operation
+      note: "Mesophilic operation near 35 C."
 
-  # VFA composition
-  vfa_split:
-    AceticAcid: 0.25
-    PropionicAcid: 0.05
-    ButyricAcid: 0.45
-    ValericAcid: 0.05
-    HexanoicAcid: 0.20
+vfa_ad_performance:
+  case: seaweed_arrested_fitted
+
+  digestible_IDs:
+    - Glucan
+    - Arabinan
+    - Alginate
+    - Fucoidan
+    - Mannitol
+    - Protein
+    - OtherSolids
+
+  cases:
+    seaweed_arrested_fitted:
+      vs_destruction: 0.50
+      vfa_kg_per_kg_vs_destroyed: 0.47
+      
+      fit_note: "Mass yield back-calculated from the 52% carbon-to-VFA conversion
+        efficiency reported in the seaweed-arrested AD paper (bioRxiv 2025).
+        Assumes ~50% carbon content of VS and ~55% carbon content of mixed
+        VFAs (C2–C6). Consistent with the 0.35–0.80 g VFA/g VS range
+        reported across algal and food waste acidogenic systems (González-
+        Fernández et al. 2019, Sci Reports; Feng et al. 2019, PMC). Treat
+        as a central scoping estimate; sensitivity range 0.35–0.65"
+
+        
+        # Chosen so butyrate + hexanoate + acetate = 0.76
+      vfa_split:
+        AceticAcid: 0.42
+        PropionicAcid: 0.18
+        ButyricAcid: 0.20
+        ValericAcid: 0.06
+        HexanoicAcid: 0.14
+
+vfa_fermentation:
+  case: yarrowia_vfa_base
+
+  # These IDs match the current code.
+  vfa_IDs:
+    - AceticAcid
+    - PropionicAcid
+    - ButyricAcid
+    - ValericAcid
+    - HexanoicAcid
+
+  sources:
+    pathway_concept:
+      key: frontiers_2021_vfa_to_microbial_oil
+      note: "VFAs generated by anaerobic digestion can serve as substrate for microbial oil production; literature process concept includes a VFA-rich permeate and a retentate suitable for secondary AD."
+    yarrowia_vfa_feasibility:
+      key: fontanille_2012_yarrowia_vfa_lipids
+      note: "Yarrowia lipolytica can assimilate VFAs and accumulate intracellular lipids."
+    yarrowia_real_vfa_feed:
+      key: pereira_2023_food_waste_vfa_yarrowia
+      note: "Yarrowia lipolytica has been tested on food-waste-derived VFAs and can accumulate intracellular lipids on real VFA mixtures."
+    pH_control:
+      key: gao_2020_yarrowia_high_vfa_alkaline
+      note: "Initial pH 8 was reported as optimal under high-VFA alkaline cultivation."
+    modeling_note:
+      key: thesis_scoping_model
+      note: "Residence time, stoichiometric yields, and split fractions below are current model assumptions for process scoping and should be sensitivity-tested."
+
+  cases:
+    yarrowia_vfa_base:
+      organism: Yarrowia lipolytica
+      product_ID: MicrobialOil
+
+      # Literature-backed operating anchor
+      target_pH: 8.0
+
+      # Current scoping values used by the code
+      residence_time_h: 48.0
+      conversion: 0.85
+      product_yield_kg_per_kg_vfa_consumed: 0.144   # Gao et al. 2020, Y_L/S at pH 8
+      biomass_yield_kg_per_kg_vfa_consumed: 0.40
+      co2_yield_kg_per_kg_vfa_consumed: 0.20
+
+      # Seed stream for current code; keep zero until you choose an inoculum basis
+      seed_water_kgph: 0.0
+      seed_cellmass_kgph: 0.0
+
+      # Conditioner doses; keep zero until you choose a medium basis
+      ammonia_dose_kg_per_m3: 0.0
+      phosphate_dose_kg_per_m3: 0.0
+      base_dose_kg_per_m3: 0.0
+
+      notes:
+        - "Main fermentation product is crude microbial oil."
+        - "Omega fatty acids and squalene are not modeled as primary fermenter products in the base case."
+        - "Stoichiometric yields are current model assumptions, not exact literature-fitted values."
+
+  vfa_microfilter:
+    # Split-based representation of the literature permeate/retentate concept.
+    # These are model assumptions, not membrane-flux parameters.
+    vfa_to_permeate_frac: 0.98
+    water_to_permeate_frac: 0.97
+    solids_to_permeate_frac: 0.05
+    dissolved_other_to_permeate_frac: 0.90
+
+    notes:
+      - "Use retentate as the future integration hook to secondary methanogenic AD."
+
+  fermentation_medium_tank:
+    broth_density_kg_per_m3: 1000.0
+    target_pH: 8.0
+    ammonia_dose_kg_per_m3: 0.0
+    phosphate_dose_kg_per_m3: 0.0
+    base_dose_kg_per_m3: 0.0
+
+  cell_harvest_centrifuge:
+    # Split-based stand-in for biomass harvesting.
+    oil_to_biomass_frac: 0.98
+    cellmass_to_biomass_frac: 0.98
+    water_to_biomass_frac: 0.10
+    dissolved_to_biomass_frac: 0.05
+
+  wet_lipid_recovery:
+    # Split-based stand-in for crude oil recovery from wet biomass.
+    oil_recovery_frac: 0.95
+    water_to_oil_frac: 0.001
+    cellmass_to_oil_frac: 0.02
+    dissolved_to_oil_frac: 0.001
+
+  product_quality:
+    crude_product_stream_ID: crude_microbial_oil
+    report_as: crude_microbial_oil
+
+    # Leave these as zero until you build the higher-value oil variant.
+    dha_wt_frac_in_oil: 0.0
+    squalene_wt_frac_in_oil: 0.0
+
+    notes:
+      - "Base case reports crude microbial oil only."
+      - "DHA and squalene can be added later as fractions of recovered oil in a higher-value variant."
+
+  scenario_flags:
+    send_vfa_retentate_to_secondary_AD: false
+    use_yarrowia_base_case: true
+    use_high_value_oil_variant: false
+
+
+  sources:
+    seaweed_arrested_anchor:
+      key: seaweed_arrested_ad_preprint
+      note: "Peak ~14.5 g/L total VFA; dominant acids butyrate, hexanoate, acetate; CH4/CO2 < 0.04; biogas suppression 96%."
+
+feed_price_sensitivity:
+  tipping_fee_usd_per_kg_wet: -0.02
+  near_zero_usd_per_kg_wet: 0.00
+  low_cost_collect_usd_per_kg_wet: 0.03
+  beach_midpoint_usd_per_kg_wet: 0.05
+  source: "Rodriguez-Martinez et al. 2023 (Sci Total Environ); 
+           cleanup costs $19-85/m3 wet = $0.024-0.106/kg wet."
+
+
+# HTL WAS NOT DEVELOPED
+htl_feed:
+  target_solids_wt_frac: 0.10
+  source:
+    key: asama_2025_inferred
+    note: "Brown macroalgae HTL optimum reported at water-to-biomass ratio 10:1; converted to ~0.0909 solids mass fraction for slurry basis."
+
+htl:
+  temperature_C: 280.0
+  pressure_bar: 100.0
+  residence_time_min: 15.0
+
+  sources:
+    temperature_C:
+      key: allen_2024
+      note: "Continuous Mexican Sargassum HTL anchor case; 280 C used as conservative literature-based baseline."
+    pressure_bar:
+      key: assumed_htl_baseline
+      note: "Placeholder until exact continuous Sargassum operating pressure is fixed from selected design basis."
+    residence_time_min:
+      key: allen_2024_assumed
+      note: "Short residence time selected as conservative continuous HTL-style baseline; revise once exact basis is finalized."
+
+htl_performance:
+  basis: dry_feed
+
+  # literature-anchored base case
+  biocrude_yield_wt_frac_dry: 0.12
+  aqueous_yield_wt_frac_dry: 0.46
+  gas_yield_wt_frac_dry: 0.10
+  char_yield_wt_frac_dry: 0.32
+
+  biocrude_HHV_MJ_per_kg: 28.48
+
+  sources:
+    biocrude_yield:
+      key: allen_2024
+      note: "Continuous HTL of Mexican Sargassum reported total biocrude yield ~12 wt% on dry seaweed basis."
+    biocrude_HHV:
+      key: allen_2024
+      note: "Reported HHV of Sargassum HTL biocrude was 28.48 MJ/kg."
+    aqueous_gas_char_split:
+      key: assumed_closure
+      note: "Temporary closure assumption to complete dry-feed mass split until a tighter product distribution source is selected."
+
+  cases:
+    continuous_mexican_sargassum:
+      temperature_C: 280.0
+      pressure_bar: 100.0
+      residence_time_min: 15.0
+      target_solids_wt_frac: 0.10
+      biocrude_yield_wt_frac_dry: 0.12
+      aqueous_yield_wt_frac_dry: 0.46
+      gas_yield_wt_frac_dry: 0.10
+      char_yield_wt_frac_dry: 0.32
+      biocrude_HHV_MJ_per_kg: 28.48
+      slurry_density_kg_per_m3: 1000.0
+
+      source:
+        key: allen_2024
+        note: "Biocrude yield and HHV from continuous Mexican Sargassum HTL paper; non-oil product split provisional."
+
+    batch_sargassum_water:
+      temperature_C: 280.0
+      pressure_bar: 100.0
+      residence_time_min: 30.0
+      target_solids_wt_frac: 0.10
+      biocrude_yield_wt_frac_dry: 0.1633
+      aqueous_yield_wt_frac_dry: 0.40
+      gas_yield_wt_frac_dry: 0.08
+      char_yield_wt_frac_dry: 0.3567
+      biocrude_HHV_MJ_per_kg: 28.48
+      slurry_density_kg_per_m3: 1000.0
+
+      source:
+        key: biswas_2017
+        note: "Water-only HTL of Sargassum tenerrimum reported max biocrude yield ~16.33 wt% at 280 C; non-oil split provisional."
+
+    optimized_brown_macroalgae:
+      temperature_C: 283.0
+      pressure_bar: 200.0
+      residence_time_min: 54.0
+      water_to_biomass_ratio: 10.0
+      target_solids_wt_frac: 0.0909
+      biocrude_yield_wt_frac_dry: 0.23
+      aqueous_yield_wt_frac_dry: 0.37
+      gas_yield_wt_frac_dry: 0.10
+      char_yield_wt_frac_dry: 0.30
+      slurry_density_kg_per_m3: 1000.0
+
+      source:
+        key: asama_2025
+        note: "Predictive optimum for brown macroalgae HTL; non-oil split provisional."
+
+htl_costing:
+  reactor:
+    capex_model: placeholder_scaled
+    basis: dry_kg_per_hr
+    ref_capacity_dry_kg_per_hr: 1000.0
+    purchase_cost_ref_usd: 5000000.0
+    scale_exponent: 0.60
+    F_BM: 2.0
+
+
+  separator:
+    capex_model: placeholder_fraction
+    fraction_of_reactor_purchase_cost: 0.20
+    F_BM: 1.5
+
+htl_separation:
+  biocrude_recovery_to_oil: 0.98
+  aqueous_org_recovery_to_aqueous: 0.99
+  char_recovery_to_solids: 1.00
+  gas_recovery_to_gas: 1.00
+  oil_water_to_oil_frac: 0.02

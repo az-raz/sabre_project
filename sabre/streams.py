@@ -11,19 +11,14 @@ from sabre.config import load_assumptions
 
 # Wet-basis composition
 WET_COMPOSITION = dict(
-    Water=0.85,
-    Ash=0.0720,
-    Protein=0.0090,
-    Lignin=0.0003,
-    Glucan=0.01146,
-    Xylan=0.000705,
-    Mannan=0.000705,
-    Galactan=0.001665,
-    Arabinan=0.0,
-    Alginate=0.00987,
-    Fucoidan=0.00321,
-    Mannitol=0.007785,
-    OtherSolids=0.0333,
+    Water=0.8673,
+    Ash=0.04580,        # 34.53% dry × 0.1327
+    OtherSolids=0.03902,  # 29.41% dry × 0.1327
+    Glucan=0.01460,     # 11.00% dry × 0.1327
+    Alginate=0.01393,   # 10.50% dry × 0.1327
+    Protein=0.01003,    # 7.56% dry × 0.1327
+    Mannitol=0.00265,   # 2.00% dry × 0.1327
+    Fucoidan=0.00663,   # 5.00% dry × 0.1327
 )
 
 def make_sargassum_feed(fresh_feed_kgph: float, moisture_frac: float, quality: str):
