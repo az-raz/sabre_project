@@ -2,7 +2,7 @@
 <ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 613.51)">
 
 <ns0:g id="edge2" class="edge">
-<ns0:title>807170661:c-&gt;807248173:c</ns0:title>
+<ns0:title>396189462:c-&gt;396039421:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M178.13,-106.19C213.15,-113.29 277.5,-126.34 316.98,-134.34" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="316.06,-137.73 326.56,-136.28 317.45,-130.87 316.06,-137.73" />
 <ns0:g id="a_edge2-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.07e+05 kmol/hr">
@@ -12,7 +12,7 @@
 </ns0:g>
 
 <ns0:g id="edge33" class="edge">
-<ns0:title>807170661:c-&gt;807248350:c</ns0:title>
+<ns0:title>396189462:c-&gt;396039478:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M176.79,-79.26C179.67,-77.37 182.7,-75.7 185.8,-74.45 210.52,-64.48 239,-60.13 265.27,-58.63" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="265.29,-62.14 275.14,-58.23 265,-55.14 265.29,-62.14" />
 <ns0:g id="a_edge33-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 6.18e+03 kmol/hr">
@@ -22,7 +22,7 @@
 </ns0:g>
 
 <ns0:g id="edge3" class="edge">
-<ns0:title>807248173:c-&gt;807248440:c</ns0:title>
+<ns0:title>396039421:c-&gt;396039667:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M373.75,-146.51C390.08,-150.62 413.35,-156.4 433.8,-161.2 480.44,-172.16 533.46,-183.95 572.77,-192.56" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="571.77,-195.93 582.29,-194.64 573.27,-189.09 571.77,-195.93" />
 <ns0:g id="a_edge3-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.04e+05 kmol/hr">
@@ -32,7 +32,7 @@
 </ns0:g>
 
 <ns0:g id="edge34" class="edge">
-<ns0:title>807248173:c-&gt;807339624:w</ns0:title>
+<ns0:title>396039421:c-&gt;396232344:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M373.78,-140.96C390.13,-140.78 413.41,-140.56 433.8,-140.45 520.1,-139.99 541.67,-140.2 627.97,-140.2" />
 <ns0:g id="a_edge34-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 3.21e+03 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="505.8" y="-142.9" font-family="Arial" font-size="14.00" fill="#90918e"> milling losses</ns0:text>
@@ -41,7 +41,7 @@
 </ns0:g>
 
 <ns0:g id="edge35" class="edge">
-<ns0:title>807248440:c-&gt;807263338:c</ns0:title>
+<ns0:title>396039667:c-&gt;396165670:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M678.56,-213.76C702.75,-218.31 733.18,-224.03 761.11,-229.28" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="760.41,-232.71 770.89,-231.12 761.71,-225.83 760.41,-232.71" />
 <ns0:g id="a_edge35-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
@@ -51,7 +51,7 @@
 </ns0:g>
 
 <ns0:g id="edge4" class="edge">
-<ns0:title>807248440:c-&gt;807248584:c</ns0:title>
+<ns0:title>396039667:c-&gt;396039958:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M666.09,-183.22C672.56,-179.81 679.46,-176.75 686.3,-174.7 707.35,-168.4 730.72,-165.16 752.76,-163.67" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="752.8,-167.17 762.59,-163.14 752.42,-160.18 752.8,-167.17" />
 <ns0:g id="a_edge4-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
@@ -62,7 +62,7 @@
 </ns0:g>
 
 <ns0:g id="edge36" class="edge">
-<ns0:title>807263338:c-&gt;807263311:c</ns0:title>
+<ns0:title>396165670:c-&gt;396165799:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M908.75,-241.13C914.1,-240.96 919.41,-240.81 924.55,-240.7 969.54,-239.74 980.81,-239.8 1025.8,-240.7 1025.94,-240.7 1026.07,-240.71 1026.21,-240.71" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="1025.82,-244.2 1035.91,-240.95 1026,-237.2 1025.82,-244.2" />
 <ns0:g id="a_edge36-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 3.9e+04 kmol/hr">
@@ -73,7 +73,7 @@
 </ns0:g>
 
 <ns0:g id="edge5" class="edge">
-<ns0:title>807263338:c-&gt;807339132:w</ns0:title>
+<ns0:title>396165670:c-&gt;396231768:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M891.58,-266.1C944.38,-287.61 1031.31,-317.2 1109.72,-317.2" />
 <ns0:g id="a_edge5-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 155 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="975.18" y="-309.05" font-family="Arial" font-size="14.00" fill="#90918e"> offgas</ns0:text>
@@ -82,7 +82,7 @@
 </ns0:g>
 
 <ns0:g id="edge37" class="edge">
-<ns0:title>807263311:c-&gt;807263494:c</ns0:title>
+<ns0:title>396165799:c-&gt;396165484:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M1188.6,-244.2C1227.18,-244.2 1273.9,-244.2 1310.73,-244.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="1310.49,-247.7 1320.49,-244.2 1310.49,-240.7 1310.49,-247.7" />
 <ns0:g id="a_edge37-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 2.79e+04 kmol/hr">
@@ -92,7 +92,7 @@
 </ns0:g>
 
 <ns0:g id="edge6" class="edge">
-<ns0:title>807263311:c-&gt;807339216:w</ns0:title>
+<ns0:title>396165799:c-&gt;396231804:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1168.65,-266.21C1219.71,-285.06 1299.02,-309.2 1370.47,-309.2" />
 <ns0:g id="a_edge6-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.11e+04 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1252.05" y="-320.64" font-family="Arial" font-size="14.00" fill="#90918e"> acidogenic</ns0:text>
@@ -102,7 +102,7 @@
 </ns0:g>
 
 <ns0:g id="edge7" class="edge">
-<ns0:title>807263494:c-&gt;807263317:c</ns0:title>
+<ns0:title>396165484:c-&gt;396165436:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M1417.15,-266.3C1449.2,-284.08 1493.98,-310.63 1530.05,-338.45 1554.38,-357.22 1579.32,-381.37 1597.72,-400.32" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="1595.08,-402.62 1604.53,-407.41 1600.13,-397.78 1595.08,-402.62" />
 <ns0:g id="a_edge7-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.24e+04 kmol/hr">
@@ -112,7 +112,7 @@
 </ns0:g>
 
 <ns0:g id="edge38" class="edge">
-<ns0:title>807263494:c-&gt;807339036:w</ns0:title>
+<ns0:title>396165484:c-&gt;396231696:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1425.37,-241.24C1432.56,-240.91 1439.87,-240.63 1446.8,-240.45 1483.79,-239.48 1493.06,-239.71 1530.05,-240.45 1571.54,-241.28 1581.85,-244.2 1623.34,-244.2" />
 <ns0:g id="a_edge38-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.55e+04 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1488.43" y="-242.9" font-family="Arial" font-size="14.00" fill="#90918e"> vfa retentate</ns0:text>
@@ -121,7 +121,7 @@
 </ns0:g>
 
 <ns0:g id="edge8" class="edge">
-<ns0:title>807263317:c-&gt;807263524:c</ns0:title>
+<ns0:title>396165436:c-&gt;396165145:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M1716.85,-420.93C1751.91,-419.11 1792.36,-419.86 1828.3,-427.7 1840.49,-430.36 1853.02,-434.9 1864.61,-439.98" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="1863.11,-443.14 1873.66,-444.17 1866.06,-436.79 1863.11,-443.14" />
 <ns0:g id="a_edge8-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.24e+04 kmol/hr">
@@ -132,7 +132,7 @@
 </ns0:g>
 
 <ns0:g id="edge39" class="edge">
-<ns0:title>807263524:c-&gt;807263485:c</ns0:title>
+<ns0:title>396165145:c-&gt;396165304:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M1941.55,-445.32C1957.88,-432.26 1980.28,-416.55 2002.8,-407.7 2026.2,-398.51 2053.87,-394.08 2076.75,-391.98" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="2076.91,-395.48 2086.62,-391.22 2076.38,-388.5 2076.91,-395.48" />
 <ns0:g id="a_edge39-label"><ns0:a ns1:title="Temperature: 305.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.5e+04 kmol/hr">
@@ -143,7 +143,7 @@
 </ns0:g>
 
 <ns0:g id="edge9" class="edge">
-<ns0:title>807263524:c-&gt;807339024:w</ns0:title>
+<ns0:title>396165145:c-&gt;396073708:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1961.35,-489.23C2001.74,-507.05 2063.29,-529.2 2119.72,-529.2" />
 <ns0:g id="a_edge9-label"><ns0:a ns1:title="Temperature: 305.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 23 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="2042.55" y="-544.09" font-family="Arial" font-size="14.00" fill="#90918e"> fermentation</ns0:text>
@@ -153,7 +153,7 @@
 </ns0:g>
 
 <ns0:g id="edge10" class="edge">
-<ns0:title>807263485:c-&gt;807263449:c</ns0:title>
+<ns0:title>396165304:c-&gt;396166111:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M2157.62,-389.52C2191.42,-388.82 2244.04,-387.74 2279.78,-387" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="2279.78,-390.5 2289.71,-386.79 2279.64,-383.5 2279.78,-390.5" />
 <ns0:g id="a_edge10-label"><ns0:a ns1:title="Temperature: 305.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.5e+04 kmol/hr">
@@ -164,7 +164,7 @@
 </ns0:g>
 
 <ns0:g id="edge11" class="edge">
-<ns0:title>807263449:c-&gt;807263473:c</ns0:title>
+<ns0:title>396166111:c-&gt;396165634:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M2345.47,-384.78C2376.96,-383 2432.57,-379.87 2480.39,-377.17" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="2480.53,-380.67 2490.31,-376.61 2480.13,-373.68 2480.53,-380.67" />
 <ns0:g id="a_edge11-label"><ns0:a ns1:title="Temperature: 305.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.5e+04 kmol/hr">
@@ -175,7 +175,7 @@
 </ns0:g>
 
 <ns0:g id="edge12" class="edge">
-<ns0:title>807263473:c-&gt;807263407:c</ns0:title>
+<ns0:title>396165634:c-&gt;396165325:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M2645.53,-372.2C2691.27,-372.2 2747.78,-372.2 2784.23,-372.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="2783.82,-375.7 2793.82,-372.2 2783.82,-368.7 2783.82,-375.7" />
 <ns0:g id="a_edge12-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 30953 Pa&#10;Liquid flow: 7.97e+03 kmol/hr">
@@ -186,7 +186,7 @@
 </ns0:g>
 
 <ns0:g id="edge40" class="edge">
-<ns0:title>807263473:c-&gt;807263956:w</ns0:title>
+<ns0:title>396165634:c-&gt;396165586:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M2587.81,-350.22C2614.19,-319.16 2667.88,-265.46 2728.37,-258.87" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="2728.34,-262.38 2738.13,-258.33 2727.95,-255.39 2728.34,-262.38" />
 <ns0:g id="a_edge40-label"><ns0:a ns1:title="Temperature: 356.95 K&#10;Pressure: 30953 Pa&#10;Liquid flow: 7.03e+03 kmol/hr">
@@ -197,7 +197,7 @@
 </ns0:g>
 
 <ns0:g id="edge13" class="edge">
-<ns0:title>807263407:c-&gt;807263923:c</ns0:title>
+<ns0:title>396165325:c-&gt;396165613:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M2849.04,-372.2C2889.46,-372.2 2970.37,-372.2 3035.29,-372.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="3035.2,-375.7 3045.2,-372.2 3035.2,-368.7 3035.2,-375.7" />
 <ns0:g id="a_edge13-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 7.97e+03 kmol/hr">
@@ -207,7 +207,7 @@
 </ns0:g>
 
 <ns0:g id="edge14" class="edge">
-<ns0:title>807263923:c-&gt;807263950:c</ns0:title>
+<ns0:title>396165613:c-&gt;396165592:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M3217.53,-372.2C3248.9,-372.2 3284.23,-372.2 3314.45,-372.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="3314.21,-375.7 3324.21,-372.2 3314.21,-368.7 3314.21,-375.7" />
 <ns0:g id="a_edge14-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 7.97e+03 kmol/hr">
@@ -217,7 +217,7 @@
 </ns0:g>
 
 <ns0:g id="edge41" class="edge">
-<ns0:title>807263950:c-&gt;807263455:w</ns0:title>
+<ns0:title>396165592:c-&gt;396165616:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M3421.14,-350.22C3449.94,-332.67 3494.13,-310.43 3537.81,-306.73" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="3537.84,-310.23 3547.68,-306.3 3537.54,-303.24 3537.84,-310.23" />
 <ns0:g id="a_edge41-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 7.25e+03 kmol/hr">
@@ -228,7 +228,7 @@
 </ns0:g>
 
 <ns0:g id="edge15" class="edge">
-<ns0:title>807263950:c-&gt;807224360:w</ns0:title>
+<ns0:title>396165592:c-&gt;396073876:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M3448.9,-385.15C3497.1,-394.39 3566.6,-405.2 3628.04,-405.2" />
 <ns0:g id="a_edge15-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 721 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="3499.35" y="-402.12" font-family="Arial" font-size="14.00" fill="#90918e"> backend oil</ns0:text>
@@ -237,7 +237,7 @@
 </ns0:g>
 
 <ns0:g id="edge29" class="edge">
-<ns0:title>807263455:c-&gt;807263323:c</ns0:title>
+<ns0:title>396165616:c-&gt;396165937:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M3673.35,-330.3C3722.62,-359.83 3805.84,-409.69 3857.08,-440.39" />
 <ns0:polygon fill="#90918e" stroke="#90918e" points="3855.21,-443.35 3865.59,-445.49 3858.81,-437.35 3855.21,-443.35" />
 <ns0:g id="a_edge29-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 522 kmol/hr">
@@ -247,17 +247,17 @@
 </ns0:g>
 
 <ns0:g id="edge48" class="edge">
-<ns0:title>807263455:c-&gt;807263833:c</ns0:title>
+<ns0:title>396165616:c-&gt;396165595:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M3673.35,-296.02C3722.01,-283.71 3803.76,-263.02 3855.14,-250.01" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="1.6" points="3855.7,-253.48 3864.54,-247.63 3853.98,-246.7 3855.7,-253.48" />
-<ns0:g id="a_edge48-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 6.72e+03 kmol/hr">
+<ns0:g id="a_edge48-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 6.73e+03 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="3772.77" y="-284.71" font-family="Arial" font-size="14.00" fill="#90918e"> residual purge</ns0:text>
 </ns0:a>
 </ns0:g>
 </ns0:g>
 
 <ns0:g id="edge31" class="edge">
-<ns0:title>807263323:e-&gt;807263524:c</ns0:title>
+<ns0:title>396165937:e-&gt;396165145:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M3976.27,-467.2C3977.82,-467.2 3976.38,-521.97 3975.27,-523.06 3929.65,-567.87 3881.68,-562.57 3831.4,-523.06 3819.58,-513.77 3834.64,-500.18 3823.4,-490.2 3759.7,-433.64 3718.31,-467.2 3633.12,-467.2 2122.8,-467.2 2122.8,-467.2 2122.8,-467.2 2084.51,-467.2 2042.22,-467.2 2005.95,-467.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" points="2006.41,-463.7 1996.41,-467.2 2006.41,-470.7 2006.41,-463.7" />
 <ns0:g id="a_edge31-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 522 kmol/hr">
@@ -267,7 +267,7 @@
 </ns0:g>
 
 <ns0:g id="edge17" class="edge">
-<ns0:title>807263956:c-&gt;807263833:c</ns0:title>
+<ns0:title>396165586:c-&gt;396165595:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M2863.89,-244.53C2922.23,-226 3033.89,-195.2 3131.6,-195.2 3131.6,-195.2 3131.6,-195.2 3633.12,-195.2 3712.12,-195.2 3802.57,-213.55 3855.8,-226.27" />
 <ns0:polygon fill="#90918e" stroke="#90918e" points="3854.88,-229.65 3865.42,-228.62 3856.53,-222.85 3854.88,-229.65" />
 <ns0:g id="a_edge17-label"><ns0:a ns1:title="(empty)">
@@ -278,7 +278,7 @@
 </ns0:g>
 
 <ns0:g id="edge42" class="edge">
-<ns0:title>807263956:c-&gt;807225212:w</ns0:title>
+<ns0:title>396165586:c-&gt;396073468:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M2864.02,-258.2C2922.42,-258.2 3033.75,-258.2 3128.52,-258.2" />
 <ns0:g id="a_edge42-label"><ns0:a ns1:title="Temperature: 356.95 K&#10;Pressure: 30953 Pa&#10;Liquid flow: 7.03e+03 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="2976.35" y="-276.4" font-family="Arial" font-size="14.00" fill="#90918e"> evaporator</ns0:text>
@@ -288,9 +288,9 @@
 </ns0:g>
 
 <ns0:g id="edge18" class="edge">
-<ns0:title>807263833:e-&gt;807225200:w</ns0:title>
+<ns0:title>396165595:e-&gt;396073288:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M3974.23,-238.2C4017.26,-238.2 4028.02,-238.2 4071.05,-238.2" />
-<ns0:g id="a_edge18-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 6.72e+03 kmol/hr">
+<ns0:g id="a_edge18-label"><ns0:a ns1:title="Temperature: 342.97 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 6.73e+03 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="4021.98" y="-256.4" font-family="Arial" font-size="14.00" fill="#90918e"> fermentation</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="4021.98" y="-240.65" font-family="Arial" font-size="14.00" fill="#90918e"> wastewater</ns0:text>
 </ns0:a>
@@ -298,7 +298,7 @@
 </ns0:g>
 
 <ns0:g id="edge19" class="edge">
-<ns0:title>807248584:c-&gt;807248785:c</ns0:title>
+<ns0:title>396039958:c-&gt;396039454:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M917.02,-165.2C949.04,-165.2 986.77,-165.2 1020.51,-165.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="1020.39,-168.7 1030.39,-165.2 1020.39,-161.7 1020.39,-168.7" />
 <ns0:g id="a_edge19-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
@@ -309,7 +309,7 @@
 </ns0:g>
 
 <ns0:g id="edge20" class="edge">
-<ns0:title>807248785:c-&gt;807248881:c</ns0:title>
+<ns0:title>396039454:c-&gt;396039604:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M1194.19,-165.2C1226.83,-165.2 1264.49,-165.2 1296.85,-165.2" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="1296.56,-168.7 1306.56,-165.2 1296.56,-161.7 1296.56,-168.7" />
 <ns0:g id="a_edge20-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 5.18e+04 kmol/hr">
@@ -320,7 +320,7 @@
 </ns0:g>
 
 <ns0:g id="edge21" class="edge">
-<ns0:title>807248881:c-&gt;807248407:c</ns0:title>
+<ns0:title>396039604:c-&gt;396039973:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1439.18,-166.98C1478.82,-168.08 1529.43,-169.49 1568.04,-170.57" />
 <ns0:polygon fill="#90918e" stroke="#90918e" points="1567.49,-174.06 1577.59,-170.84 1567.69,-167.06 1567.49,-174.06" />
 <ns0:g id="a_edge21-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 516 kmol/hr">
@@ -330,7 +330,7 @@
 </ns0:g>
 
 <ns0:g id="edge43" class="edge">
-<ns0:title>807248881:c-&gt;807248833:c</ns0:title>
+<ns0:title>396039604:c-&gt;396039568:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M1439.22,-144.73C1441.77,-143.95 1444.31,-143.19 1446.8,-142.45 1477.18,-133.44 1510.62,-124.11 1540.33,-116.03" />
 <ns0:polygon fill="#90918e" stroke="#90918e" stroke-width="2.2" points="1540.87,-119.51 1549.6,-113.51 1539.04,-112.75 1540.87,-119.51" />
 <ns0:g id="a_edge43-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 4.73e+04 kmol/hr">
@@ -340,7 +340,7 @@
 </ns0:g>
 
 <ns0:g id="edge22" class="edge">
-<ns0:title>807248407:c-&gt;807248404:c</ns0:title>
+<ns0:title>396039973:c-&gt;396039880:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1675.99,-182.18C1721.67,-191.75 1791.23,-206.34 1843.48,-217.3" />
 <ns0:polygon fill="#90918e" stroke="#90918e" points="1842.7,-220.71 1853.2,-219.34 1844.13,-213.86 1842.7,-220.71" />
 <ns0:g id="a_edge22-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 500 kmol/hr">
@@ -350,7 +350,7 @@
 </ns0:g>
 
 <ns0:g id="edge44" class="edge">
-<ns0:title>807248407:c-&gt;807339444:w</ns0:title>
+<ns0:title>396039973:c-&gt;396232284:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M1675.96,-169.4C1691.52,-168.61 1708.89,-167.85 1724.8,-167.45 1807.74,-165.35 1828.5,-167.2 1911.47,-167.2" />
 <ns0:g id="a_edge44-label"><ns0:a ns1:title="(empty)">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1776.55" y="-169.9" font-family="Arial" font-size="14.00" fill="#90918e"> spent h2s media</ns0:text>
@@ -359,7 +359,7 @@
 </ns0:g>
 
 <ns0:g id="edge23" class="edge">
-<ns0:title>807248404:c-&gt;807339948:w</ns0:title>
+<ns0:title>396039880:c-&gt;396232176:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1976.19,-218.24C2016.49,-210.01 2071.01,-201.2 2119.72,-201.2" />
 <ns0:g id="a_edge23-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 444 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="2042.55" y="-215.46" font-family="Arial" font-size="14.00" fill="#90918e"> biomethane</ns0:text>
@@ -368,7 +368,7 @@
 </ns0:g>
 
 <ns0:g id="edge45" class="edge">
-<ns0:title>807248404:c-&gt;807339612:w</ns0:title>
+<ns0:title>396039880:c-&gt;396232200:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1976.3,-243.91C2016.64,-250.81 2071.18,-258.2 2119.72,-258.2" />
 <ns0:g id="a_edge45-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Gas flow: 56.5 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="2042.55" y="-259.26" font-family="Arial" font-size="14.00" fill="#90918e"> offgas co2</ns0:text>
@@ -377,7 +377,7 @@
 </ns0:g>
 
 <ns0:g id="edge24" class="edge">
-<ns0:title>807248833:c-&gt;807339504:w</ns0:title>
+<ns0:title>396039568:c-&gt;396231828:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M1702.02,-95.61C1759.14,-97.28 1840.32,-99.2 1911.47,-99.2" />
 <ns0:g id="a_edge24-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.47e+04 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1776.55" y="-100.91" font-family="Arial" font-size="14.00" fill="#90918e"> soil amendment</ns0:text>
@@ -386,7 +386,7 @@
 </ns0:g>
 
 <ns0:g id="edge46" class="edge">
-<ns0:title>807248833:c-&gt;807339528:w</ns0:title>
+<ns0:title>396039568:c-&gt;396232008:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M1702.26,-72.46C1759,-58.34 1839.57,-42.2 1911.47,-42.2" />
 <ns0:g id="a_edge46-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 3.26e+04 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1776.55" y="-68.62" font-family="Arial" font-size="14.00" fill="#90918e"> liquid digestate</ns0:text>
@@ -395,7 +395,7 @@
 </ns0:g>
 
 <ns0:g id="edge25" class="edge">
-<ns0:title>807248350:c-&gt;807339768:w</ns0:title>
+<ns0:title>396039478:c-&gt;396232572:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M426.09,-63.02C481.53,-63.57 559.53,-64.2 627.97,-64.2" />
 <ns0:g id="a_edge25-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.4e+03 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="505.8" y="-82.29" font-family="Arial" font-size="14.00" fill="#90918e"> biostimulant</ns0:text>
@@ -405,7 +405,7 @@
 </ns0:g>
 
 <ns0:g id="edge47" class="edge">
-<ns0:title>807248350:c-&gt;807339780:w</ns0:title>
+<ns0:title>396039478:c-&gt;396232560:w</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="1.6" d="M423.29,-40.15C478.43,-24.84 557.33,-7.2 627.97,-7.2" />
 <ns0:g id="a_edge47-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 4.78e+03 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="505.8" y="-38.8" font-family="Arial" font-size="14.00" fill="#90918e"> pressate permeate</ns0:text>
@@ -414,7 +414,7 @@
 </ns0:g>
 
 <ns0:g id="edge1" class="edge">
-<ns0:title>807339888:e-&gt;807170661:c</ns0:title>
+<ns0:title>396232296:e-&gt;396189462:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-width="2.2" d="M10.8,-101.2C51.49,-101.2 98.79,-101.2 126.89,-101.2" />
 <ns0:g id="a_edge1-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 1.13e+05 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="69.05" y="-103.65" font-family="Arial" font-size="14.00" fill="#90918e"> sargassum feed</ns0:text>
@@ -423,7 +423,7 @@
 </ns0:g>
 
 <ns0:g id="edge16" class="edge">
-<ns0:title>807339156:e-&gt;807263323:c</ns0:title>
+<ns0:title>396231996:e-&gt;396165937:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M3639.03,-527.2C3722.32,-527.2 3816.83,-498.19 3866.69,-480.52" />
 <ns0:g id="a_edge16-label"><ns0:a ns1:title="(empty)">
 <ns0:text xml:space="preserve" text-anchor="middle" x="3772.77" y="-536.69" font-family="Arial" font-size="14.00" fill="#90918e"> fresh seed</ns0:text>
@@ -433,7 +433,7 @@
 </ns0:g>
 
 <ns0:g id="edge26" class="edge">
-<ns0:title>807339204:e-&gt;807263317:c</ns0:title>
+<ns0:title>396231792:e-&gt;396165436:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M1381.45,-577.2C1449.85,-577.2 1484.7,-588.4 1530.05,-537.2 1546.72,-518.38 1523.88,-501.97 1538.05,-481.2 1546,-469.55 1557.61,-460.3 1569.82,-453.09" />
 <ns0:g id="a_edge26-label"><ns0:a ns1:title="(empty)">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1488.43" y="-596.21" font-family="Arial" font-size="14.00" fill="#90918e"> fermentation</ns0:text>
@@ -443,7 +443,7 @@
 </ns0:g>
 
 <ns0:g id="edge27" class="edge">
-<ns0:title>401502824:e-&gt;807263524:c</ns0:title>
+<ns0:title>392959592:e-&gt;396165145:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M1634.33,-504.2C1702.78,-504.2 1779.84,-493.21 1835.8,-483.21" />
 <ns0:g id="a_edge27-label"><ns0:a ns1:title="(empty)">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1776.55" y="-501.28" font-family="Arial" font-size="14.00" fill="#90918e"> s1</ns0:text>
@@ -452,7 +452,7 @@
 </ns0:g>
 
 <ns0:g id="edge28" class="edge">
-<ns0:title>807339336:e-&gt;807263317:c</ns0:title>
+<ns0:title>396231900:e-&gt;396165436:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M1381.45,-504.2C1453.79,-504.2 1533.32,-474.61 1581.56,-453.1" />
 <ns0:g id="a_edge28-label"><ns0:a ns1:title="(empty)">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1488.43" y="-514.81" font-family="Arial" font-size="14.00" fill="#90918e"> fermentation</ns0:text>
@@ -462,7 +462,7 @@
 </ns0:g>
 
 <ns0:g id="edge30" class="edge">
-<ns0:title>807339228:e-&gt;807263317:c</ns0:title>
+<ns0:title>396231876:e-&gt;396165436:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" stroke-dasharray="5,2" d="M1381.45,-431.2C1410.54,-431.2 1417.73,-428.48 1446.8,-427.7 1483.79,-426.71 1493.06,-427.03 1530.05,-427.7 1532.56,-427.75 1535.11,-427.8 1537.68,-427.86" />
 <ns0:g id="a_edge30-label"><ns0:a ns1:title="(empty)">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1488.43" y="-445.9" font-family="Arial" font-size="14.00" fill="#90918e"> fermentation</ns0:text>
@@ -472,7 +472,7 @@
 </ns0:g>
 
 <ns0:g id="edge32" class="edge">
-<ns0:title>807339324:e-&gt;807263317:c</ns0:title>
+<ns0:title>396231888:e-&gt;396165436:c</ns0:title>
 <ns0:path fill="none" stroke="#90918e" d="M1381.45,-358.2C1448.7,-358.2 1466.03,-366.12 1530.05,-386.7 1548.47,-392.62 1568,-401.17 1584.62,-409.2" />
 <ns0:g id="a_edge32-label"><ns0:a ns1:title="Temperature: 298.15 K&#10;Pressure: 101325 Pa&#10;Liquid flow: 0.875 kmol/hr">
 <ns0:text xml:space="preserve" text-anchor="middle" x="1488.43" y="-404.9" font-family="Arial" font-size="14.00" fill="#90918e"> fermentation</ns0:text>
@@ -482,7 +482,7 @@
 </ns0:g>
 
 <ns0:g id="node1" class="node">
-<ns0:title>807170661</ns0:title>
+<ns0:title>396189462</ns0:title>
 <ns0:g id="a_node1"><ns0:a ns1:title="Electricity consumption: 457 kW&#10;Utility cost: 35.7 USD/hr&#10;Purchase cost: 39,362,714 USD&#10;Installed equipment cost: 39,362,714 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="177.8,-122.8 127.3,-122.8 127.3,-79.6 177.8,-79.6 177.8,-122.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="152.55" y="-103.65" font-family="Arial" font-size="14.00" fill="white">PR</ns0:text>
@@ -492,7 +492,7 @@
 </ns0:g>
 
 <ns0:g id="node2" class="node">
-<ns0:title>807248173</ns0:title>
+<ns0:title>396039421</ns0:title>
 <ns0:g id="a_node2"><ns0:a ns1:title="Electricity consumption: 2.24e+03 kW&#10;Utility cost: 175 USD/hr&#10;Purchase cost: 3,334,632 USD&#10;Installed equipment cost: 3,334,632 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="373.4,-162.8 330.2,-162.8 330.2,-119.6 373.4,-119.6 373.4,-162.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="351.8" y="-143.65" font-family="Arial" font-size="14.00" fill="white">ML</ns0:text>
@@ -502,7 +502,7 @@
 </ns0:g>
 
 <ns0:g id="node3" class="node">
-<ns0:title>807248440</ns0:title>
+<ns0:title>396039667</ns0:title>
 <ns0:g id="a_node3"><ns0:a ns1:title="No capital costs or utilities">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="678.3,-226.8 585.8,-226.8 585.8,-183.6 678.3,-183.6 678.3,-226.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="632.05" y="-207.65" font-family="Arial" font-size="14.00" fill="white">SPL</ns0:text>
@@ -512,7 +512,7 @@
 </ns0:g>
 
 <ns0:g id="node4" class="node">
-<ns0:title>807263338</ns0:title>
+<ns0:title>396165670</ns0:title>
 <ns0:g id="a_node4"><ns0:a ns1:title="Electricity consumption: 473 kW&#10;Heating duty: 1.16e+04 MJ/hr&#10;Utility cost: 108 USD/hr&#10;Purchase cost: 43,112,721 USD&#10;Installed equipment cost: 43,112,721 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="908.3,-265.8 774.55,-265.8 774.55,-222.6 908.3,-222.6 908.3,-265.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="841.43" y="-246.65" font-family="Arial" font-size="14.00" fill="white">VFA_AD</ns0:text>
@@ -522,7 +522,7 @@
 </ns0:g>
 
 <ns0:g id="node5" class="node">
-<ns0:title>807263311</ns0:title>
+<ns0:title>396165799</ns0:title>
 <ns0:g id="a_node5"><ns0:a ns1:title="Electricity consumption: 172 kW&#10;Utility cost: 13.4 USD/hr&#10;Purchase cost: 1,581,879 USD&#10;Installed equipment cost: 1,581,879 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1188.18,-265.8 1039.43,-265.8 1039.43,-222.6 1188.18,-222.6 1188.18,-265.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1113.8" y="-246.65" font-family="Arial" font-size="14.00" fill="white">SP_VFA</ns0:text>
@@ -532,8 +532,8 @@
 </ns0:g>
 
 <ns0:g id="node6" class="node">
-<ns0:title>807263494</ns0:title>
-<ns0:g id="a_node6"><ns0:a ns1:title="Electricity consumption: 18.9 kW&#10;Utility cost: 1.48 USD/hr&#10;Purchase cost: 1,993,222 USD&#10;Installed equipment cost: 1,993,222 USD">
+<ns0:title>396165484</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:title="Electricity consumption: 18.9 kW&#10;Utility cost: 1.48 USD/hr&#10;Purchase cost: 2,366,777 USD&#10;Installed equipment cost: 2,366,777 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1424.93,-265.8 1324.18,-265.8 1324.18,-222.6 1424.93,-222.6 1424.93,-265.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1374.55" y="-246.65" font-family="Arial" font-size="14.00" fill="white">MF</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="1374.55" y="-230.9" font-family="Arial" font-size="14.00" fill="white">VFAMicrofilter</ns0:text>
@@ -542,8 +542,8 @@
 </ns0:g>
 
 <ns0:g id="node7" class="node">
-<ns0:title>807263317</ns0:title>
-<ns0:g id="a_node7"><ns0:a ns1:title="Electricity consumption: 5.38 kW&#10;Utility cost: 0.42 USD/hr&#10;Purchase cost: 198,622 USD&#10;Installed equipment cost: 198,622 USD">
+<ns0:title>396165436</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:title="Electricity consumption: 5.38 kW&#10;Utility cost: 0.42 USD/hr&#10;Purchase cost: 293,773 USD&#10;Installed equipment cost: 293,773 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1716.8,-452.8 1538.05,-452.8 1538.05,-409.6 1716.8,-409.6 1716.8,-452.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1627.43" y="-433.65" font-family="Arial" font-size="14.00" fill="white">T601</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="1627.43" y="-417.9" font-family="Arial" font-size="14.00" fill="white">Fermentation medium tank</ns0:text>
@@ -552,8 +552,8 @@
 </ns0:g>
 
 <ns0:g id="node8" class="node">
-<ns0:title>807263524</ns0:title>
-<ns0:g id="a_node8"><ns0:a ns1:title="Electricity consumption: 698 kW&#10;Utility cost: 54.6 USD/hr&#10;Purchase cost: 26,822,798 USD&#10;Installed equipment cost: 59,625,728 USD">
+<ns0:title>396165145</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:title="Electricity consumption: 697 kW&#10;Utility cost: 54.5 USD/hr&#10;Purchase cost: 26,812,142 USD&#10;Installed equipment cost: 59,601,641 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1994.8,-488.8 1836.3,-488.8 1836.3,-445.6 1994.8,-445.6 1994.8,-488.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1915.55" y="-469.65" font-family="Arial" font-size="14.00" fill="white">R601</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="1915.55" y="-453.9" font-family="Arial" font-size="14.00" fill="white">Yarrowia lipid fermenter</ns0:text>
@@ -562,8 +562,8 @@
 </ns0:g>
 
 <ns0:g id="node9" class="node">
-<ns0:title>807263485</ns0:title>
-<ns0:g id="a_node9"><ns0:a ns1:title="Electricity consumption: 27.7 kW&#10;Utility cost: 2.16 USD/hr&#10;Purchase cost: 751,874 USD&#10;Installed equipment cost: 1,240,592 USD">
+<ns0:title>396165304</ns0:title>
+<ns0:g id="a_node9"><ns0:a ns1:title="Electricity consumption: 27.7 kW&#10;Utility cost: 2.16 USD/hr&#10;Purchase cost: 751,834 USD&#10;Installed equipment cost: 1,240,526 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="2157.3,-411.8 2090.3,-411.8 2090.3,-368.6 2157.3,-368.6 2157.3,-411.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="2123.8" y="-392.65" font-family="Arial" font-size="14.00" fill="white">V605</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="2123.8" y="-376.9" font-family="Arial" font-size="14.00" fill="white">Mix tank</ns0:text>
@@ -572,8 +572,8 @@
 </ns0:g>
 
 <ns0:g id="node10" class="node">
-<ns0:title>807263449</ns0:title>
-<ns0:g id="a_node10"><ns0:a ns1:title="Electricity consumption: 9.49 kW&#10;Utility cost: 0.742 USD/hr&#10;Purchase cost: 10,575 USD&#10;Installed equipment cost: 27,331 USD">
+<ns0:title>396166111</ns0:title>
+<ns0:g id="a_node10"><ns0:a ns1:title="Electricity consumption: 9.49 kW&#10;Utility cost: 0.742 USD/hr&#10;Purchase cost: 10,574 USD&#10;Installed equipment cost: 27,329 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="2345.3,-407.8 2293.3,-407.8 2293.3,-364.6 2345.3,-364.6 2345.3,-407.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="2319.3" y="-388.65" font-family="Arial" font-size="14.00" fill="white">P606</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="2319.3" y="-372.9" font-family="Arial" font-size="14.00" fill="white">Pump</ns0:text>
@@ -582,8 +582,8 @@
 </ns0:g>
 
 <ns0:g id="node11" class="node">
-<ns0:title>807263473</ns0:title>
-<ns0:g id="a_node11"><ns0:a ns1:title="Electricity consumption: 5.79 kW&#10;Cooling duty: -8.22e+04 MJ/hr&#10;Heating duty: 1.32e+05 MJ/hr&#10;Utility cost: 838 USD/hr&#10;Purchase cost: 355,194 USD&#10;Installed equipment cost: 975,190 USD">
+<ns0:title>396165634</ns0:title>
+<ns0:g id="a_node11"><ns0:a ns1:title="Electricity consumption: 5.79 kW&#10;Cooling duty: -8.22e+04 MJ/hr&#10;Heating duty: 1.32e+05 MJ/hr&#10;Utility cost: 838 USD/hr&#10;Purchase cost: 355,196 USD&#10;Installed equipment cost: 975,197 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="2645.05,-393.8 2494.05,-393.8 2494.05,-350.6 2645.05,-350.6 2645.05,-393.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="2569.55" y="-374.65" font-family="Arial" font-size="14.00" fill="white">Ev607</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="2569.55" y="-358.9" font-family="Arial" font-size="14.00" fill="white">Multi-effect evaporator</ns0:text>
@@ -592,8 +592,8 @@
 </ns0:g>
 
 <ns0:g id="node12" class="node">
-<ns0:title>807263407</ns0:title>
-<ns0:g id="a_node12"><ns0:a ns1:title="Electricity consumption: 3.3 kW&#10;Utility cost: 0.258 USD/hr&#10;Purchase cost: 5,547 USD&#10;Installed equipment cost: 18,306 USD">
+<ns0:title>396165325</ns0:title>
+<ns0:g id="a_node12"><ns0:a ns1:title="Electricity consumption: 3.3 kW&#10;Utility cost: 0.258 USD/hr&#10;Purchase cost: 5,547 USD&#10;Installed equipment cost: 18,305 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="2848.57,-393.8 2796.57,-393.8 2796.57,-350.6 2848.57,-350.6 2848.57,-393.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="2822.57" y="-374.65" font-family="Arial" font-size="14.00" fill="white">P607</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="2822.57" y="-358.9" font-family="Arial" font-size="14.00" fill="white">Pump</ns0:text>
@@ -602,8 +602,8 @@
 </ns0:g>
 
 <ns0:g id="node13" class="node">
-<ns0:title>807263923</ns0:title>
-<ns0:g id="a_node13"><ns0:a ns1:title="Electricity consumption: 5.57e+03 kW&#10;Utility cost: 435 USD/hr&#10;Purchase cost: 4,690,264 USD&#10;Installed equipment cost: 4,690,264 USD">
+<ns0:title>396165613</ns0:title>
+<ns0:g id="a_node13"><ns0:a ns1:title="Electricity consumption: 754 kW&#10;Utility cost: 58.9 USD/hr&#10;Purchase cost: 4,330,493 USD&#10;Installed equipment cost: 4,330,493 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="3217.1,-393.8 3048.1,-393.8 3048.1,-350.6 3217.1,-350.6 3217.1,-393.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="3132.6" y="-374.65" font-family="Arial" font-size="14.00" fill="white">OE</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="3132.6" y="-358.9" font-family="Arial" font-size="14.00" fill="white">Oil extraction placeholder</ns0:text>
@@ -612,8 +612,8 @@
 </ns0:g>
 
 <ns0:g id="node14" class="node">
-<ns0:title>807263950</ns0:title>
-<ns0:g id="a_node14"><ns0:a ns1:title="Electricity consumption: 139 kW&#10;Utility cost: 10.9 USD/hr&#10;Purchase cost: 424,812 USD&#10;Installed equipment cost: 862,370 USD">
+<ns0:title>396165592</ns0:title>
+<ns0:g id="a_node14"><ns0:a ns1:title="Electricity consumption: 139 kW&#10;Utility cost: 10.9 USD/hr&#10;Purchase cost: 424,757 USD&#10;Installed equipment cost: 862,257 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="3448.6,-393.8 3326.85,-393.8 3326.85,-350.6 3448.6,-350.6 3448.6,-393.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="3387.72" y="-374.65" font-family="Arial" font-size="14.00" fill="white">C603_2</ns0:text>
 <ns0:text xml:space="preserve" text-anchor="middle" x="3387.72" y="-358.9" font-family="Arial" font-size="14.00" fill="white">Liquids centrifuge</ns0:text>
@@ -622,7 +622,7 @@
 </ns0:g>
 
 <ns0:g id="node15" class="node">
-<ns0:title>807263455</ns0:title>
+<ns0:title>396165616</ns0:title>
 <ns0:g id="a_node15"><ns0:a ns1:title="No capital costs or utilities">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="3550.1,-306.2 3673.14,-250.34 3673.14,-362.06 3550.1,-306.2" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="3632.12" y="-308.65" font-family="Arial" font-size="14.00" fill="white">S602</ns0:text>
@@ -632,7 +632,7 @@
 </ns0:g>
 
 <ns0:g id="node16" class="node">
-<ns0:title>807263323</ns0:title>
+<ns0:title>396165937</ns0:title>
 <ns0:g id="a_node16"><ns0:a ns1:title="No capital costs or utilities">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="3974.23,-467.2 3867.11,-523.06 3867.11,-411.34 3974.23,-467.2" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="3902.82" y="-469.65" font-family="Arial" font-size="14.00" fill="white">M602</ns0:text>
@@ -642,7 +642,7 @@
 </ns0:g>
 
 <ns0:g id="node17" class="node">
-<ns0:title>807263956</ns0:title>
+<ns0:title>396165586</ns0:title>
 <ns0:g id="a_node17"><ns0:a ns1:title="No capital costs or utilities">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="2740.55,-258.2 2863.59,-202.34 2863.59,-314.06 2740.55,-258.2" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="2822.57" y="-260.65" font-family="Arial" font-size="14.00" fill="white">S601</ns0:text>
@@ -652,7 +652,7 @@
 </ns0:g>
 
 <ns0:g id="node18" class="node">
-<ns0:title>807263833</ns0:title>
+<ns0:title>396165595</ns0:title>
 <ns0:g id="a_node18"><ns0:a ns1:title="No capital costs or utilities">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="3974.23,-238.2 3867.11,-294.06 3867.11,-182.34 3974.23,-238.2" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="3902.82" y="-240.65" font-family="Arial" font-size="14.00" fill="white">M601</ns0:text>
@@ -662,7 +662,7 @@
 </ns0:g>
 
 <ns0:g id="node19" class="node">
-<ns0:title>807248584</ns0:title>
+<ns0:title>396039958</ns0:title>
 <ns0:g id="a_node19"><ns0:a ns1:title="Purchase cost: 1,000,000 USD&#10;Installed equipment cost: 1,000,000 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="916.55,-186.8 766.3,-186.8 766.3,-143.6 916.55,-143.6 916.55,-186.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="841.43" y="-167.65" font-family="Arial" font-size="14.00" fill="white">PX</ns0:text>
@@ -672,7 +672,7 @@
 </ns0:g>
 
 <ns0:g id="node20" class="node">
-<ns0:title>807248785</ns0:title>
+<ns0:title>396039454</ns0:title>
 <ns0:g id="a_node20"><ns0:a ns1:title="Purchase cost: 7,280,000 USD&#10;Installed equipment cost: 7,280,000 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1193.8,-186.8 1033.8,-186.8 1033.8,-143.6 1193.8,-143.6 1193.8,-186.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1113.8" y="-167.65" font-family="Arial" font-size="14.00" fill="white">EZ</ns0:text>
@@ -682,7 +682,7 @@
 </ns0:g>
 
 <ns0:g id="node21" class="node">
-<ns0:title>807248881</ns0:title>
+<ns0:title>396039604</ns0:title>
 <ns0:g id="a_node21"><ns0:a ns1:title="Electricity consumption: 788 kW&#10;Heating duty: 1.16e+04 MJ/hr&#10;Utility cost: 133 USD/hr&#10;Purchase cost: 71,290,627 USD&#10;Installed equipment cost: 71,290,627 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1438.8,-186.8 1310.3,-186.8 1310.3,-143.6 1438.8,-143.6 1438.8,-186.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1374.55" y="-167.65" font-family="Arial" font-size="14.00" fill="white">AD</ns0:text>
@@ -692,7 +692,7 @@
 </ns0:g>
 
 <ns0:g id="node22" class="node">
-<ns0:title>807248407</ns0:title>
+<ns0:title>396039973</ns0:title>
 <ns0:g id="a_node22"><ns0:a ns1:title="Purchase cost: 1,721,654 USD&#10;Installed equipment cost: 1,721,654 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1675.55,-193.8 1579.3,-193.8 1579.3,-150.6 1675.55,-150.6 1675.55,-193.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1627.43" y="-174.65" font-family="Arial" font-size="14.00" fill="white">H2SR</ns0:text>
@@ -702,7 +702,7 @@
 </ns0:g>
 
 <ns0:g id="node23" class="node">
-<ns0:title>807248404</ns0:title>
+<ns0:title>396039880</ns0:title>
 <ns0:g id="a_node23"><ns0:a ns1:title="Electricity consumption: 2.8e+03 kW&#10;Utility cost: 219 USD/hr&#10;Purchase cost: 24,674,818 USD&#10;Installed equipment cost: 24,674,818 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1976.05,-253.8 1855.05,-253.8 1855.05,-210.6 1976.05,-210.6 1976.05,-253.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1915.55" y="-234.65" font-family="Arial" font-size="14.00" fill="white">UP</ns0:text>
@@ -712,7 +712,7 @@
 </ns0:g>
 
 <ns0:g id="node24" class="node">
-<ns0:title>807248833</ns0:title>
+<ns0:title>396039568</ns0:title>
 <ns0:g id="a_node24"><ns0:a ns1:title="Electricity consumption: 170 kW&#10;Utility cost: 13.3 USD/hr&#10;Purchase cost: 1,581,879 USD&#10;Installed equipment cost: 1,581,879 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="1701.8,-114.8 1553.05,-114.8 1553.05,-71.6 1701.8,-71.6 1701.8,-114.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="1627.43" y="-95.65" font-family="Arial" font-size="14.00" fill="white">SP_AD</ns0:text>
@@ -722,7 +722,7 @@
 </ns0:g>
 
 <ns0:g id="node25" class="node">
-<ns0:title>807248350</ns0:title>
+<ns0:title>396039478</ns0:title>
 <ns0:g id="a_node25"><ns0:a ns1:title="Electricity consumption: 208 kW&#10;Utility cost: 16.3 USD/hr&#10;Purchase cost: 1,191,165 USD&#10;Installed equipment cost: 1,191,165 USD">
 <ns0:polygon fill="#555f69" stroke="#90918e" points="425.8,-83.8 277.8,-83.8 277.8,-40.6 425.8,-40.6 425.8,-83.8" />
 <ns0:text xml:space="preserve" text-anchor="middle" x="351.8" y="-64.65" font-family="Arial" font-size="14.00" fill="white">PC</ns0:text>
@@ -732,112 +732,112 @@
 </ns0:g>
 
 <ns0:g id="node26" class="node">
-<ns0:title>807339888</ns0:title>
+<ns0:title>396232296</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="5.4,-106.6 0,-101.2 5.4,-95.8 10.8,-101.2 5.4,-106.6" />
 </ns0:g>
 
 <ns0:g id="node27" class="node">
-<ns0:title>807339132</ns0:title>
+<ns0:title>396231768</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1119.2,-317.2 1111.1,-324.4 1111.1,-310 1119.2,-317.2" />
 </ns0:g>
 
 <ns0:g id="node28" class="node">
-<ns0:title>807339216</ns0:title>
+<ns0:title>396231804</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1379.95,-309.2 1371.85,-316.4 1371.85,-302 1379.95,-309.2" />
 </ns0:g>
 
 <ns0:g id="node29" class="node">
-<ns0:title>807339024</ns0:title>
+<ns0:title>396073708</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="2129.2,-529.2 2121.1,-536.4 2121.1,-522 2129.2,-529.2" />
 </ns0:g>
 
 <ns0:g id="node30" class="node">
-<ns0:title>807224360</ns0:title>
+<ns0:title>396073876</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="3637.52,-405.2 3629.42,-412.4 3629.42,-398 3637.52,-405.2" />
 </ns0:g>
 
 <ns0:g id="node31" class="node">
-<ns0:title>807339156</ns0:title>
+<ns0:title>396231996</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="3632.12,-532.6 3626.72,-527.2 3632.12,-521.8 3637.52,-527.2 3632.12,-532.6" />
 </ns0:g>
 
 <ns0:g id="node32" class="node">
-<ns0:title>807225200</ns0:title>
+<ns0:title>396073288</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="4080.53,-238.2 4072.43,-245.4 4072.43,-231 4080.53,-238.2" />
 </ns0:g>
 
 <ns0:g id="node33" class="node">
-<ns0:title>807339948</ns0:title>
+<ns0:title>396232176</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="2129.2,-201.2 2121.1,-208.4 2121.1,-194 2129.2,-201.2" />
 </ns0:g>
 
 <ns0:g id="node34" class="node">
-<ns0:title>807339504</ns0:title>
+<ns0:title>396231828</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1920.95,-99.2 1912.85,-106.4 1912.85,-92 1920.95,-99.2" />
 </ns0:g>
 
 <ns0:g id="node35" class="node">
-<ns0:title>807339768</ns0:title>
+<ns0:title>396232572</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="637.45,-64.2 629.35,-71.4 629.35,-57 637.45,-64.2" />
 </ns0:g>
 
 <ns0:g id="node36" class="node">
-<ns0:title>807339204</ns0:title>
+<ns0:title>396231792</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1374.55,-582.6 1369.15,-577.2 1374.55,-571.8 1379.95,-577.2 1374.55,-582.6" />
 </ns0:g>
 
 <ns0:g id="node37" class="node">
-<ns0:title>401502824</ns0:title>
+<ns0:title>392959592</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1627.43,-509.6 1622.03,-504.2 1627.43,-498.8 1632.83,-504.2 1627.43,-509.6" />
 </ns0:g>
 
 <ns0:g id="node38" class="node">
-<ns0:title>807339336</ns0:title>
+<ns0:title>396231900</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1374.55,-509.6 1369.15,-504.2 1374.55,-498.8 1379.95,-504.2 1374.55,-509.6" />
 </ns0:g>
 
 <ns0:g id="node39" class="node">
-<ns0:title>807339228</ns0:title>
+<ns0:title>396231876</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1374.55,-436.6 1369.15,-431.2 1374.55,-425.8 1379.95,-431.2 1374.55,-436.6" />
 </ns0:g>
 
 <ns0:g id="node40" class="node">
-<ns0:title>807339324</ns0:title>
+<ns0:title>396231888</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1374.55,-363.6 1369.15,-358.2 1374.55,-352.8 1379.95,-358.2 1374.55,-363.6" />
 </ns0:g>
 
 <ns0:g id="node41" class="node">
-<ns0:title>807339624</ns0:title>
+<ns0:title>396232344</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="637.45,-140.2 629.35,-147.4 629.35,-133 637.45,-140.2" />
 </ns0:g>
 
 <ns0:g id="node42" class="node">
-<ns0:title>807339036</ns0:title>
+<ns0:title>396231696</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1632.83,-244.2 1624.73,-251.4 1624.73,-237 1632.83,-244.2" />
 </ns0:g>
 
 <ns0:g id="node43" class="node">
-<ns0:title>807225212</ns0:title>
+<ns0:title>396073468</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="3138,-258.2 3129.9,-265.4 3129.9,-251 3138,-258.2" />
 </ns0:g>
 
 <ns0:g id="node44" class="node">
-<ns0:title>807339444</ns0:title>
+<ns0:title>396232284</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1920.95,-167.2 1912.85,-174.4 1912.85,-160 1920.95,-167.2" />
 </ns0:g>
 
 <ns0:g id="node45" class="node">
-<ns0:title>807339612</ns0:title>
+<ns0:title>396232200</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="2129.2,-258.2 2121.1,-265.4 2121.1,-251 2129.2,-258.2" />
 </ns0:g>
 
 <ns0:g id="node46" class="node">
-<ns0:title>807339528</ns0:title>
+<ns0:title>396232008</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="1920.95,-42.2 1912.85,-49.4 1912.85,-35 1920.95,-42.2" />
 </ns0:g>
 
 <ns0:g id="node47" class="node">
-<ns0:title>807339780</ns0:title>
+<ns0:title>396232560</ns0:title>
 <ns0:polygon fill="#f98f60" stroke="#90918e" points="637.45,-7.2 629.35,-14.4 629.35,0 637.45,-7.2" />
 </ns0:g>
 </ns0:g>

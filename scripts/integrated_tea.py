@@ -13,9 +13,9 @@ For each alpha, reports:
   - TCI and VOC breakdown
 
 Products:
-  - Biomethane at assumed $5/MMBtu (Henry Hub midpoint)
-  - Microbial oil at assumed $2.47/kg (near_zero standalone result)
-  - Biostimulant at $0.50/kg (conservative)
+  - Biomethane at assumed $10/MMBtu (European TTF benchmark)
+  - Microbial oil at assumed $1.00/kg (midpoint of $0.62–1.50/kg soybean oil range)
+  - Biostimulant at $0.50/kg (standard assumption)
 """
 
 import biosteam as bst
@@ -27,34 +27,32 @@ from sabre.tea import make_baseline_tea, solve_product_msp, solve_biomethane_msp
 
 # -------------------------
 # Market price assumptions
-# Used for NPV calculation at each alpha
 # -------------------------
-BIOMETHANE_MARKET_MMBTU    = 3.00    # $/MMBtu 
-OIL_MARKET_USD_PER_KG      = 5.00  # $/kg
-BIOSTIMULANT_USD_PER_KG    = 0.00   # $/kg (base case --> looking at AD pathways)
+BIOMETHANE_MARKET_MMBTU    = 10.00   # $/MMBtu — European TTF benchmark
+OIL_MARKET_USD_PER_KG      =  1.00   # $/kg    — midpoint of soybean oil $0.62–1.50/kg range
+BIOSTIMULANT_USD_PER_KG    =  0.50   # $/kg    — standard assumption
+
+# Biomethane price sensitivity range
+BIOMETHANE_PRICES = [3.0, 10.0, 14.0]   # Henry Hub, TTF, JKM
 
 # -------------------------
 # Reagent cost (oil extraction)
-# --> OE.add_OPEX same as standalone VFA TEA
 # -------------------------
-OIL_EXTRACTION_REAGENT_USD_PER_KG_OIL = 0.50 # lower end
+OIL_EXTRACTION_REAGENT_USD_PER_KG_OIL = 0.50
 
 # -------------------------
 # Disposal costs
 # -------------------------
-RETENTATE_DISPOSAL_USD_PER_KG      = -0.005
+RETENTATE_DISPOSAL_USD_PER_KG       = -0.005
 FERM_WASTEWATER_DISPOSAL_USD_PER_KG = -0.005
-SOLIDS_DISPOSAL_USD_PER_KG          = -0.04   # acidogenic solids
+SOLIDS_DISPOSAL_USD_PER_KG          = -0.04
 LIQUID_DIGESTATE_DISPOSAL_USD_PER_KG = -0.002
 SOLID_DIGESTATE_DISPOSAL_USD_PER_KG  = -0.02
 
 # -------------------------
-# Feed price scenarios
+# Feed price base case
 # -------------------------
-FEED_PRICE_CASES = [
-    ("tipping_fee",  -0.02),
-    ("near_zero",     0.00),
-]
+FEED_PRICE_BASE = 0.02   # $/kg wet — standard collection cost assumption
 
 # -------------------------
 # Alpha sweep points
@@ -65,7 +63,6 @@ CH4_MMBTU_PER_KG = 0.0526
 
 
 def _get_integrated_stream(stream_id: str):
-    """Safe stream lookup — returns None if not in registry."""
     try:
         return bst.main_flowsheet.stream[stream_id]
     except Exception:
@@ -73,19 +70,13 @@ def _get_integrated_stream(stream_id: str):
 
 
 def _apply_stream_prices(streams, biostimulant_price=BIOSTIMULANT_USD_PER_KG):
-    """Set prices on all outlet streams that carry economic value or cost."""
-    # Biostimulant revenue
     if streams.get("biostimulant_membrane_concentrate") is not None:
         streams["biostimulant_membrane_concentrate"].price = biostimulant_price
 
-    # Pressate permeate — zero-cost discharge (floating biorefinery assumption)
-    # The PC permeate is mostly water; modeled as near-shore discharge with no cost
-    # A disposal cost of $0.001–0.003/kg could be applied if necessary
     permeate = _get_integrated_stream("pressate_permeate")
     if permeate is not None:
         permeate.price = 0.0
 
-    # VFA pathway disposal costs
     for sid, price in [
         ("vfa_retentate",              RETENTATE_DISPOSAL_USD_PER_KG),
         ("fermentation_wastewater",    FERM_WASTEWATER_DISPOSAL_USD_PER_KG),
@@ -95,10 +86,9 @@ def _apply_stream_prices(streams, biostimulant_price=BIOSTIMULANT_USD_PER_KG):
         if s is not None:
             s.price = price
 
-    # AD pathway disposal costs
     for sid, price in [
-        ("soil_amendment",    SOLID_DIGESTATE_DISPOSAL_USD_PER_KG),
-        ("liquid_digestate",  LIQUID_DIGESTATE_DISPOSAL_USD_PER_KG),
+        ("soil_amendment",   SOLID_DIGESTATE_DISPOSAL_USD_PER_KG),
+        ("liquid_digestate", LIQUID_DIGESTATE_DISPOSAL_USD_PER_KG),
     ]:
         s = streams.get(sid)
         if s is not None:
@@ -106,7 +96,6 @@ def _apply_stream_prices(streams, biostimulant_price=BIOSTIMULANT_USD_PER_KG):
 
 
 def _wire_oil_reagent(streams, units):
-    """Wire oil extraction reagent cost into OE.add_OPEX."""
     oil_stream = streams.get("backend_oil")
     oe = units.get("OE")
     if oil_stream is not None and oe is not None:
@@ -116,7 +105,6 @@ def _wire_oil_reagent(streams, units):
 
 
 def _patch_ev607():
-    """Low-duty evaporator placeholder (same as standalone VFA TEA)."""
     try:
         ev607 = bst.main_flowsheet.unit["Ev607"]
         v = getattr(ev607, "V", None)
@@ -134,21 +122,17 @@ def _patch_ev607():
 
 
 def _compute_npv_at_market(tea, streams, market_mmbtu, market_oil_usd_per_kg):
-    """
-    Compute NPV at assumed market prices for both products
-    Sets prices temporarily, reads NPV, restores prices
-    """
     biomethane = streams.get("biomethane")
     oil_stream = streams.get("backend_oil")
 
-    old_bm_price = biomethane.price if biomethane is not None else None
-    old_oil_price = oil_stream.price if oil_stream is not None else None
+    old_bm_price  = biomethane.price  if biomethane  is not None else None
+    old_oil_price = oil_stream.price  if oil_stream  is not None else None
 
     try:
         if biomethane is not None and float(biomethane.F_mass) > 0:
-            ch4_mass = float(biomethane.imass["Methane"])
+            ch4_mass   = float(biomethane.imass["Methane"])
             total_mass = float(biomethane.F_mass)
-            ch4_frac = ch4_mass / total_mass if total_mass > 0 else 0.0
+            ch4_frac   = ch4_mass / total_mass if total_mass > 0 else 0.0
             biomethane.price = market_mmbtu * CH4_MMBTU_PER_KG * ch4_frac
 
         if oil_stream is not None and float(oil_stream.F_mass) > 0:
@@ -158,28 +142,23 @@ def _compute_npv_at_market(tea, streams, market_mmbtu, market_oil_usd_per_kg):
         npv = tea.NPV
 
     finally:
-        if biomethane is not None and old_bm_price is not None:
-            biomethane.price = old_bm_price
-        if oil_stream is not None and old_oil_price is not None:
-            oil_stream.price = old_oil_price
+        if biomethane  is not None and old_bm_price  is not None:
+            biomethane.price  = old_bm_price
+        if oil_stream  is not None and old_oil_price is not None:
+            oil_stream.price  = old_oil_price
 
     return npv
 
 
 def run_alpha_sweep(
-    feed_price: float = 0.00,
-    case_label: str = "near_zero",
+    feed_price: float = FEED_PRICE_BASE,
+    case_label: str = "base",
     pretreatment_case: str = "press_mill_only",
     biostimulant_price: float = BIOSTIMULANT_USD_PER_KG,
     market_mmbtu: float = BIOMETHANE_MARKET_MMBTU,
     market_oil: float = OIL_MARKET_USD_PER_KG,
     print_summary: bool = True,
 ):
-    """
-    Sweep alpha from 0 to 1 and report both product MSPs and combined NPV
-
-    Returns a list of result dicts, one per alpha point
-    """
     results = []
 
     for alpha in ALPHA_SWEEP:
@@ -192,7 +171,6 @@ def run_alpha_sweep(
                 pretreatment_case=pretreatment_case,
             )
             streams["feed"].price = feed_price
-
             sys.simulate()
 
             _patch_ev607()
@@ -201,34 +179,27 @@ def run_alpha_sweep(
 
             tea = make_baseline_tea(sys)
 
-            # --- Biomethane MSP (if any methane is produced) ---
             biomethane = streams.get("biomethane")
-            msp_mmbtu = float("nan")
-            msp_ch4 = float("nan")
-            # --- Independent MSPs ---
-            # Each MSP is solved with the OTHER product's stream price held at
-            # zero. This gives the true standalone breakeven for each product
-            # within the integrated system — i.e., the price each product needs
-            # to reach if the other contributes nothing.
-
             oil_stream = streams.get("backend_oil")
-            msp_oil    = float("nan")   # reset each iteration —> prevents value leaking from previous alpha
-            oil_kg_yr  = 0.0
+            msp_mmbtu = float("nan")
+            msp_ch4   = float("nan")
+            msp_oil   = float("nan")
+            oil_kg_yr = 0.0
 
-            # Biomethane MSP: solve with oil price = 0
+            # Biomethane MSP (oil price = 0)
             if biomethane is not None and alpha > 0 and float(biomethane.F_mass) > 0:
                 old_oil_price = oil_stream.price if oil_stream is not None else None
                 try:
                     if oil_stream is not None:
                         oil_stream.price = 0.0
-                    bm_msp   = solve_biomethane_msp(tea, biomethane)
+                    bm_msp    = solve_biomethane_msp(tea, biomethane)
                     msp_mmbtu = bm_msp.get("usd_per_mmbtu", float("nan"))
                     msp_ch4   = bm_msp.get("usd_per_kg_ch4", float("nan"))
                 finally:
                     if oil_stream is not None and old_oil_price is not None:
                         oil_stream.price = old_oil_price
 
-            # Oil MSP: solve with biomethane price = 0
+            # Oil MSP (biomethane price = 0)
             if oil_stream is not None and alpha < 1.0 and float(oil_stream.F_mass) > 0:
                 old_bm_price = biomethane.price if biomethane is not None else None
                 try:
@@ -241,19 +212,18 @@ def run_alpha_sweep(
                     if biomethane is not None and old_bm_price is not None:
                         biomethane.price = old_bm_price
 
-            # --- Combined NPV at market prices ---
             npv = _compute_npv_at_market(tea, streams, market_mmbtu, market_oil)
 
             row = {
                 "alpha": alpha,
                 "msp_biomethane_mmbtu": msp_mmbtu,
-                "msp_biomethane_ch4": msp_ch4,
-                "msp_oil_usd_per_kg": msp_oil,
-                "combined_npv_M": npv / 1e6,
-                "tci_M": tea.TCI / 1e6,
-                "voc_M": tea.VOC / 1e6,
-                "foc_M": tea.FOC / 1e6,
-                "oil_kg_yr": oil_kg_yr,
+                "msp_biomethane_ch4":   msp_ch4,
+                "msp_oil_usd_per_kg":   msp_oil,
+                "combined_npv_M":       npv / 1e6,
+                "tci_M":                tea.TCI / 1e6,
+                "voc_M":                tea.VOC / 1e6,
+                "foc_M":                tea.FOC / 1e6,
+                "oil_kg_yr":            oil_kg_yr,
                 "ok": True,
             }
 
@@ -261,14 +231,14 @@ def run_alpha_sweep(
             row = {
                 "alpha": alpha,
                 "msp_biomethane_mmbtu": float("nan"),
-                "msp_biomethane_ch4": float("nan"),
-                "msp_oil_usd_per_kg": float("nan"),
-                "combined_npv_M": float("nan"),
-                "tci_M": float("nan"),
-                "voc_M": float("nan"),
-                "foc_M": float("nan"),
-                "oil_kg_yr": 0.0,
-                "ok": False,
+                "msp_biomethane_ch4":   float("nan"),
+                "msp_oil_usd_per_kg":   float("nan"),
+                "combined_npv_M":       float("nan"),
+                "tci_M":                float("nan"),
+                "voc_M":                float("nan"),
+                "foc_M":                float("nan"),
+                "oil_kg_yr":            0.0,
+                "ok":    False,
                 "error": str(e),
             }
             print(f"  [alpha={alpha:.1f}] ERROR: {e}")
@@ -290,10 +260,8 @@ def _print_sweep_table(results, case_label, pretreatment_case,
         f"  Feed: ${feed_price:.3f}/kg [{case_label}]  |  "
         f"Pretreatment: {pretreatment_case}  |  "
         f"Biostimulant: ${biostimulant_price:.2f}/kg\n"
-        f"  Market assumptions for NPV: biomethane ${market_mmbtu:.1f}/MMBtu  |  "
-        f"microbial oil ${market_oil:.2f}/kg\n"
-        f"  MSPs are INDEPENDENT: each solved with the other product price = $0\n"
-        f"  (i.e. breakeven price if that product carries all remaining costs)"
+        f"  Market: biomethane ${market_mmbtu:.1f}/MMBtu  |  "
+        f"microbial oil ${market_oil:.2f}/kg"
     )
     print("=" * 95)
     print(
@@ -303,7 +271,10 @@ def _print_sweep_table(results, case_label, pretreatment_case,
     )
     print("  " + "-" * 93)
 
-    best_npv = max((r["combined_npv_M"] for r in results if r["ok"]), default=float("nan"))
+    best_npv = max(
+        (r["combined_npv_M"] for r in results if r["ok"]),
+        default=float("nan"),
+    )
 
     for r in results:
         if not r["ok"]:
@@ -311,84 +282,43 @@ def _print_sweep_table(results, case_label, pretreatment_case,
             continue
 
         alpha = r["alpha"]
-        pct_ch4 = f"{alpha*100:.0f}%"
-        pct_oil = f"{(1-alpha)*100:.0f}%"
-
         msp_ch4_str = f"${r['msp_biomethane_mmbtu']:.2f}" if not math.isnan(r["msp_biomethane_mmbtu"]) else "  n/a  "
-        msp_oil_str = f"${r['msp_oil_usd_per_kg']:.3f}" if not math.isnan(r["msp_oil_usd_per_kg"]) else "  n/a  "
-        npv_str = f"${r['combined_npv_M']:.1f}M"
-        tci_str = f"${r['tci_M']:.1f}M"
-
-        star = " ◄ best NPV" if abs(r["combined_npv_M"] - best_npv) < 0.01 and r["ok"] else ""
+        msp_oil_str = f"${r['msp_oil_usd_per_kg']:.3f}"   if not math.isnan(r["msp_oil_usd_per_kg"])   else "  n/a  "
+        star = " ◄ best" if abs(r["combined_npv_M"] - best_npv) < 0.01 else ""
 
         print(
-            f"  {alpha:>6.1f}  {pct_ch4:>6}  {pct_oil:>6}  "
+            f"  {alpha:>6.1f}  {alpha*100:>5.0f}%  {(1-alpha)*100:>5.0f}%  "
             f"{msp_ch4_str:>20}  {msp_oil_str:>16}  "
-            f"{npv_str:>15}  {tci_str:>10}{star}"
+            f"${r['combined_npv_M']:>13.1f}M  ${r['tci_M']:>8.1f}M{star}"
         )
 
-    # Find best alpha (highest NPV) among valid results
     valid = [r for r in results if r["ok"] and not math.isnan(r["combined_npv_M"])]
     if valid:
         best = max(valid, key=lambda r: r["combined_npv_M"])
-        print(f"\n  Optimal alpha = {best['alpha']:.1f} "
-              f"(NPV = ${best['combined_npv_M']:.1f}M)")
+        print(f"\n  Optimal alpha = {best['alpha']:.1f} (NPV = ${best['combined_npv_M']:.1f}M)")
 
 
 # =============================================================
-# Main
+# Main — runs updated four scenarios at three biomethane prices
 # =============================================================
-
 if __name__ == "__main__":
 
-    # -------------------------
-    # 1. near_zero feed, press_mill_only, base biostimulant price
-    # -------------------------
-    print("\n>>> SWEEP 1: near_zero feed | press_mill_only | biostimulant=$0.50/kg")
-    run_alpha_sweep(
-        feed_price=0.00,
-        case_label="near_zero",
-        pretreatment_case="press_mill_only",
-        biostimulant_price=0.50,
-        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
-        market_oil=OIL_MARKET_USD_PER_KG,
-    )
+    SCENARIOS = [
+        ("base",       0.02,  0.50),
+        ("tipping",   -0.02,  0.50),
+        ("biostim",    0.02,  1.00),
+        ("best_case", -0.02,  1.00),
+    ]
 
-    # -------------------------
-    # 2. tipping_fee feed, press_mill_only
-    # -------------------------
-    print("\n>>> SWEEP 2: tipping_fee feed | press_mill_only | biostimulant=$0.50/kg")
-    run_alpha_sweep(
-        feed_price=-0.02,
-        case_label="tipping_fee",
-        pretreatment_case="press_mill_only",
-        biostimulant_price=0.50,
-        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
-        market_oil=OIL_MARKET_USD_PER_KG,
-    )
-
-    # -------------------------
-    # 3. near_zero feed, combined_PE (best methanogenic pretreatment)
-    # -------------------------
-    print("\n>>> SWEEP 3: near_zero feed | combined_PE | biostimulant=$0.50/kg")
-    run_alpha_sweep(
-        feed_price=0.00,
-        case_label="near_zero",
-        pretreatment_case="combined_PE",
-        biostimulant_price=0.50,
-        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
-        market_oil=OIL_MARKET_USD_PER_KG,
-    )
-
-    # -------------------------
-    # 4. near_zero feed, optimistic biostimulant
-    # -------------------------
-    print("\n>>> SWEEP 4: near_zero feed | press_mill_only | biostimulant=$1.00/kg")
-    run_alpha_sweep(
-        feed_price=0.00,
-        case_label="near_zero",
-        pretreatment_case="press_mill_only",
-        biostimulant_price=1.00,
-        market_mmbtu=BIOMETHANE_MARKET_MMBTU,
-        market_oil=OIL_MARKET_USD_PER_KG,
-    )
+    for name, feed, biostim in SCENARIOS:
+        for bm_price in BIOMETHANE_PRICES:
+            print(f"\n>>> {name} | feed=${feed:.2f}/kg | biostim=${biostim:.2f}/kg | "
+                  f"biomethane=${bm_price:.0f}/MMBtu")
+            run_alpha_sweep(
+                feed_price=feed,
+                case_label=name,
+                pretreatment_case="press_mill_only",
+                biostimulant_price=biostim,
+                market_mmbtu=bm_price,
+                market_oil=OIL_MARKET_USD_PER_KG,
+            )

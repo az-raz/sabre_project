@@ -31,10 +31,6 @@ SOLIDS_DISPOSAL_USD_PER_KG = -0.04
 
 # -------------------------
 # Oil extraction reagent cost
-# Wired to tea.other_annual_costs so it flows through MSP calculation correctly.
-# Basis: solvent purchase + recovery $0.50-1.50/kg oil
-#   (Knoshaug et al. 2018, NREL/TP-5100-62492; Laurens et al. 2017, Green Chem.)
-# Base case $0.50/kg — sensitivity tested below
 OIL_EXTRACTION_REAGENT_USD_PER_KG_OIL = 0.50
 
 VFA_IDS = ["AceticAcid", "PropionicAcid", "ButyricAcid", "ValericAcid", "HexanoicAcid"]
@@ -45,7 +41,7 @@ VFA_IDS = ["AceticAcid", "PropionicAcid", "ButyricAcid", "ValericAcid", "Hexanoi
 FEED_PRICE_CASES = [
     ("tipping_fee",      -0.02),
     ("near_zero",         0.00),
-    ("low_cost_collect",  0.03),
+    ("low_cost_collect",  0.02),
     ("beach_midpoint",    0.05),
 ]
 
@@ -372,7 +368,7 @@ def run_case(
     print(f"  Utility cost ($/yr):         {tea.utility_cost:>18,.0f}")
 
     # -------------------------
-    # MSP — now includes reagent cost automatically
+    # MSP — includes reagent cost automatically
     # -------------------------
     print("\n=== MSP ===")
     for k, v in msp.items():
@@ -511,8 +507,8 @@ PRODUCT_SCENARIOS = [
         "yield":           0.144,    # Gao et al. 2020, Y_L/S at pH 8 #0.144
         "residence_h":    48.0,
         "extraction_usd_per_kg": 0.50,
-        "market_price":   5.00,    # $/kg — vegetable oil commodity proxy
-        "market_label":   "$5.00/kg",
+        "market_price":   1.50,    # $/kg — vegetable oil commodity proxy
+        "market_label":   "$1.50/kg",
         "global_market_tonne_yr": None,
         "source": "Gao et al. 2020 Biotechnol Biofuels; World Bank commodity price",
     },
@@ -521,7 +517,7 @@ PRODUCT_SCENARIOS = [
         "product_ID":     "MicrobialOil",  # same chemical class, re-use stream
         "yield":           0.10,    # ~15% DCW on VFA basis — Xue et al. 2013
         "residence_h":   168.0,     # 7-day fed-batch — Xie et al. 2017
-        "extraction_usd_per_kg": 15.00,  # winterization + polishing chromatography
+        "extraction_usd_per_kg": 50.00,  # winterization + polishing chromatography
         "market_price":   80.00,    # $/kg bulk EPA oil — DuPont Newharvest basis
         "market_label":  "$80/kg",
         "global_market_tonne_yr": 50000,  # fish oil EPA equivalent — no constraint at this scale
@@ -532,7 +528,7 @@ PRODUCT_SCENARIOS = [
         "product_ID":     "MicrobialOil",  # same extraction stream, re-use
         "yield":           0.003,   # g/g VFA — back-calc from 2.75 g/L at ~50 g/L DCW
         "residence_h":   156.0,     # fed-batch — Abdullah et al. 2025
-        "extraction_usd_per_kg": 150.00, # cell disruption + HPLC + saponification
+        "extraction_usd_per_kg": 500.00, # cell disruption + HPLC + saponification
         "market_price":  1800.00,   # $/kg natural astaxanthin wholesale
         "market_label":  "$1,800/kg",
         "global_market_tonne_yr": 250,   # global natural astaxanthin — BINDING constraint

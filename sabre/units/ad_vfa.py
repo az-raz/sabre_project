@@ -35,10 +35,6 @@ class AcidogenicDigester(bst.Unit):
     0) offgas
     1) acidogenic_broth
 
-    Main modeling choice:
-    - The digester produces one whole broth stream.
-    - Downstream solid/liquid separation determines the actual VFA broth sent to fermentation.
-    - There is no in-reactor 'VFA recovery' split.
     """
 
     _N_ins = 1
@@ -53,7 +49,7 @@ class AcidogenicDigester(bst.Unit):
         outs=(),
         *,
         vs_destruction: float = 0.50,
-        vfa_kg_per_kg_vs_destroyed: float = 0.80,
+        vfa_kg_per_kg_vs: float = 0.80,
         vfa_split: Optional[Dict[str, float]] = None,
         digestible_IDs: Optional[Iterable[str]] = None,
         produce_offgas_co2: bool = True,
@@ -75,7 +71,7 @@ class AcidogenicDigester(bst.Unit):
         super().__init__(ID, ins, outs, **kwargs)
 
         self.vs_destruction = float(vs_destruction)
-        self.vfa_kg_per_kg_vs_destroyed = float(vfa_kg_per_kg_vs_destroyed)
+        self.vfa_kg_per_kg_vs= float(vfa_kg_per_kg_vs)
         self.vfa_split = dict(vfa_split) if vfa_split is not None else None
         self.digestible_IDs = tuple(digestible_IDs) if digestible_IDs is not None else (
             "Glucan",
@@ -184,7 +180,7 @@ class AcidogenicDigester(bst.Unit):
             broth.imass[cid] -= take
 
         split = self._resolve_vfa_split()
-        vfa_total = max(0.0, self.vfa_kg_per_kg_vs_destroyed) * remove
+        vfa_total = max(0.0, self.vfa_kg_per_kg_vs) * remove
         vfa_total = min(vfa_total, remove)
 
         for chem_id, frac in split.items():

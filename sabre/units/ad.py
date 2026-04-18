@@ -36,7 +36,7 @@ ADBC_CAPEX = [1720964, 1750201, 1779439, 1808676, 1867151, 1984101]
 
 
 def interp_capex(volume_m3: float) -> float:
-    """Linear interpolation/extrapolation of ADBC digester CAPEX."""
+    """Linear interpolation/extrapolation of ADBC digester CAPEX"""
     x = ADBC_VOL_M3
     y = ADBC_CAPEX
 
@@ -53,7 +53,7 @@ def interp_capex(volume_m3: float) -> float:
             m = (y[i + 1] - y[i]) / (x[i + 1] - x[i])
             return y[i] + m * (volume_m3 - x[i])
 
-    raise RuntimeError("CAPEX interpolation failed.")
+    raise RuntimeError("CAPEX interpolation failed")
 
 
 class AnaerobicDigester(bst.Unit):
@@ -78,7 +78,7 @@ class AnaerobicDigester(bst.Unit):
         slurry_density_kg_per_m3=1000.0,
         headspace_frac=0.20,
         max_single_digester_volume_MG=1.5,
-        # Costing anchors (stored for future flexibility)
+        # Costing anchors 
         base_volume_m3=None,
         base_capex_usd=None,
         maintenance_usd_per_m3_yr=None,

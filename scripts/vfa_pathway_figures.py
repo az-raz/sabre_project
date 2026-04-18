@@ -62,7 +62,7 @@ plt.rcParams.update({
 # ============================================================
 # Figure 1 — VFA composition in acidogenic broth
 # ============================================================
-def make_vfa_composition_figure(feed_price: float = 0.00):
+def make_vfa_composition_figure(feed_price: float = 0.02):
     vfa_sys, fer_sys, streams, units, full_sys = build_and_simulate(feed_price)
     vfa_broth = vfa_sys.flowsheet.stream.vfa_broth
 
@@ -235,9 +235,9 @@ def make_product_scenario_comparison_figure(feed_price: float = 0.00):
 
 
 if __name__ == "__main__":
-    make_vfa_composition_figure(feed_price=0.00)
+    make_vfa_composition_figure(feed_price=0.02)
     make_oil_msp_vs_feed_price_figure()
-    make_product_scenario_comparison_figure(feed_price=0.00)
+    make_product_scenario_comparison_figure(feed_price=0.02)
 
     print("\nSaved:")
     print(OUT / "fig_vfa_composition.png")

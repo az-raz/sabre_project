@@ -7,6 +7,8 @@ including error bars based on the low/high methane-yield estimates in assumption
 Outputs:
 1) fig_methane_production_by_pretreatment_errorbars.(png/pdf)
 2) fig_msp_by_pretreatment_errorbars.(png/pdf)
+
+BASECASE: biostimulant: $0/kg (no revenue), feedstock: $0.02/kg wet
 """
 
 from __future__ import annotations
@@ -47,7 +49,7 @@ CASE_LABELS = {
 LIQUID_DIGESTATE_DISPOSAL_USD_PER_KG = -0.002
 SOLIDS_DIGESTATE_DISPOSAL_USD_PER_KG = -0.02
 BIOSTIMULANT_PRICE_BASE_USD_PER_KG = 0.00
-FEED_PRICE_USD_PER_KG_WET = 0.00
+FEED_PRICE_USD_PER_KG_WET = 0.02
 
 
 def apply_stream_economics(
@@ -94,23 +96,22 @@ def build_case(
     sys = create_ad_biogas_system(
         quality="pelagic_high_quality",
         pretreatment_case=pretreatment_case,
+        ch4_override=yield_override,
     )
 
-    # Override methane yield for central / low / high cases
     if yield_override is not None:
         sys.flowsheet.unit.AD.ch4_kg_per_kg_vs_fed = float(yield_override)
 
     sys.feeds[0].price = feed_price
     sys.simulate()
 
-    apply_stream_economics(
-        sys,
-        biostimulant_price=BIOSTIMULANT_PRICE_BASE_USD_PER_KG,
-    )
+    apply_stream_economics(sys, biostimulant_price=BIOSTIMULANT_PRICE_BASE_USD_PER_KG)
 
     tea = make_baseline_tea(sys)
     msp = solve_biomethane_msp(tea, sys.flowsheet.stream.biomethane)
-    return sys, tea, msp
+    ch4_kgph = float(sys.flowsheet.stream.biomethane.imass["Methane"])
+
+    return sys, tea, msp, ch4_kgph
 
 
 A = load_assumptions()
@@ -155,32 +156,19 @@ labels = [CASE_LABELS[c] for c in PRETREATMENT_CASES]
 for case in PRETREATMENT_CASES:
     central_y, low_y, high_y = get_case_yields(case)
 
-    sys_c, tea_c, msp_c = build_case(case, yield_override=central_y)
-    sys_l, tea_l, msp_l = build_case(case, yield_override=low_y)
-    sys_h, tea_h, msp_h = build_case(case, yield_override=high_y)
-
-    # Methane production from AD design results
-    try:
-        ch4_c = float(sys_c.flowsheet.unit.AD.design_results["Methane production (kg/hr)"])
-        ch4_l = float(sys_l.flowsheet.unit.AD.design_results["Methane production (kg/hr)"])
-        ch4_h = float(sys_h.flowsheet.unit.AD.design_results["Methane production (kg/hr)"])
-    except Exception:
-        # Fallback to biomethane methane mass flow
-        ch4_c = float(sys_c.flowsheet.stream.biomethane.imass["Methane"])
-        ch4_l = float(sys_l.flowsheet.stream.biomethane.imass["Methane"])
-        ch4_h = float(sys_h.flowsheet.stream.biomethane.imass["Methane"])
+    sys_c, tea_c, msp_c, ch4_c = build_case(case, yield_override=central_y)
+    sys_l, tea_l, msp_l, ch4_l = build_case(case, yield_override=low_y)
+    sys_h, tea_h, msp_h, ch4_h = build_case(case, yield_override=high_y)
 
     methane_kgph.append(ch4_c)
     methane_err_low.append(max(ch4_c - ch4_l, 0.0))
     methane_err_high.append(max(ch4_h - ch4_c, 0.0))
 
-    # MSP from TEA reruns
     msp_c_val = float(msp_c["usd_per_mmbtu"])
     msp_l_val = float(msp_l["usd_per_mmbtu"])
     msp_h_val = float(msp_h["usd_per_mmbtu"])
 
     msp_mmbtu.append(msp_c_val)
-    # Lower methane yield => higher MSP; higher methane yield => lower MSP
     msp_err_low.append(max(msp_c_val - msp_h_val, 0.0))
     msp_err_high.append(max(msp_l_val - msp_c_val, 0.0))
 
@@ -205,11 +193,11 @@ bars1 = ax1.bar(
     linewidth=0.8,
     width=0.55,
     yerr=np.array([methane_err_low, methane_err_high]),
-    capsize=7,
+    capsize=6,
     error_kw={
-        "elinewidth": 2.0,
+        "elinewidth": 1.0,
         "ecolor": "#222222",
-        "capthick": 2.0,
+        "capthick": 1.0,
         "zorder": 5,
     },
     zorder=3,
@@ -252,8 +240,13 @@ bars2 = ax2.bar(
     linewidth=0.8,
     width=0.55,
     yerr=np.array([msp_err_low, msp_err_high]),
-    capsize=4,
-    error_kw={"elinewidth": 1.0, "ecolor": "#444441"},
+    capsize=6,
+    error_kw={
+        "elinewidth": 1.0,
+        "ecolor": "#222222",
+        "capthick": 1.0,
+        "zorder": 5,
+    },
     zorder=3,
 )
 
@@ -261,7 +254,7 @@ for bar, val, ehi in zip(bars2, msp_mmbtu, msp_err_high):
     ax2.text(
         bar.get_x() + bar.get_width() / 2,
         bar.get_height() + ehi + max(msp_mmbtu) * 0.015,
-        f"${val:.1f}",
+        f"${val:.2f}",
         ha="center",
         va="bottom",
         fontsize=8,
@@ -274,6 +267,24 @@ ax2.axhline(
     linestyle="--",
     zorder=2,
     label="Market price ~$3/MMBtu",
+)
+
+ax2.axhline(
+    10.0,
+    color="black",
+    linewidth=1.3,
+    linestyle=":",
+    zorder=2,
+    label="Market price ~$10/MMBtu",
+)
+
+ax2.axhline(
+    14.0,
+    color="black",
+    linewidth=1.3,
+    linestyle="-.",
+    zorder=2,
+    label="Market price ~$14/MMBtu",
 )
 
 ax2.set_xticks(x)

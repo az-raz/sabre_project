@@ -64,6 +64,7 @@ def create_ad_biogas_system(
     quality: str = "pelagic_high_quality",
     pretreatment_case: str | None = None,
     press_cake_solids_wt_frac: float | None = None,
+    ch4_override=None
 ):
     A = load_assumptions()
     q = get_quality_params(A, quality)
@@ -408,9 +409,12 @@ def create_ad_biogas_system(
     # -------------------------
     ad_effects = pt_case.get("ad_effects", {})
     vs_destruction = float(ad_effects.get("vs_destruction", vs_destruction))
-    ch4_kg_per_kg_vs_fed = float(
-        ad_effects.get("ch4_kg_per_kg_vs_fed", ch4_kg_per_kg_vs_fed)
-    )
+    if ch4_override is not None:
+        ch4_kg_per_kg_vs_fed = float(ch4_override)
+    else:
+        ch4_kg_per_kg_vs_fed = float(
+            ad_effects.get("ch4_kg_per_kg_vs_fed", ch4_kg_per_kg_vs_fed)
+        )
     biodegradability = _apply_biodegradability_overrides(
         biodegradability,
         ad_effects.get("biodegradability_factor_overrides", {}),

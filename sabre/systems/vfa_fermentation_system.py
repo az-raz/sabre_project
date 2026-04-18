@@ -7,14 +7,16 @@ from sabre.units.vfa_fermentation import YarrowiaLipidFermenter
 from sabre.units.oil_extraction import OilExtractionPlaceholder
 
 
+from biosteam.units.design_tools.tank_design import (
+    mix_tank_purchase_cost_algorithms,
+    compute_number_of_tanks_and_purchase_cost,
+)
+
 class VFAMicrofilter(bst.Unit):
     """
     Split-based representation of a VFA-rich permeate step.
-
-    This remains a conceptual separator, but now includes a first-pass
-    power draw and purchase cost so it is not economically invisible.
+    Includes first-pass power draw and area-based membrane cost.
     """
-
     _N_ins = 1
     _N_outs = 2
     _F_BM_default = {"Microfilter": 1.0}
@@ -33,6 +35,8 @@ class VFAMicrofilter(bst.Unit):
         dissolved_other_to_permeate_frac: float = 0.90,
         broth_density_kg_per_m3: float = 1000.0,
         SEC_kWh_per_m3_feed: float = 0.08,
+        design_flux_L_m2_h: float = 20.0,
+        membrane_cost_usd_per_m2: float = 200.0,
         **kwargs,
     ):
         super().__init__(ID, ins, outs, **kwargs)
@@ -49,6 +53,8 @@ class VFAMicrofilter(bst.Unit):
         self.dissolved_other_to_permeate_frac = float(dissolved_other_to_permeate_frac)
         self.broth_density_kg_per_m3 = float(broth_density_kg_per_m3)
         self.SEC_kWh_per_m3_feed = float(SEC_kWh_per_m3_feed)
+        self.design_flux_L_m2_h = float(design_flux_L_m2_h)
+        self.membrane_cost_usd_per_m2 = float(membrane_cost_usd_per_m2)
 
     def _run(self):
         feed = self.ins[0]
@@ -79,17 +85,24 @@ class VFAMicrofilter(bst.Unit):
 
     def _design(self):
         feed = self.ins[0]
-        feed_m3h = feed.F_mass / self.broth_density_kg_per_m3 if self.broth_density_kg_per_m3 > 0 else 0.0
+        feed_m3h = (
+            feed.F_mass / self.broth_density_kg_per_m3
+            if self.broth_density_kg_per_m3 > 0 else 0.0
+        )
+        membrane_area_m2 = 0.0
+        if self.design_flux_L_m2_h > 0:
+            membrane_area_m2 = feed_m3h * 1000.0 / self.design_flux_L_m2_h
+
         self.design_results["Feed flow (kg/h)"] = feed.F_mass
         self.design_results["Feed flow (m3/h)"] = feed_m3h
         self.design_results["Permeate flow (kg/h)"] = self.outs[0].F_mass
         self.design_results["Retentate flow (kg/h)"] = self.outs[1].F_mass
+        self.design_results["Membrane area (m2)"] = membrane_area_m2
         self.power_utility.consumption = self.SEC_kWh_per_m3_feed * feed_m3h
 
     def _cost(self):
-        Q = max(float(self.design_results.get("Feed flow (m3/h)", 0.0)), 1.0)
-        self.baseline_purchase_costs["Microfilter"] = 75000.0 * Q ** 0.6
-
+        A = float(self.design_results.get("Membrane area (m2)", 0.0))
+        self.baseline_purchase_costs["Microfilter"] = max(A, 0.0) * self.membrane_cost_usd_per_m2
 
 class FermentationMediumTank(bst.Unit):
     """
@@ -169,8 +182,18 @@ class FermentationMediumTank(bst.Unit):
         self.power_utility.consumption = self.mixing_kW_per_m3 * tank_vol
 
     def _cost(self):
-        V = max(float(self.design_results.get("Tank volume (m3)", 0.0)), 1.0)
-        self.baseline_purchase_costs["Medium tank"] = 12000.0 * V ** 0.6
+        V_total = max(float(self.design_results.get("Tank volume (m3)", 0.0)), 0.0)
+        if V_total <= 0.0:
+            self.baseline_purchase_costs["Medium tank"] = 0.0
+            return
+
+        alg = mix_tank_purchase_cost_algorithms["Conventional"]
+        N, Cp_each = compute_number_of_tanks_and_purchase_cost(V_total, alg)
+        V_each = V_total / N
+
+        self.design_results["Number of tanks"] = N
+        self.design_results["Tank volume per tank (m3)"] = V_each
+        self.baseline_purchase_costs["Medium tank"] = N * Cp_each
 
 
 def create_vfa_fermentation_system(
@@ -179,8 +202,8 @@ def create_vfa_fermentation_system(
     product_ID: str = "MicrobialOil",
     vfa_IDs: list[str] | None = None,
     conversion: float = 0.85,
-    product_yield_kg_per_kg_vfa_consumed: float = 0.45,
-    biomass_yield_kg_per_kg_vfa_consumed: float = 0.10,
+    product_yield_kg_per_kg_vfa_consumed: float = 0.144,
+    biomass_yield_kg_per_kg_vfa_consumed: float = 0.40,
     co2_yield_kg_per_kg_vfa_consumed: float = 0.20,
     oxygen_kg_per_kg_vfa_consumed: float = 0.80,
     residence_time_h: float = 48.0,
@@ -192,27 +215,32 @@ def create_vfa_fermentation_system(
     magnesium_sulfate_dose_kg_per_m3: float = 0.0,
     seed_water_kgph: float = 0.0,
     seed_cellmass_kgph: float = 0.0,
+
     vfa_to_permeate_frac: float = 0.98,
     water_to_permeate_frac: float = 0.97,
     solids_to_permeate_frac: float = 0.05,
     dissolved_other_to_permeate_frac: float = 0.90,
+    microfilter_SEC_kWh_per_m3_feed: float = 0.08,
+    microfilter_design_flux_L_m2_h: float = 20.0,
+    microfilter_membrane_cost_usd_per_m2: float = 200.0,
 
-    # Downstream separation assumptions
+    medium_tank_residence_time_h: float = 0.5,
+    medium_tank_mixing_kW_per_m3: float = 0.05,
+
     target_oil_and_solids_content: float = 60.0,
     target_wastewater_concentration: float = 60.0,
     backend_oil_recovery: float = 0.99,
     backend_oil_water_split: float = 0.0001,
-    cellmass_recovery: float = 0.99,
 
-    # Oil extraction placeholder assumptions
-    # Anchor: NREL/TP-5100-55431 (2012), Davis et al.
-    # Cell disruption + extraction: ~$8.5M installed at 10 dry ton/hr biomass
-    # Homogenization electricity: 1.5 kWh/kg dry biomass (Postma et al. 2017)
+    recycle_total_fraction: float = 0.10,
+    recycle_cellmass_wt_frac: float = 0.10,
+
     oil_extraction_ref_dry_biomass_tph: float = 10.0,
-    oil_extraction_ref_installed_cost_usd: float = 8_500_000.0,
-    oil_extraction_homogenization_kWh_per_kg: float = 1.5,
+    oil_extraction_ref_installed_cost_usd: float = 7_848_000.0,
+    oil_extraction_homogenization_kWh_per_kg: float = 0.203,
     oil_extraction_scale_exponent: float = 0.6,
 ):
+    
     chem_ids = set(bst.settings.thermo.chemicals.IDs)
     for req in (product_ID, "CarbonDioxide", "CellMass", "Water"):
         if req not in chem_ids:
@@ -247,6 +275,9 @@ def create_vfa_fermentation_system(
         solids_to_permeate_frac=solids_to_permeate_frac,
         dissolved_other_to_permeate_frac=dissolved_other_to_permeate_frac,
         broth_density_kg_per_m3=broth_density_kg_per_m3,
+        SEC_kWh_per_m3_feed=microfilter_SEC_kWh_per_m3_feed,
+        design_flux_L_m2_h=microfilter_design_flux_L_m2_h,
+        membrane_cost_usd_per_m2=microfilter_membrane_cost_usd_per_m2,
     )
 
     T601 = FermentationMediumTank(
@@ -259,6 +290,8 @@ def create_vfa_fermentation_system(
         magnesium_sulfate_dose_kg_per_m3=magnesium_sulfate_dose_kg_per_m3,
         broth_density_kg_per_m3=broth_density_kg_per_m3,
         target_pH=target_pH,
+        residence_time_h=medium_tank_residence_time_h,
+        mixing_kW_per_m3=medium_tank_mixing_kW_per_m3,
     )
 
     # -------------------------------------------------
@@ -356,7 +389,6 @@ def create_vfa_fermentation_system(
     # Pass-through unit: carries capital + electricity costs for
     # high-pressure homogenization and lipid extraction.
     # Capital anchor: NREL/TP-5100-55431 (2012), Davis et al.
-    # Electricity: Postma et al. 2017 (1.5 kWh/kg dry biomass)
     # -------------------------------------------------
     OE = OilExtractionPlaceholder(
         "OE",
@@ -383,8 +415,8 @@ def create_vfa_fermentation_system(
         ins=C603_2 - 1,
         outs=(recycle_biomass, "residual_purge"),
     )
-    S602.recycle_total_fraction = 0.10
-    S602.recycle_cellmass_wt_frac = 0.10
+    S602.recycle_total_fraction = recycle_total_fraction
+    S602.recycle_cellmass_wt_frac = recycle_cellmass_wt_frac
 
     @S602.add_specification(run=True)
     def adjust_biomass_recycle():

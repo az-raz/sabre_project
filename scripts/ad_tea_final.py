@@ -1,7 +1,7 @@
 """
 Methanogenic AD TEA
 =====================================
-Runs all five pretreatment cases -->
+Runs all five pretreatment cases
   1. Base case (press_mill_only) with full diagnostics
   2. Pretreatment case comparison table (MSP vs case)
   3. Feed price sensitivity (same 4 scenarios as VFA TEA)
@@ -13,7 +13,7 @@ Co-product: biostimulant liquid concentrate (pressate concentrator output) --> n
 MSP reported as $/kg CH4 and $/MMBtu
 
 Sources:
-  - Feed price scenarios: Rodriguez-Martinez et al. 2023 (Sci Total Environ)
+  - Feed price scenarios
   - Biomethane market: US natural gas Henry Hub ~$3-6/MMBtu typical range
   - AD maintenance: ADBC spreadsheet, $10/m3/yr
   - Biogas upgrading maintenance: IEA Bioenergy Task 37 (2014), 3.5%/yr
@@ -339,7 +339,7 @@ def run_case(
 # =============================================================
 
 def run_pretreatment_comparison(
-    feed_price: float = 0.00,
+    feed_price: float = 0.02,
     biostimulant_price: float = BIOSTIMULANT_PRICE_BASE_USD_PER_KG,
 ):
     print("\n" + "=" * 80)
@@ -395,7 +395,7 @@ def run_feed_price_sensitivity(pretreatment_case: str = "press_mill_only"):
 
 def run_biomethane_npv_sensitivity(
     pretreatment_case: str = "press_mill_only",
-    feed_price: float = 0.00,
+    feed_price: float = 0.02,
 ):
     print("\n" + "=" * 65)
     print(f"BIOMETHANE NPV — pretreatment: {pretreatment_case} | feed=${feed_price:.3f}/kg")
@@ -418,7 +418,7 @@ def run_biomethane_npv_sensitivity(
 
 def run_biostimulant_sensitivity(
     pretreatment_case: str = "press_mill_only",
-    feed_price: float = 0.00,
+    feed_price: float = 0.02,
 ):
     """
     Show impact of biostimulant co-product price on biomethane MSP.
@@ -464,10 +464,10 @@ def run_biostimulant_sensitivity(
 if __name__ == "__main__":
 
     # 1. Base case with full diagnostics
-    print("\n>>> BASE CASE: press_mill_only | near_zero | biostimulant=$0.00/kg")
+    print("\n>>> BASE CASE: press_mill_only | base-case | biostimulant=$0.00/kg")
     run_case(
         pretreatment_case="press_mill_only",
-        feed_price_per_kg_wet=0.00,
+        feed_price_per_kg_wet=0.02,
         case_label="near_zero",
         run_diagnostics=True,
         target_biomethane_prices_mmbtu=BIOMETHANE_MARKET_MMBTU,
@@ -483,19 +483,19 @@ if __name__ == "__main__":
     )
 
     # 2. Pretreatment comparison (base + optimistic biostimulant)
-    run_pretreatment_comparison(feed_price=0.00, biostimulant_price=0.50)
-    run_pretreatment_comparison(feed_price=0.00, biostimulant_price=1.00)
+    run_pretreatment_comparison(feed_price=0.02, biostimulant_price=0.50)
+    run_pretreatment_comparison(feed_price=0.02, biostimulant_price=1.00)
 
     # 3. Feed price sensitivity
     run_feed_price_sensitivity(pretreatment_case="press_mill_only")
 
     # 4. Biomethane NPV sensitivity for each pretreatment case
     for case in PRETREATMENT_CASES:
-        run_biomethane_npv_sensitivity(pretreatment_case=case, feed_price=0.00)
+        run_biomethane_npv_sensitivity(pretreatment_case=case, feed_price=0.02)
 
     # 5. Biostimulant price sensitivity
-    run_biostimulant_sensitivity(pretreatment_case="press_mill_only", feed_price=0.00)
-    run_biostimulant_sensitivity(pretreatment_case="combined_PE", feed_price=0.00)
+    run_biostimulant_sensitivity(pretreatment_case="press_mill_only", feed_price=0.02)
+    run_biostimulant_sensitivity(pretreatment_case="combined_PE", feed_price=0.02)
 
     # 6. Unit CAPEX and OPEX by pretreatment case
     run_unit_capex_opex_table()

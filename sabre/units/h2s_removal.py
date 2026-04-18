@@ -1,5 +1,5 @@
 """
-H2S Removal Unit — Biogas Desulfurization
+H2S Removal Unit
 ==========================================
 Removes hydrogen sulfide from raw biogas before membrane upgrading.
 H2S must be removed because it degrades polymer membranes rapidly and
@@ -13,23 +13,6 @@ Modeling approach:
 - H2S captured to near-zero in treated gas
 - Capital cost scaled to raw biogas flow (Nm3/h)
 - Reagent cost (iron sponge replacement) as add_OPEX
-
-Capital anchor:
-  EPA/USDA AgSTAR: Iron sponge desulfurization systems for biogas,
-  typical installed cost $200–600 per Nm3/h raw biogas at 100–1000 Nm3/h
-  scale, scaling exponent 0.6
-  Reference: AgSTAR Handbook, 3rd Ed. (2012); EPRI Biogas Cleanup (2013)
-
-Reagent cost:
-  Iron sponge media replacement: ~$0.001–0.003/Nm3 raw biogas treated.
-  Source: Wellinger & Linberg, Biogas Upgrading and Utilisation (2000);
-          IEA Bioenergy Task 37 (2014)
-
-Operating notes:
-  - Electricity is negligible for iron sponge (passive media bed)
-  - H2S removal efficiency: >99% (treats to <10 ppm H2S typical)
-  - The 0.25 kWh/Nm3 in BiogasUpgrading already includes compression,
-    so no additional compression electricity is added here.
 """
 
 from __future__ import annotations
@@ -59,10 +42,10 @@ class H2SRemoval(bst.Unit):
         outs=(),
         *,
         h2s_removal_efficiency: float = 0.99,
-        ref_flow_Nm3ph: float = 1000.0,
-        ref_installed_cost_usd: float = 400_000.0,
-        scale_exponent: float = 0.6,
-        reagent_cost_usd_per_Nm3_raw: float = 0.002,
+        ref_flow_Nm3ph: float = 1700.0,
+        ref_installed_cost_usd: float = 450_000.0,
+        scale_exponent: float = 0.7,
+        reagent_cost_usd_per_Nm3_raw: float = 0.005,
         F_BM: float = 1.0,
         **kwargs,
     ):
@@ -147,7 +130,7 @@ class H2SRemoval(bst.Unit):
         self.design_results["Installed cost ($)"] = installed_cost
 
         # Reagent (iron sponge media replacement) as add_OPEX
-        # Basis: $0.002/Nm3 raw biogas — IEA Bioenergy Task 37 (2014)
+        # Basis: $0.002/Nm3 raw biogas
         reagent_usd_per_hr = self.reagent_cost_usd_per_Nm3_raw * Q_Nm3ph
         if reagent_usd_per_hr > 0:
             self.add_OPEX = {

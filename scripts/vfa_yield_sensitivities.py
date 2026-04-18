@@ -39,14 +39,14 @@ OUT.mkdir(parents=True, exist_ok=True)
 # -------------------------
 # Base assumptions / ranges
 # -------------------------
-FEED_PRICE_USD_PER_KG_WET = 0.00
+FEED_PRICE_USD_PER_KG_WET = 0.02
 
 # From assumptions.yaml fit_note: sensitivity range 0.35–0.65
 VFA_YIELD_RANGE = np.array([0.35, 0.40, 0.47, 0.55, 0.65])  # kg VFA / kg VS destroyed
 
 # Base fermentation yield is 0.15 kg/kg VFA consumed.
 # Use a conservative-to-optimistic scoping range.
-FERM_YIELD_RANGE = np.array([0.10, 0.144, 0.20, 0.25, 0.30])  # kg oil / kg VFA consumed
+FERM_YIELD_RANGE = np.array([0.10, 0.144, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50])  # kg oil / kg VFA consumed
 
 BASE_FERM_YIELD = 0.144
 BASE_RESIDENCE_H = 48.0
@@ -99,15 +99,15 @@ def solve_oil_msp_from_full_system(
 def override_acidogenic_vfa_yield(vfa_sys, target_vfa_yield):
     """
     Find the acidogenic digester unit generically and override
-    vfa_kg_per_kg_vs_destroyed, then re-simulate that subsystem.
+    vfa_kg_per_kg_vs, then re-simulate that subsystem.
     """
     found = False
     for u in vfa_sys.units:
-        if hasattr(u, "vfa_kg_per_kg_vs_destroyed"):
-            u.vfa_kg_per_kg_vs_destroyed = float(target_vfa_yield)
+        if hasattr(u, "vfa_kg_per_kg_vs"):
+            u.vfa_kg_per_kg_vs = float(target_vfa_yield)
             found = True
     if not found:
-        raise RuntimeError("Could not find acidogenic digester unit with attribute 'vfa_kg_per_kg_vs_destroyed'.")
+        raise RuntimeError("Could not find acidogenic digester unit with attribute 'vfa_kg_per_kg_vs'.")
     vfa_sys.simulate()
 
 
@@ -140,6 +140,23 @@ ax1.plot(
     zorder=3,
 )
 
+ax1.axhline(
+    y=1.50,
+    linestyle="--",
+    linewidth=1.2,
+    color="black",
+    zorder=2,
+    label="Soybean oil market price ($0.62–1.50/kg)",
+)
+ax1.axhline(
+    y=0.62,
+    linestyle="--",
+    linewidth=1.2,
+    color="black",
+    zorder=2,
+)
+ax1.axhspan(0.62, 1.50, alpha=0.10, color="black", zorder=1)
+
 for x, y in zip(VFA_YIELD_RANGE, msp_vs_vfa_yield):
     ax1.text(
         x,
@@ -151,7 +168,7 @@ for x, y in zip(VFA_YIELD_RANGE, msp_vs_vfa_yield):
     )
 
 # base-case star
-base_vfa_yield = 0.47
+base_vfa_yield = 0.55
 base_idx = list(VFA_YIELD_RANGE).index(base_vfa_yield)
 base_msp_vfa = msp_vs_vfa_yield[base_idx]
 
@@ -172,7 +189,7 @@ ax1.set_ylabel("Crude microbial oil MSP ($/kg)")
 ax1.set_title("Effect of acidogenic VFA yield on crude microbial oil MSP")
 ax1.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
 ax1.yaxis.set_major_formatter(mticker.FormatStrFormatter("$%.0f"))
-ax1.set_ylim(5, max(msp_vs_vfa_yield) * 1.05)
+ax1.set_ylim(0, max(msp_vs_vfa_yield) * 1.10)
 ax1.grid(axis="both", linewidth=0.4, color="#D3D1C7", zorder=0)
 ax1.legend(frameon=False, fontsize=8, loc="upper right")
 
@@ -211,6 +228,23 @@ ax2.plot(
     zorder=3,
 )
 
+ax2.axhline(
+    y=1.50,
+    linestyle="--",
+    linewidth=1.2,
+    color="black",
+    zorder=2,
+    label="Soybean oil market price ($0.62–1.50/kg)",
+)
+ax2.axhline(
+    y=0.62,
+    linestyle="--",
+    linewidth=1.2,
+    color="black",
+    zorder=2,
+)
+ax2.axhspan(0.62, 1.50, alpha=0.10, color="black", zorder=1)
+
 for x, y in zip(FERM_YIELD_RANGE, msp_vs_ferm_yield):
     ax2.text(
         x,
@@ -244,7 +278,7 @@ ax2.set_title("Effect of fermentation oil yield on crude microbial oil MSP")
 ax2.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
 ax2.yaxis.set_major_formatter(mticker.FormatStrFormatter("$%.0f"))
 ax2.grid(axis="both", linewidth=0.4, color="#D3D1C7", zorder=0)
-ax2.set_ylim(3, max(msp_vs_ferm_yield) * 1.05)
+ax2.set_ylim(0, max(msp_vs_ferm_yield) * 1.10)
 ax2.legend(frameon=False, fontsize=8, loc="upper right")
 
 fig2.tight_layout()

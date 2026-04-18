@@ -228,7 +228,7 @@ def create_vfa_ad_system(
         ins=ad_inlet,
         outs=("offgas", "acidogenic_broth"),
         vs_destruction=float(vfaP.get("vs_destruction", 0.50)),
-        vfa_kg_per_kg_vs_destroyed=float(vfaP.get("vfa_kg_per_kg_vs_destroyed", 0.47)),
+        vfa_kg_per_kg_vs=float(vfaP.get("vfa_kg_per_kg_vs", 0.47)),
         vfa_split=vfa_split,
         digestible_IDs=vfaP.get(
             "digestible_IDs", A.get("ad_performance", {}).get("digestible_IDs")

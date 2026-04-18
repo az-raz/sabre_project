@@ -181,8 +181,8 @@ ad_pretreatment_cases:
     ad_effects:
       vs_destruction: 0.20
       ch4_kg_per_kg_vs_fed: 0.100
-      ch4_kg_per_kg_vs_fed_low: 0.0958   # BMP (224.19 - 9.45) L/kg VS, scaled
-      ch4_kg_per_kg_vs_fed_high: 0.1042  # BMP (224.19 + 9.45) L/kg VS, scaled
+      ch4_kg_per_kg_vs_fed_low: 0.1000   # BMP (142.91 - 0.004) mL CH4/gVS, scaled; near-zero uncertainty
+      ch4_kg_per_kg_vs_fed_high: 0.1000  # BMP (142.91 + 0.004) mL CH4/gVS, scaled; near-zero uncertainty
       raw_biogas_molfrac:
         Methane: 0.4644
         CarbonDioxide: 0.5056
@@ -470,29 +470,19 @@ vfa_ad_performance:
   cases:
     seaweed_arrested_fitted:
       vs_destruction: 0.50
-      vfa_kg_per_kg_vs_destroyed: 0.47
+      vfa_kg_per_kg_vs: 0.55
       
-      fit_note: "Mass yield back-calculated from the 52% carbon-to-VFA conversion
-        efficiency reported in the seaweed-arrested AD paper (bioRxiv 2025).
-        Assumes ~50% carbon content of VS and ~55% carbon content of mixed
-        VFAs (C2–C6). Consistent with the 0.35–0.80 g VFA/g VS range
-        reported across algal and food waste acidogenic systems (González-
-        Fernández et al. 2019, Sci Reports; Feng et al. 2019, PMC). Treat
-        as a central scoping estimate; sensitivity range 0.35–0.65"
 
-        
-        # Chosen so butyrate + hexanoate + acetate = 0.76
       vfa_split:
-        AceticAcid: 0.42
-        PropionicAcid: 0.18
-        ButyricAcid: 0.20
-        ValericAcid: 0.06
-        HexanoicAcid: 0.14
+        AceticAcid: 0.648
+        PropionicAcid: 0.186
+        ButyricAcid: 0.084
+        ValericAcid: 0.082
+        HexanoicAcid: 0.000
 
 vfa_fermentation:
   case: yarrowia_vfa_base
 
-  # These IDs match the current code.
   vfa_IDs:
     - AceticAcid
     - PropionicAcid
@@ -515,74 +505,89 @@ vfa_fermentation:
       note: "Initial pH 8 was reported as optimal under high-VFA alkaline cultivation."
     modeling_note:
       key: thesis_scoping_model
-      note: "Residence time, stoichiometric yields, and split fractions below are current model assumptions for process scoping and should be sensitivity-tested."
+      note: "Residence time, stoichiometric yields, split fractions, and some equipment-cost placeholders below are current scoping assumptions for process modeling and should be sensitivity-tested."
 
   cases:
     yarrowia_vfa_base:
       organism: Yarrowia lipolytica
       product_ID: MicrobialOil
 
-      # Literature-backed operating anchor
       target_pH: 8.0
 
-      # Current scoping values used by the code
       residence_time_h: 48.0
       conversion: 0.85
-      product_yield_kg_per_kg_vfa_consumed: 0.144   # Gao et al. 2020, Y_L/S at pH 8
+      product_yield_kg_per_kg_vfa_consumed: 0.144
       biomass_yield_kg_per_kg_vfa_consumed: 0.40
       co2_yield_kg_per_kg_vfa_consumed: 0.20
+      oxygen_kg_per_kg_vfa_consumed: 0.80
 
-      # Seed stream for current code; keep zero until you choose an inoculum basis
       seed_water_kgph: 0.0
       seed_cellmass_kgph: 0.0
-
-      # Conditioner doses; keep zero until you choose a medium basis
-      ammonia_dose_kg_per_m3: 0.0
-      phosphate_dose_kg_per_m3: 0.0
-      base_dose_kg_per_m3: 0.0
 
       notes:
         - "Main fermentation product is crude microbial oil."
         - "Omega fatty acids and squalene are not modeled as primary fermenter products in the base case."
-        - "Stoichiometric yields are current model assumptions, not exact literature-fitted values."
+        - "Residence time, conversion, biomass yield, CO2 yield, and O2 demand are current scoping assumptions."
 
   vfa_microfilter:
-    # Split-based representation of the literature permeate/retentate concept.
-    # These are model assumptions, not membrane-flux parameters.
+    broth_density_kg_per_m3: 1000.0
+
     vfa_to_permeate_frac: 0.98
     water_to_permeate_frac: 0.97
     solids_to_permeate_frac: 0.05
     dissolved_other_to_permeate_frac: 0.90
 
+    SEC_kWh_per_m3_feed: 0.08
+
+    # Area-based membrane costing
+    design_flux_L_m2_h: 20.0
+    membrane_cost_usd_per_m2: 200.0
+
     notes:
-      - "Use retentate as the future integration hook to secondary methanogenic AD."
+      - "Area basis uses A = Q_feed * 1000 / flux, where flux is in L/m2/h."
+      - "20 LMH selected as a conservative design flux for low-pressure clarification."
+      - "$200/m2 selected as an upper-end polymeric membrane cost proxy."
 
   fermentation_medium_tank:
     broth_density_kg_per_m3: 1000.0
     target_pH: 8.0
+
+    residence_time_h: 0.5
+    mixing_kW_per_m3: 0.05
+
     ammonia_dose_kg_per_m3: 0.0
     phosphate_dose_kg_per_m3: 0.0
     base_dose_kg_per_m3: 0.0
+    magnesium_sulfate_dose_kg_per_m3: 0.0
 
-  cell_harvest_centrifuge:
-    # Split-based stand-in for biomass harvesting.
-    oil_to_biomass_frac: 0.98
-    cellmass_to_biomass_frac: 0.98
-    water_to_biomass_frac: 0.10
-    dissolved_to_biomass_frac: 0.05
+    cost_model: biosteam_conventional_mix_tank
 
-  wet_lipid_recovery:
-    # Split-based stand-in for crude oil recovery from wet biomass.
-    oil_recovery_frac: 0.95
-    water_to_oil_frac: 0.001
-    cellmass_to_oil_frac: 0.02
-    dissolved_to_oil_frac: 0.001
+    notes:
+      - "Uses BioSTEAM conventional stainless-steel mix-tank purchase-cost algorithm rather than a custom placeholder."
+
+  downstream_recovery:
+    target_oil_and_solids_content_g_per_L: 60.0
+
+    backend_oil_recovery: 0.99
+    backend_oil_water_split: 0.0001
+
+    recycle_total_fraction: 0.10
+    recycle_cellmass_wt_frac: 0.10
+
+    oil_extraction_ref_dry_biomass_tph: 10.0
+    oil_extraction_ref_installed_cost_usd: 7848000.0
+    oil_extraction_homogenization_kWh_per_kg: 0.203
+    oil_extraction_scale_exponent: 0.6
+
+    notes:
+      - "Oil extraction placeholder carries disruption + wet extraction burden."
+      - "Installed cost basis back-calculated from NREL 55431 cell-disruption plus extraction/separation cost bases."
+      - "Homogenization electricity aligned to the harmonized NREL algal-lipid basis rather than the earlier 1.5 kWh/kg placeholder."
 
   product_quality:
     crude_product_stream_ID: crude_microbial_oil
     report_as: crude_microbial_oil
 
-    # Leave these as zero until you build the higher-value oil variant.
     dha_wt_frac_in_oil: 0.0
     squalene_wt_frac_in_oil: 0.0
 
@@ -594,7 +599,6 @@ vfa_fermentation:
     send_vfa_retentate_to_secondary_AD: false
     use_yarrowia_base_case: true
     use_high_value_oil_variant: false
-
 
   sources:
     seaweed_arrested_anchor:

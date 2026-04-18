@@ -1,5 +1,5 @@
 """
-plot_biostimulant_sensitivity.py --< feed price and biostimulant price sensitivity for AD pretreatment case
+plot_biostimulant_sensitivity.py --> feed price and biostimulant price sensitivity for AD pretreatment case
 --------------------------------
 Plot biomethane MSP as a function of biostimulant selling price for the
 methanogenic AD pretreatment cases
@@ -41,9 +41,9 @@ CASE_LABELS = {
 }
 
 # Same sensitivity points used in ad_tea_final.py
-BIOSTIMULANT_PRICES = [0.00, 0.50, 1.00, 2.00]
+BIOSTIMULANT_PRICES = [0.00, 0.50, 1.00, 1.50, 2.00, 2.50, 3.00]
 
-FEED_PRICE_USD_PER_KG_WET = 0.00
+FEED_PRICE_USD_PER_KG_WET = 0.02
 LIQUID_DIGESTATE_DISPOSAL_USD_PER_KG = -0.002
 SOLIDS_DIGESTATE_DISPOSAL_USD_PER_KG = -0.02
 
@@ -148,8 +148,9 @@ for case in PRETREATMENT_CASES:
         zorder=3,
     )
 
-ax.axhline(3.0, color="black", linewidth=1.0, linestyle="--", zorder=1, label="$3/MMBtu")
-ax.axhline(5.0, color="dimgray", linewidth=1.0, linestyle=":", zorder=1, label="$5/MMBtu")
+ax.axhline(3.0, color="black", linewidth=1.3, linestyle="--", zorder=2, label="$3/MMBtu")
+ax.axhline(10.0, color="black", linewidth=1.3, linestyle=":", zorder=2, label="$10/MMBtu")
+ax.axhline(14.0, color="black", linewidth=1.3, linestyle="-.", zorder=2, label="$14/MMBtu")
 
 ax.set_xlabel("Biostimulant price ($/kg)")
 ax.set_ylabel("Biomethane MSP ($/MMBtu)")
@@ -158,6 +159,14 @@ ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
 ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("$%.0f"))
 ax.grid(axis="both", linewidth=0.4, color="#D3D1C7", zorder=0)
 ax.legend(frameon=False, fontsize=8, ncol=2, loc="upper right")
+ax.axvline(
+    0.00,
+    color="black",
+    linewidth=1.0,
+    linestyle="--",
+    zorder=2,
+    label="Baseline ($0.00/kg)",
+)
 
 fig.tight_layout()
 fig.savefig(OUT / "fig_biostimulant_sensitivity.png", bbox_inches="tight")

@@ -1,38 +1,35 @@
-from __future__ import annotations
-
 """
 Integrated-system TEA figures
-
-1) Runs the alpha sweep for several integrated-system scenarios
-2) Saves one CSV per scenario plus a summary CSV of the best point in each case
-3) Plots 4 figures:
-   - Figure 1: Alpha sweep across four scenario cases (2x2 panels, NPV vs alpha)
-   - Figure 2: Best-case scenario comparison
-   - Figure 3: Cost metrics at selected alpha values (base scenario)
-   - Figure 4: Annual product outputs vs alpha (base scenario)
+===========================================
+Figures:
+  1) Alpha sweep with market price uncertainty bands — four scenarios
+  2) NPV bar chart at alpha=0 — four scenarios × three biomethane prices
+  3) 2D heatmap — biomethane × oil price → NPV at alpha=0, base scenario
+  4) 2×3 panel heatmaps — alpha=0/0.25/0.50/0.75/1.0, three feed prices
 """
 
-import math
+from __future__ import annotations
+
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import biosteam as bst
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
 import pandas as pd
 
-# -----------------------------------------------------------------------------
-# Import integrated TEA utilities
-# -----------------------------------------------------------------------------
 THIS_DIR = Path(__file__).resolve().parent
 if str(THIS_DIR) not in sys.path:
     sys.path.insert(0, str(THIS_DIR))
 
 from integrated_tea import (
     BIOMETHANE_MARKET_MMBTU,
+    BIOMETHANE_PRICES,
     OIL_MARKET_USD_PER_KG,
     _apply_stream_prices,
+    _compute_npv_at_market,
     _patch_ev607,
     _wire_oil_reagent,
     run_alpha_sweep,
@@ -41,136 +38,89 @@ from sabre.chemicals import set_thermo
 from sabre.systems.integrated_system import create_integrated_biorefinery
 from sabre.tea import make_baseline_tea
 
+# ── Output directories ────────────────────────────────────────────────────────
+OUTPUT_DIR = Path("results") / "integrated_figures"
+CSV_DIR    = OUTPUT_DIR / "csv"
+FIG_DIR    = OUTPUT_DIR / "figures"
 
-# -----------------------------------------------------------------------------
-# Scenario definitions --> trying to find worst/best cases
-# -----------------------------------------------------------------------------
+# ── Scenario definitions ──────────────────────────────────────────────────────
 @dataclass(frozen=True)
 class Scenario:
-    name: str
-    label: str
-    group_label: str
-    pretreatment_label: str
-    feed_price: float
-    pretreatment_case: str
+    name:               str
+    label:              str
+    short_label:        str
+    feed_price:         float
     biostimulant_price: float
-    market_mmbtu: float = BIOMETHANE_MARKET_MMBTU
-    market_oil: float = OIL_MARKET_USD_PER_KG
+    pretreatment_case:  str   = "press_mill_only"
+    market_mmbtu:       float = BIOMETHANE_MARKET_MMBTU
+    market_oil:         float = OIL_MARKET_USD_PER_KG
 
 
 SCENARIOS: tuple[Scenario, ...] = (
-    # 1) zero feed cost, zero biostimulant
     Scenario(
-        name="pm_feed0_bio0",
-        label="Press and mill | feed $0/kg | biostim $0/kg",
-        group_label="Feed $0/kg\nBiostim $0/kg",
-        pretreatment_label="Press and mill",
-        feed_price=0.00,
-        pretreatment_case="press_mill_only",
-        biostimulant_price=0.00,
+        name="base",
+        label="Base | feed $0.02/kg | biostim $0.50/kg",
+        short_label="Base\n($0.02/kg feed)",
+        feed_price=0.02,
+        biostimulant_price=0.50,
     ),
     Scenario(
-        name="pe_feed0_bio0",
-        label="PE | feed $0/kg | biostim $0/kg",
-        group_label="Feed $0/kg\nBiostim $0/kg",
-        pretreatment_label="PE",
-        feed_price=0.00,
-        pretreatment_case="combined_PE",
-        biostimulant_price=0.00,
-    ),
-
-    # 2) tipping fees, zero biostimulant
-    Scenario(
-        name="pm_tip_bio0",
-        label="Press and mill | tipping fee | biostim $0/kg",
-        group_label="Tipping fee\nBiostim $0/kg",
-        pretreatment_label="Press and mill",
+        name="tipping_fee",
+        label="Tipping fee | feed -$0.02/kg | biostim $0.50/kg",
+        short_label="Tipping fee\n(-$0.02/kg)",
         feed_price=-0.02,
-        pretreatment_case="press_mill_only",
-        biostimulant_price=0.00,
+        biostimulant_price=0.50,
     ),
     Scenario(
-        name="pe_tip_bio0",
-        label="PE | tipping fee | biostim $0/kg",
-        group_label="Tipping fee\nBiostim $0/kg",
-        pretreatment_label="PE",
+        name="biostim",
+        label="Base | feed \$0.02/kg | biostim \$3.00/kg",
+        short_label="Biostimulant\n(\$3.00/kg)",
+        feed_price=0.02,
+        biostimulant_price=3.00,
+    ),
+    Scenario(
+        name="best_case",
+        label="Best case | tipping fee | biostim \$3.00/kg",
+        short_label="Best case\n(tip + biostim)",
         feed_price=-0.02,
-        pretreatment_case="combined_PE",
-        biostimulant_price=0.00,
-    ),
-
-    # 3) zero feed cost, $1 biostimulant
-    Scenario(
-        name="pm_feed0_bio1",
-        label="Press and mill | feed $0/kg | biostim $1/kg",
-        group_label="Feed $0/kg\nBiostim $1/kg",
-        pretreatment_label="Press and mill",
-        feed_price=0.00,
-        pretreatment_case="press_mill_only",
-        biostimulant_price=1.00,
-    ),
-    Scenario(
-        name="pe_feed0_bio1",
-        label="PE | feed $0/kg | biostim $1/kg",
-        group_label="Feed $0/kg\nBiostim $1/kg",
-        pretreatment_label="PE",
-        feed_price=0.00,
-        pretreatment_case="combined_PE",
-        biostimulant_price=1.00,
-    ),
-
-    # 4) tipping fees, $1 biostimulant
-    Scenario(
-        name="pm_tip_bio1",
-        label="Press and mill | tipping fee | biostim $1/kg",
-        group_label="Tipping fee\nBiostim $1/kg",
-        pretreatment_label="Press and mill",
-        feed_price=-0.02,
-        pretreatment_case="press_mill_only",
-        biostimulant_price=1.00,
-    ),
-    Scenario(
-        name="pe_tip_bio1",
-        label="PE | tipping fee | biostim $1/kg",
-        group_label="Tipping fee\nBiostim $1/kg",
-        pretreatment_label="PE",
-        feed_price=-0.02,
-        pretreatment_case="combined_PE",
-        biostimulant_price=1.00,
+        biostimulant_price=3.00,
     ),
 )
 
-BASE_SCENARIO_NAME = "pm_feed0_bio0"
-OUTPUT_DIR = Path("results") / "integrated_figures"
-CSV_DIR = OUTPUT_DIR / "csv"
-FIG_DIR = OUTPUT_DIR / "figures"
+BASE_SCENARIO_NAME = "base"
+
+SCENARIO_COLORS = {
+    "base":        "#1f77b4",
+    "tipping_fee": "#ff7f0e",
+    "biostim":     "#2ca02c",
+    "best_case":   "#d62728",
+}
+
+BIOMETHANE_PRICE_LABELS = {
+    3.0:  "$3/MMBtu (Henry Hub)",
+    10.0: "$10/MMBtu (TTF)",
+    14.0: "$14/MMBtu (JKM)",
+}
+
+TEXT = "#2C2C2A"
 
 
-# -----------------------------------------------------------------------------
-# Helper functions
-# -----------------------------------------------------------------------------
-def _safe_operating_hours(tea) -> float:
-    if hasattr(tea, "operating_hours"):
-        return float(tea.operating_hours)
-    if hasattr(tea, "operating_days"):
-        return float(tea.operating_days) * 24.0
-    return 330.0 * 24.0
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def _save_dataframe(df: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
+    print(f"Saved CSV: {path}")
 
 
-def _crf(rate: float, years: int) -> float:
-    if rate == 0:
-        return 1.0 / years
-    return rate * (1.0 + rate) ** years / ((1.0 + rate) ** years - 1.0)
-
-
-def _build_case_metrics(
+def _build_npv_at_alpha(
     alpha: float,
-    *,
     feed_price: float,
-    pretreatment_case: str,
     biostimulant_price: float,
-) -> dict[str, float]:
-    """Rebuild one alpha case and return detailed metrics for plotting."""
+    pretreatment_case: str,
+    market_mmbtu: float,
+    market_oil: float,
+) -> float:
+    """Run one simulation at given alpha and return NPV ($M)."""
     bst.main_flowsheet.clear()
     set_thermo()
 
@@ -186,456 +136,356 @@ def _build_case_metrics(
     _wire_oil_reagent(streams, units)
 
     tea = make_baseline_tea(sys)
-    op_hours = _safe_operating_hours(tea)
-
-    duration = getattr(tea, "duration", (0, 30))
-    if isinstance(duration, tuple) and len(duration) == 2:
-        years = int(duration[1] - duration[0])
-    else:
-        years = 30
-    rate = float(getattr(tea, "IRR", 0.10) or 0.10)
-    annualized_capital = float(tea.TCI) * _crf(rate, max(years, 1))
-
-    biomethane = streams.get("biomethane")
-    backend_oil = streams.get("backend_oil")
-    biostimulant = streams.get("biostimulant_membrane_concentrate")
-
-    methane_kgph = 0.0
-    methane_mmbtu_per_yr = 0.0
-    if biomethane is not None and float(biomethane.F_mass) > 0:
-        methane_kgph = float(biomethane.imass["Methane"])
-        methane_mmbtu_per_yr = methane_kgph * 0.0526 * op_hours
-
-    oil_t_per_yr = 0.0
-    if backend_oil is not None and float(backend_oil.F_mass) > 0:
-        oil_kgph = float(backend_oil.imass["MicrobialOil"])
-        oil_t_per_yr = oil_kgph * op_hours / 1000.0
-
-    biostim_t_per_yr = 0.0
-    if biostimulant is not None and float(biostimulant.F_mass) > 0:
-        biostim_kgph = float(biostimulant.F_mass)
-        biostim_t_per_yr = biostim_kgph * op_hours / 1000.0
-
-    return {
-        "alpha": alpha,
-        "TCI_M": float(tea.TCI) / 1e6,
-        "VOC_M_per_yr": float(tea.VOC) / 1e6,
-        "FOC_M_per_yr": float(tea.FOC) / 1e6,
-        "annualized_capital_M_per_yr": annualized_capital / 1e6,
-        "methane_kgph": methane_kgph,
-        "methane_MMBtu_per_yr": methane_mmbtu_per_yr,
-        "microbial_oil_t_per_yr": oil_t_per_yr,
-        "biostimulant_t_per_yr": biostim_t_per_yr,
-    }
+    npv = _compute_npv_at_market(tea, streams, market_mmbtu, market_oil)
+    return npv / 1e6
 
 
-def _best_row(df: pd.DataFrame) -> pd.Series:
-    valid = df[df["ok"]].copy()
-    valid = valid[pd.notna(valid["combined_npv_M"])]
-    if valid.empty:
-        raise RuntimeError("No valid rows found when selecting best alpha.")
-    idx = valid["combined_npv_M"].idxmax()
-    return valid.loc[idx]
+def _style_ax(ax):
+    ax.grid(False)
+    ax.set_facecolor("white")
+    for spine in ax.spines.values():
+        spine.set_linewidth(1.0)
+        spine.set_color("#1a1a1a")
+    ax.tick_params(labelsize=9)
 
 
-def _save_dataframe(df: pd.DataFrame, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(path, index=False)
-    print(f"Saved CSV: {path}")
+def _add_npv0_contour(ax, grid, n_rows, n_cols):
+    """Add NPV=0 dashed contour to a heatmap panel."""
+    try:
+        from scipy.interpolate import RegularGridInterpolator
+        bm_f    = np.linspace(0, n_cols - 1, 300)
+        oil_f   = np.linspace(0, n_rows - 1, 300)
+        BM, OIL = np.meshgrid(bm_f, oil_f)
+        interp  = RegularGridInterpolator(
+            (np.arange(n_rows), np.arange(n_cols)), grid,
+            method="linear", bounds_error=False)
+        Z  = interp(np.stack([OIL.ravel(), BM.ravel()], axis=1)).reshape(BM.shape)
+        cs = ax.contour(BM, OIL, Z, levels=[0], colors=["black"],
+                        linewidths=1.8, linestyles=["--"], zorder=5)
+        ax.clabel(cs, fmt={0: "NPV=0"}, fontsize=6.5, inline=True)
+    except Exception:
+        pass
 
 
-# -----------------------------------------------------------------------------
-# Plotting
-# -----------------------------------------------------------------------------
-def plot_alpha_sweep_four_cases(all_results: dict[str, pd.DataFrame], outpath: Path) -> None:
+# ── Figure 1 — Alpha sweep with uncertainty bands ─────────────────────────────
+def plot_alpha_sweep_with_bands(outpath: Path) -> None:
     """
-    Single-panel alpha sweep — one line per scenario (4 series).
-    Press-mill only; pretreatment comparison dropped.
-    Legend outside right; optimal-alpha dotted vline per series.
+    Four scenarios, each with:
+      - Central line : biomethane $10/MMBtu · oil $1.00/kg
+      - Shaded band  : [bm=$3, oil=$0.62] to [bm=$14, oil=$1.50]
+
+    Scenarios:
+      1. feed=$0.02,  biostim=$0.50
+      2. feed=-$0.02, biostim=$0.50
+      3. feed=$0.02,  biostim=$3.00
+      4. feed=-$0.02, biostim=$3.00
     """
-    import matplotlib.ticker as mticker
-
-    TEXT   = "#2C2C2A"
-    C_GRID = "#E8E6DE"
-
-    # 4 series: feed cost × biostimulant price (press-mill only)
-    SERIES = [
-        {
-            "group":  "Feed $0/kg\nBiostim $0/kg",
-            "label":  "Near-zero feed · Biostim $0/kg",
-            "color":  "#1f77b4",
-            "ls":     "-",
-            "marker": "o",
-        },
-        {
-            "group":  "Tipping fee\nBiostim $0/kg",
-            "label":  "Tipping fee · Biostim $0/kg",
-            "color":  "#ff7f0e",
-            "ls":     "--",
-            "marker": "^",
-        },
-        {
-            "group":  "Feed $0/kg\nBiostim $1/kg",
-            "label":  "Near-zero feed · Biostim $1/kg",
-            "color":  "#2ca02c",
-            "ls":     "-",
-            "marker": "s",
-        },
-        {
-            "group":  "Tipping fee\nBiostim $1/kg",
-            "label":  "Tipping fee · Biostim $1/kg",
-            "color":  "#d62728",
-            "ls":     "--",
-            "marker": "D",
-        },
+    BAND_SCENARIOS = [
+        {"feed":  0.02, "biostim": 0.50,
+        "label": r"Feed \$0.02/kg $\cdot$ Biostim \$0.50/kg",
+        "color": "#1f77b4", "ls": "-",  "marker": "o"},
+        {"feed": -0.02, "biostim": 0.50,
+        "label": r"Tipping fee $\cdot$ Biostim \$0.50/kg",
+        "color": "#ff7f0e", "ls": "--", "marker": "^"},
+        {"feed":  0.02, "biostim": 3.00,
+        "label": r"Feed \$0.02/kg $\cdot$ Biostim \$3.00/kg",
+        "color": "#2ca02c", "ls": "-",  "marker": "s"},
+        {"feed": -0.02, "biostim": 3.00,
+        "label": r"Tipping fee $\cdot$ Biostim \$3.00/kg",
+        "color": "#d62728", "ls": "--", "marker": "D"},
     ]
 
-    fig, ax = plt.subplots(figsize=(9, 5.5))
-    fig.subplots_adjust(left=0.10, right=0.72, top=0.88, bottom=0.12)
+    BM_LOW,  BM_MID,  BM_HIGH  =  3.0, 10.0, 14.0
+    OIL_LOW, OIL_MID, OIL_HIGH = 0.62,  1.00,  1.50
 
-    for sc in SERIES:
-        # find the press-mill dataframe for this group
-        df = None
-        for candidate in all_results.values():
-            if (candidate["group_label"].iloc[0] == sc["group"] and
-                    candidate["pretreatment_label"].iloc[0] == "Press and mill"):
-                df = candidate
-                break
-        if df is None:
-            continue
+    fig, ax = plt.subplots(figsize=(9.0, 5.5))
+    fig.subplots_adjust(left=0.11, right=0.68, top=0.88, bottom=0.22)
 
-        valid = df[df["ok"] & df["combined_npv_M"].notna()]
-        ax.plot(valid["alpha"], valid["combined_npv_M"],
-                color=sc["color"], ls=sc["ls"], lw=1.6,
+    for sc in BAND_SCENARIOS:
+        print(f"\nRunning band sweep: {sc['label']}")
+
+        r_mid  = run_alpha_sweep(sc["feed"], "band", "press_mill_only",
+                                 sc["biostim"], BM_MID,  OIL_MID,  False)
+        r_low  = run_alpha_sweep(sc["feed"], "band", "press_mill_only",
+                                 sc["biostim"], BM_LOW,  OIL_LOW,  False)
+        r_high = run_alpha_sweep(sc["feed"], "band", "press_mill_only",
+                                 sc["biostim"], BM_HIGH, OIL_HIGH, False)
+
+        alphas   = [r["alpha"]          for r in r_mid  if r["ok"]]
+        npv_mid  = [r["combined_npv_M"] for r in r_mid  if r["ok"]]
+        npv_low  = [r["combined_npv_M"] for r in r_low  if r["ok"]]
+        npv_high = [r["combined_npv_M"] for r in r_high if r["ok"]]
+
+        ax.fill_between(alphas, npv_low, npv_high,
+                        color=sc["color"], alpha=0.15, zorder=2)
+        ax.plot(alphas, npv_mid,
+                color=sc["color"], ls=sc["ls"], lw=1.8,
                 marker=sc["marker"], markersize=5,
                 markerfacecolor="white", markeredgewidth=1.4,
                 markeredgecolor=sc["color"],
                 label=sc["label"], zorder=3)
 
-        try:
-            best = _best_row(df)
-            ax.axvline(best["alpha"], color=sc["color"], ls=":",
-                       lw=0.9, zorder=2, alpha=0.6)
-        except Exception:
-            pass
-
-    # NPV = 0 reference
-    ax.axhline(0, color="#555555", lw=0.8, ls="-", zorder=1)
-    ax.text(1.01, 0, "NPV = 0", transform=ax.get_yaxis_transform(),
+    ax.axhline(0, color="#555555", lw=0.9, ls="-", zorder=1)
+    ax.text(1.02, 0, "NPV = 0", transform=ax.get_yaxis_transform(),
             va="center", fontsize=7.5, color="#555555")
 
-    ax.set_xlabel("\u03b1  (fraction of milled biomass to biomethane pathway)",
+    ax.set_xlabel("α  (fraction of milled biomass to biomethane pathway)",
                   fontsize=10, color=TEXT)
     ax.set_ylabel("Combined NPV  ($M)", fontsize=10, color=TEXT)
     ax.set_title(
-        "Integrated biorefinery NPV vs. pathway split (\u03b1)\n"
-        "Oil $5.00/kg  \u00b7  Biomethane $3.00/MMBtu  \u00b7  Press-mill pretreatment",
-        fontsize=10.5, color=TEXT, pad=8,
+        r"Integrated biorefinery NPV vs. pathway split ($\alpha$)" + "\n"
+        r"Central line: \$10/MMBtu, \$1.00/kg oil  |  "
+        r"Band: [\$3$-$\$14/MMBtu] $\times$ [\$0.62$-$\$1.50/kg oil]",
+        fontsize=10, color=TEXT, pad=8,
     )
-
     ax.set_xlim(-0.03, 1.03)
     ax.xaxis.set_major_locator(mticker.MultipleLocator(0.2))
     ax.xaxis.set_minor_locator(mticker.MultipleLocator(0.1))
-    ax.yaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda v, _: f"${v:,.0f}M"))
-    ax.tick_params(labelsize=9)
-    ax.grid(False)
-    ax.set_facecolor("white")
-    for spine in ax.spines.values():
-        spine.set_linewidth(1.0)
-        spine.set_color("#1a1a1a")
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"${v:,.0f}M"))
+    _style_ax(ax)
 
-    leg = ax.legend(title="Scenario", title_fontsize=8.5,
-                    fontsize=8.5, loc="upper left",
-                    bbox_to_anchor=(1.02, 1.0),
-                    frameon=True, framealpha=0.95,
-                    edgecolor="#D3D1C7", ncol=1,
-                    handlelength=2.4, borderaxespad=0)
-    leg.get_title().set_fontweight("bold")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.24),
+              ncol=2, frameon=True, fontsize=8.5)
 
     outpath.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close(fig)
-    print(f"Saved figure: {outpath}")
+    print(f"Saved: {outpath}")
 
-def plot_scenario_comparison(summary_df: pd.DataFrame, outpath: Path) -> None:
-    """
-    Best-NPV bar chart only — one bar per scenario, press-mill pretreatment.
-    Optimal alpha annotated inside each bar.
-    """
-    import numpy as np
-    import matplotlib.ticker as mticker
 
-    TEXT   = "#2C2C2A"
-    C_GRID = "#E8E6DE"
+# ── Figure 2 — NPV bar chart at alpha=1 ──────────────────────────────────────
+def plot_npv_bar_chart(npv_table: dict, outpath: Path) -> None:
+    sc_names  = [sc.name        for sc in SCENARIOS]
+    sc_labels = [sc.short_label for sc in SCENARIOS]
 
-    groups = [
-        "Feed $0/kg\nBiostim $0/kg",
-        "Tipping fee\nBiostim $0/kg",
-        "Feed $0/kg\nBiostim $1/kg",
-        "Tipping fee\nBiostim $1/kg",
-    ]
-    xlabels = [
-        "Near-zero feed\nBiostim $0/kg",
-        "Tipping fee\nBiostim $0/kg",
-        "Near-zero feed\nBiostim $1/kg",
-        "Tipping fee\nBiostim $1/kg",
-    ]
-    COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+    width   = 0.22
+    x       = np.arange(len(sc_names))
+    HATCHES = ["", "//", "xx"]
+    COLORS  = ["#aec7e8", "#1f77b4", "#17517d"]
 
-    pm = (summary_df[summary_df["pretreatment_label"] == "Press and mill"]
-          .set_index("group_label").loc[groups])
+    fig, ax = plt.subplots(figsize=(9, 5.5))
 
-    x = np.arange(len(groups))
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-
-    bars = ax.bar(x, pm["best_npv_M"], width=0.5,
-                  color=COLORS, alpha=0.88,
-                  zorder=3, linewidth=0.5, edgecolor="white")
+    for k, (bm_price, hatch, color) in enumerate(
+            zip(BIOMETHANE_PRICES, HATCHES, COLORS)):
+        offsets  = x + (k - 1) * width
+        npv_vals = [npv_table[sc][bm_price] for sc in sc_names]
+        ax.bar(offsets, npv_vals, width=width, color=color,
+               edgecolor="white", hatch=hatch, linewidth=0.5, zorder=3,
+               label=BIOMETHANE_PRICE_LABELS[bm_price])
 
     ax.axhline(0, color="#555555", lw=0.9, zorder=2)
-
-    # Annotate optimal alpha inside bars
-    for bar, (_, row) in zip(bars, pm.iterrows()):
-        a   = row["optimal_alpha"]
-        h   = bar.get_height()
-        yc  = bar.get_y() + h / 2
-        ax.text(bar.get_x() + bar.get_width() / 2, yc,
-                f"\u03b1 = {a:.1f}",
-                ha="center", va="center",
-                fontsize=9, color="white", fontweight="bold")
-
-    ax.set_ylabel("Best combined NPV  ($M)", fontsize=10, color=TEXT)
+    ax.set_ylabel("Combined NPV at alpha = 1  (\$M)", fontsize=10, color=TEXT)
     ax.set_title(
-        "Best integrated-system NPV at optimal \u03b1\n"
-        "Oil $5.00/kg  \u00b7  Biomethane $3.00/MMBtu  \u00b7  Press-mill pretreatment",
+        f"Integrated biorefinery NPV at alpha = 1\n"
+        f"Oil \${OIL_MARKET_USD_PER_KG:.2f}/kg  ·  Press-mill  ·  Biostimulant \$0.50/kg",
         fontsize=10.5, color=TEXT, pad=8,
     )
     ax.set_xticks(x)
-    ax.set_xticklabels(xlabels, fontsize=9)
-    ax.yaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda v, _: f"${v:,.0f}M"))
-    ax.tick_params(labelsize=9)
-    ax.set_facecolor("white")
-    ax.grid(False)
-    ax.set_axisbelow(False)
-    for spine in ax.spines.values():
-        spine.set_linewidth(1.0)
-        spine.set_color("#1a1a1a")
+    ax.set_xticklabels(sc_labels, fontsize=9)
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"\${v:,.0f}M"))
+    _style_ax(ax)
+    ax.legend(fontsize=8.5, frameon=True, loc="upper left")
 
-    fig.tight_layout(pad=1.2)
+    fig.tight_layout()
     outpath.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close(fig)
-    print(f"Saved figure: {outpath}")
+    print(f"Saved: {outpath}")
 
-def plot_cost_metrics(selected_df: pd.DataFrame, outpath: Path) -> None:
-    """Cost breakdown at selected alpha values (thesis quality)."""
-    import matplotlib.ticker as mticker
 
-    C_VOC  = "#185FA5"
-    C_FOC  = "#9FE1CB"
-    C_TCI  = "#BA7517"
-    C_GRID = "#E8E6DE"
-    TEXT   = "#2C2C2A"
+# ── Figure 3 — Single heatmap at alpha=0 ─────────────────────────────────────
+def plot_npv_heatmap(outpath: Path) -> None:
+    BM_PRICES_GRID  = [3.0, 5.0, 8.0, 10.0, 12.0, 14.0]
+    OIL_PRICES_GRID = [0.62, 0.80, 1.00, 1.20, 1.50]
 
-    labels = [f"α = {a:.1f}" for a in selected_df["alpha"]]
-    x = range(len(labels))
+    base = next(s for s in SCENARIOS if s.name == BASE_SCENARIO_NAME)
 
-    fig, axes = plt.subplots(2, 1, figsize=(7, 6.5), constrained_layout=True)
+    print("\nBuilding NPV heatmap (alpha=0, base scenario)...")
+    grid = np.zeros((len(OIL_PRICES_GRID), len(BM_PRICES_GRID)))
 
-    def _style(ax):
-        ax.set_facecolor("white")
-        ax.grid(False)
-        ax.set_axisbelow(False)
-        for spine in ax.spines.values():
-            spine.set_linewidth(1.0); spine.set_color("#1a1a1a")
-        ax.tick_params(labelsize=9)
+    for i, oil_p in enumerate(OIL_PRICES_GRID):
+        for j, bm_p in enumerate(BM_PRICES_GRID):
+            npv = _build_npv_at_alpha(
+                0.0, base.feed_price, base.biostimulant_price,
+                base.pretreatment_case, bm_p, oil_p)
+            grid[i, j] = npv
+            print(f"  bm=${bm_p:.0f}  oil=${oil_p:.2f}  NPV=${npv:.1f}M")
 
-    # Stacked VOC + FOC
-    axes[0].bar(labels, selected_df["VOC_M_per_yr"], color=C_VOC,
-                alpha=0.85, label="VOC", zorder=3, edgecolor="white", lw=0.5)
-    axes[0].bar(labels, selected_df["FOC_M_per_yr"],
-                bottom=selected_df["VOC_M_per_yr"],
-                color=C_FOC, alpha=0.85, label="FOC",
-                zorder=3, edgecolor="white", lw=0.5)
-    axes[0].set_ylabel("Annual operating cost  ($M/yr)", fontsize=9.5, color=TEXT)
-    axes[0].yaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda v, _: f"${v:,.0f}M"))
-    leg = axes[0].legend(fontsize=8.5, frameon=True, framealpha=0.95,
-                          edgecolor="#D3D1C7")
-    axes[0].set_title("Cost metrics at selected α values (base scenario)",
-                       fontsize=10, color=TEXT, pad=6)
-    _style(axes[0])
+    n_rows, n_cols = grid.shape
+    vmax = max(abs(grid.min()), abs(grid.max()))
+    vmin = -vmax
 
-    # TCI
-    axes[1].bar(labels, selected_df["TCI_M"], color=C_TCI,
-                alpha=0.85, zorder=3, edgecolor="white", lw=0.5)
-    axes[1].set_ylabel("Total capital investment  ($M)", fontsize=9.5, color=TEXT)
-    axes[1].set_xlabel("Pathway split  (α)", fontsize=9.5, color=TEXT)
-    axes[1].yaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda v, _: f"${v:,.0f}M"))
-    _style(axes[1])
+    fig, ax = plt.subplots(figsize=(8.0, 5.5))
+    im = ax.imshow(grid, aspect="auto", origin="lower", cmap="RdYlGn",
+                   vmin=vmin, vmax=vmax,
+                   extent=[-0.5, n_cols - 0.5, -0.5, n_rows - 0.5])
+
+    for i in range(n_rows):
+        for j in range(n_cols):
+            val    = grid[i, j]
+            normed = (val - vmin) / max(vmax - vmin, 1)
+            color  = "white" if normed < 0.25 or normed > 0.75 else "black"
+            ax.text(j, i, f"${val:.0f}M", ha="center", va="center",
+                    fontsize=7.5, color=color)
+
+    _add_npv0_contour(ax, grid, n_rows, n_cols)
+
+    ax.set_xticks(range(n_cols))
+    ax.set_xticklabels([f"${p:.0f}" for p in BM_PRICES_GRID], fontsize=8.5)
+    ax.set_yticks(range(n_rows))
+    ax.set_yticklabels([f"${p:.2f}" for p in OIL_PRICES_GRID], fontsize=8.5)
+    ax.set_xlabel("Biomethane price ($/MMBtu)", fontsize=10, color=TEXT)
+    ax.set_ylabel("Microbial oil price ($/kg)", fontsize=10, color=TEXT)
+    ax.set_title(
+        "Integrated biorefinery NPV ($M) at alpha = 0\n"
+        "Base scenario: feed $0.02/kg · biostimulant $0.50/kg · press-mill",
+        fontsize=10.5, color=TEXT, pad=8)
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("NPV ($M)", fontsize=9)
+
+    bm_ttf_idx  = BM_PRICES_GRID.index(10.0)
+    bm_jkm_idx  = BM_PRICES_GRID.index(14.0)
+    oil_mid_idx = OIL_PRICES_GRID.index(1.00)
+    ax.axvline(bm_ttf_idx,  color="#1f77b4", lw=1.2, ls=":", zorder=4,
+               label="$10/MMBtu (TTF)")
+    ax.axvline(bm_jkm_idx,  color="#ff7f0e", lw=1.2, ls=":", zorder=4,
+               label="$14/MMBtu (JKM)")
+    ax.axhline(oil_mid_idx, color="#2ca02c", lw=1.2, ls=":", zorder=4,
+               label="$1.00/kg oil")
+    ax.legend(fontsize=7.5, frameon=True, loc="upper left")
+
+    fig.tight_layout()
+    outpath.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"Saved: {outpath}")
+
+
+# ── Figure 4 — Panel heatmaps varying alpha, one file per feed price ──────────
+def plot_npv_heatmap_panel(
+    outpath: Path,
+    feed_price: float,
+    feed_label: str,
+    biostimulant_price: float = 0.50,
+) -> None:
+    """2x3 panel of NPV heatmaps at alpha=0/0.25/0.50/0.75/1.0."""
+    BM_PRICES_GRID  = [3.0, 5.0, 8.0, 10.0, 12.0, 14.0]
+    OIL_PRICES_GRID = [0.62, 0.80, 1.00, 1.20, 1.50]
+    ALPHA_VALUES    = [0.0, 0.25, 0.50, 0.75, 1.0]
+
+    grids: dict[float, np.ndarray] = {}
+
+    for alpha in ALPHA_VALUES:
+        print(f"\nHeatmap panel [{feed_label}] alpha={alpha:.2f}...")
+        grid = np.zeros((len(OIL_PRICES_GRID), len(BM_PRICES_GRID)))
+        for i, oil_p in enumerate(OIL_PRICES_GRID):
+            for j, bm_p in enumerate(BM_PRICES_GRID):
+                npv = _build_npv_at_alpha(
+                    alpha, feed_price, biostimulant_price,
+                    "press_mill_only", bm_p, oil_p)
+                grid[i, j] = npv
+                print(f"  a={alpha:.2f} bm=${bm_p:.0f} oil=${oil_p:.2f} NPV=${npv:.1f}M")
+        grids[alpha] = grid
+
+    all_vals = np.concatenate([g.ravel() for g in grids.values()])
+    vmax = np.percentile(np.abs(all_vals), 98)
+    vmin = -vmax
+    n_rows, n_cols = len(OIL_PRICES_GRID), len(BM_PRICES_GRID)
+
+    fig, axes = plt.subplots(2, 3, figsize=(14, 9), constrained_layout=False)
+    fig.subplots_adjust(hspace=0.32, wspace=0.25, bottom=0.08)
+    axes_flat = axes.flatten()
+
+    for idx, alpha in enumerate(ALPHA_VALUES):
+        ax   = axes_flat[idx]
+        grid = grids[alpha]
+
+        ax.imshow(grid, aspect="auto", origin="lower", cmap="RdYlGn",
+                  vmin=vmin, vmax=vmax,
+                  extent=[-0.5, n_cols - 0.5, -0.5, n_rows - 0.5])
+
+        for i in range(n_rows):
+            for j in range(n_cols):
+                val    = grid[i, j]
+                normed = (val - vmin) / max(vmax - vmin, 1)
+                color  = "white" if normed < 0.25 or normed > 0.75 else "black"
+                ax.text(j, i, f"${val:.0f}M", ha="center", va="center",
+                        fontsize=6.5, color=color)
+
+        _add_npv0_contour(ax, grid, n_rows, n_cols)
+
+        ax.set_xticks(range(n_cols))
+        ax.set_yticks(range(n_rows))
+        if idx >= 3:
+            ax.set_xticklabels([f"${p:.0f}" for p in BM_PRICES_GRID], fontsize=7.5)
+            ax.set_xlabel("Biomethane price ($/MMBtu)", fontsize=8.5, color=TEXT)
+        else:
+            ax.set_xticklabels([])
+        if idx % 3 == 0:
+            ax.set_yticklabels([f"${p:.2f}" for p in OIL_PRICES_GRID], fontsize=7.5)
+            ax.set_ylabel("Microbial oil price ($/kg)", fontsize=8.5, color=TEXT)
+        else:
+            ax.set_yticklabels([])
+        ax.set_title(f"alpha = {alpha:.2f}", fontsize=10, color=TEXT, pad=4)
+
+    axes_flat[-1].set_visible(False)
+    cbar_ax = fig.add_axes([0.69, 0.10, 0.02, 0.35])
+    sm = plt.cm.ScalarMappable(cmap="RdYlGn",
+                                norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    sm.set_array([])
+    cbar = fig.colorbar(sm, cax=cbar_ax)
+    cbar.set_label("NPV ($M)", fontsize=9)
+
+    fig.suptitle(
+        f"Integrated biorefinery NPV ($M) — biomethane x oil price sensitivity\n"
+        f"Feed: ${feed_price:+.2f}/kg ({feed_label}) · "
+        f"biostimulant ${biostimulant_price:.2f}/kg · press-mill",
+        fontsize=11, color=TEXT, y=1.01,
+    )
 
     outpath.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close(fig)
-    print(f"Saved figure: {outpath}")
+    print(f"Saved: {outpath}")
 
 
-def plot_product_outputs(full_metrics_df: pd.DataFrame, outpath: Path) -> None:
-    """Annual product rates vs alpha"""
-    import matplotlib.ticker as mticker
-
-    C_CH4  = "#185FA5"
-    C_OIL  = "#0F6E56"
-    C_BIO  = "#BA7517"
-    C_GRID = "#E8E6DE"
-    TEXT   = "#2C2C2A"
-
-    x = full_metrics_df["alpha"]
-
-    fig, axes = plt.subplots(3, 1, figsize=(7.5, 8.5),
-                              sharex=True, constrained_layout=True)
-
-    def _style(ax):
-        ax.set_facecolor("white")
-        ax.grid(False)
-        ax.set_axisbelow(False)
-        for spine in ax.spines.values():
-            spine.set_linewidth(1.0); spine.set_color("#1a1a1a")
-        ax.tick_params(labelsize=9)
-
-    kw = dict(lw=1.6, markersize=5, markerfacecolor="white",
-              markeredgewidth=1.3, zorder=3)
-
-    axes[0].plot(x, full_metrics_df["methane_MMBtu_per_yr"] / 1e6,
-                 color=C_CH4, marker="o", markeredgecolor=C_CH4, **kw)
-    axes[0].set_ylabel("Biomethane\n(MMBtu/yr × 10⁶)", fontsize=9, color=TEXT)
-    axes[0].set_title("Annual product rates vs. pathway split (α)\n"
-                       "(base scenario: press-mill, near-zero feed, biostimulant $0/kg)",
-                       fontsize=10, color=TEXT, pad=6)
-    _style(axes[0])
-
-    axes[1].plot(x, full_metrics_df["microbial_oil_t_per_yr"] / 1e3,
-                 color=C_OIL, marker="s", markeredgecolor=C_OIL, **kw)
-    axes[1].set_ylabel("Microbial oil\n(kt/yr)", fontsize=9, color=TEXT)
-    _style(axes[1])
-
-    axes[2].plot(x, full_metrics_df["biostimulant_t_per_yr"] / 1e3,
-                 color=C_BIO, marker="^", markeredgecolor=C_BIO, **kw)
-    axes[2].set_ylabel("Biostimulant\n(kt/yr)", fontsize=9, color=TEXT)
-    axes[2].set_xlabel("α  (fraction of milled biomass to biomethane pathway)",
-                        fontsize=9.5, color=TEXT)
-    axes[2].set_xlim(-0.03, 1.03)
-    _style(axes[2])
-
-    outpath.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor="white")
-    plt.close(fig)
-    print(f"Saved figure: {outpath}")
-
-
-# -----------------------------------------------------------------------------
-# Main
-# -----------------------------------------------------------------------------
-def main(scenarios: Iterable[Scenario] = SCENARIOS) -> None:
+# ── Main ──────────────────────────────────────────────────────────────────────
+def main() -> None:
     CSV_DIR.mkdir(parents=True, exist_ok=True)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    all_results: dict[str, pd.DataFrame] = {}
-    summary_rows: list[dict[str, float | str]] = []
+    # Figure 1 — Alpha sweep with uncertainty bands
+    plot_alpha_sweep_with_bands(FIG_DIR / "figure1_alpha_sweep_bands.png")
 
-    # 1) Run alpha sweeps and save CSVs
-    for scenario in scenarios:
-        print("\n" + "=" * 90)
-        print(f"Running scenario: {scenario.label}")
-        print("=" * 90)
+    # Figure 2 — NPV bar chart at alpha=0
+    print("\nBuilding NPV bar chart data...")
+    npv_table: dict[str, dict[float, float]] = {sc.name: {} for sc in SCENARIOS}
+    for sc in SCENARIOS:
+        for bm_price in BIOMETHANE_PRICES:
+            npv = _build_npv_at_alpha(
+                1.0, sc.feed_price, sc.biostimulant_price,
+                sc.pretreatment_case, bm_price, OIL_MARKET_USD_PER_KG)
+            npv_table[sc.name][bm_price] = npv
+            print(f"  {sc.name}  bm=${bm_price:.0f}/MMBtu  NPV=${npv:.1f}M")
+    plot_npv_bar_chart(npv_table, FIG_DIR / "figure2_npv_bar_chart.png")
 
-        results = run_alpha_sweep(
-            feed_price=scenario.feed_price,
-            case_label=scenario.name,
-            pretreatment_case=scenario.pretreatment_case,
-            biostimulant_price=scenario.biostimulant_price,
-            market_mmbtu=scenario.market_mmbtu,
-            market_oil=scenario.market_oil,
-            print_summary=True,
+    # Figure 3 — Single heatmap at alpha=0
+    plot_npv_heatmap(FIG_DIR / "figure3_npv_heatmap.png")
+
+    # Figure 4 — Panel heatmaps at five alpha values, three feed prices
+    for feed_price, feed_label in [
+        (-0.02, "tipping_fee"),
+        ( 0.00, "near_zero"),
+        ( 0.02, "base"),
+    ]:
+        plot_npv_heatmap_panel(
+            outpath=FIG_DIR / f"figure4_alpha_panel_{feed_label}.png",
+            feed_price=feed_price,
+            feed_label=feed_label,
         )
 
-        df = pd.DataFrame(results)
-        df["scenario_name"] = scenario.name
-        df["scenario_label"] = scenario.label
-        df["group_label"] = scenario.group_label
-        df["pretreatment_label"] = scenario.pretreatment_label
-
-        all_results[scenario.name] = df
-        _save_dataframe(df, CSV_DIR / f"alpha_sweep_{scenario.name}.csv")
-
-        best = _best_row(df)
-        summary_rows.append(
-            {
-                "scenario_name": scenario.name,
-                "scenario_label": scenario.label,
-                "group_label": scenario.group_label,
-                "pretreatment_label": scenario.pretreatment_label,
-                "optimal_alpha": float(best["alpha"]),
-                "best_npv_M": float(best["combined_npv_M"]),
-                "best_tci_M": float(best["tci_M"]),
-                "best_voc_M": float(best["voc_M"]),
-                "best_foc_M": float(best["foc_M"]),
-                "best_biomethane_msp_mmbtu": float(best["msp_biomethane_mmbtu"])
-                if pd.notna(best["msp_biomethane_mmbtu"]) else math.nan,
-                "best_oil_msp_usd_per_kg": float(best["msp_oil_usd_per_kg"])
-                if pd.notna(best["msp_oil_usd_per_kg"]) else math.nan,
-            }
-        )
-
-    summary_df = pd.DataFrame(summary_rows)
-    _save_dataframe(summary_df, CSV_DIR / "scenario_summary.csv")
-
-    # 2) Figure 1: alpha sweep across four paired cases
-    plot_alpha_sweep_four_cases(
-        all_results,
-        FIG_DIR / "figure1_alpha_sweep_four_cases.png",
-    )
-
-    # 3) Figure 2: scenario comparison
-    plot_scenario_comparison(summary_df, FIG_DIR / "figure2_scenario_comparison.png")
-
-    # 4) Rebuild selected alpha values for cost metrics and product outputs
-    base_scenario = next(s for s in scenarios if s.name == BASE_SCENARIO_NAME)
-    base_df = all_results[BASE_SCENARIO_NAME]
-
-    base_best_alpha = float(_best_row(base_df)["alpha"])
-    selected_alphas = sorted({0.0, 0.5, 1.0, base_best_alpha})
-
-    selected_metrics = []
-    full_metrics = []
-    for alpha in base_df["alpha"]:
-        metrics = _build_case_metrics(
-            float(alpha),
-            feed_price=base_scenario.feed_price,
-            pretreatment_case=base_scenario.pretreatment_case,
-            biostimulant_price=base_scenario.biostimulant_price,
-        )
-        full_metrics.append(metrics)
-        if any(abs(float(alpha) - a) < 1e-9 for a in selected_alphas):
-            selected_metrics.append(metrics)
-
-    full_metrics_df = pd.DataFrame(full_metrics)
-    selected_metrics_df = pd.DataFrame(selected_metrics).sort_values("alpha")
-
-    _save_dataframe(full_metrics_df, CSV_DIR / "base_scenario_full_metrics.csv")
-    _save_dataframe(selected_metrics_df, CSV_DIR / "base_scenario_selected_alphas.csv")
-
-    # 5) Figure 3 and Figure 4
-    plot_cost_metrics(selected_metrics_df, FIG_DIR / "figure3_cost_metrics_selected_alphas.png")
-    plot_product_outputs(full_metrics_df, FIG_DIR / "figure4_product_outputs_base.png")
-
-    print("\nDone.")
-    print(f"CSV output: {CSV_DIR.resolve()}")
-    print(f"Figure output: {FIG_DIR.resolve()}")
+    print(f"\nDone.\nFigures: {FIG_DIR.resolve()}\nCSVs:    {CSV_DIR.resolve()}")
 
 
 if __name__ == "__main__":

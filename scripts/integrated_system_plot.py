@@ -51,4 +51,11 @@ if vfa_units:
     vfa_sys = bst.System("vfa_ferm_path", path=vfa_units)
     vfa_sys.diagram(file=str(OUTDIR / "vfa_fermentation_pathway"))
     print(f"Saved: {OUTDIR / 'vfa_fermentation_pathway'}")
+
+from sabre.systems.vfa_system import create_vfa_ad_system 
+
+sys = create_vfa_ad_system(quality="pelagic_high_quality")
+sys.simulate()
+sys.diagram(file=str(OUTDIR / "vfa_subset"))
+
 print(f"\nAll flowsheets saved to: {OUTDIR.resolve()}")
